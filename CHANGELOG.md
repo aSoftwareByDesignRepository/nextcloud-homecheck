@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.0.15 — 2026-08-25
+
+- Feature: Nextcloud Dashboard desklet (`homecheck-launcher`) — layout status + start-page hint + **Open launcher** button.
+- Security: desklet uses read-only `summarizeForUser()` (never persists layout / apporder on Dashboard load).
+- UX: dense launcher grid — fixed-ish tile tracks packed to the start (no `1fr` stretch / empty bloated cards).
+- Assets: `app-dashboard.svg` / `app-dark.svg` + `desklet-nextcloud.css` (WCAG 2.1 AA touch/focus).
+- Tests: LauncherWidget unit + summarize contracts; desklet chrome; E2E density + OCS desklet; mutation guards.
+
+## 1.0.14 — 2026-08-25
+
+- Fix: drag-and-drop reorder — edit mode no longer sets `disabled` on launch buttons (that blocked dragstart on Firefox/Chrome).
+- Fix: pointer-based DnD with drop-target highlight (mouse + touch); native image drag disabled so reorder can start from the icon.
+- UX: restore Move left / Move right on top-level cards for keyboard/menu reorder.
+- Tests: `e2e/dnd.spec.js`; mutation guards against `launch.disabled=true`.
+
+## 1.0.13 — 2026-08-25
+
+- UX: app logos on solid `--color-primary-element` wells with NC `--primary-invert-if-dark` so white SVG icons stay visible in light, dark, and custom-accent themes.
+- UX: larger icon wells (4.5rem) and glyphs (2.75rem); folder stacks inherit the same invert treatment.
+- a11y: high-contrast ring and forced-colors Canvas rules for icon wells.
+- Tests: CSS/mutation icon invert contract; e2e size + dark-theme filter checks.
+
+## 1.0.12 — 2026-08-25
+
+- UX: native Nextcloud launcher — borderless app tiles, NC hover, compact toolbar, `button-vue primary/secondary`.
+- UX: remove heavy page header and edit banner; grid visible immediately; one-line edit hint.
+- UX: start-page CTA uses NC `notecard`; status hidden when empty.
+- UX: edit actions (⋮ menu) visible on every card in edit mode.
+- Tests: `e2e/first-view.spec.js` first-paint clarity + axe; contracts updated.
+
+## 1.0.11 — 2026-08-24
+
+- UX: design-system full-width shell (`hmk-shell--wide`) — removes 72rem page cap; matches sibling Check apps.
+- UX: page header with 56×56 icon well, `fs-2xl` title, 60ch lead, responsive action row.
+- UX: `hmk-page-stack` vertical rhythm; wider responsive app grid on tablet/desktop.
+- Shell: `shell-init.js` applies `hmk-app` on `#app-content` before paint; NC content area flex fill.
+- Tests: shell CSS contract guards; E2E wide-viewport width assertion.
+
 ## 1.0.10 — 2026-08-24
 
 - l10n: fix stale msgids (`Drag cards to reorder…`); remove unused catalog keys; 54 keys synced to PHP templates.

@@ -15,12 +15,13 @@ $catalog = $en['translations'] ?? [];
 $files = [
 	$root . '/templates/main.php',
 	$root . '/templates/admin.php',
+	$root . '/lib/Dashboard/LauncherWidget.php',
 ];
 
 $missing = [];
 foreach ($files as $file) {
 	$src = (string) file_get_contents($file);
-	if (!preg_match_all("/\\\$l->t\\('((?:\\\\'|[^'])*)'\\)/", $src, $m)) {
+	if (!preg_match_all("/(?:\\\$l|->l10n)->t\\('((?:\\\\'|[^'])*)'\\)/", $src, $m)) {
 		continue;
 	}
 	foreach ($m[1] as $raw) {

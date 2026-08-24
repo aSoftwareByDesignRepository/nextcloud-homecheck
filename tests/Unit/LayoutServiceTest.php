@@ -477,4 +477,43 @@ final class LayoutServiceTest extends TestCase
 		$this->assertFalse($out['apporderSynced']);
 		$this->assertSame(1, $out['layout']['revision']);
 	}
+
+	public function testSummarizeDoesNotPersistOrSyncApporder(): void
+	{
+		$svc = $this->service([
+			['id' => 'files', 'name' => 'Files', 'href' => '/apps/files', 'order' => 1, 'app' => 'files'],
+			['id' => 'calendar', 'name' => 'Calendar', 'href' => '/apps/calendar', 'order' => 2, 'app' => 'calendar'],
+		]);
+		$summary = $svc->summarizeForUser('summary-user');
+		$this->assertSame(2, $summary['appCount']);
+		$this->assertSame(0, $summary['folderCount']);
+		$this->assertSame(2, $summary['tileCount']);
+		$this->assertFalse($summary['isDefaultLanding']);
+		$this->assertFalse($summary['hasPersonalLayout']);
+		$this->assertArrayNotHasKey('summary-user', $this->userVals);
+	}
+
+	public function testSummarizeCountsFolderChildrenAndLanding(): void
+	{
+		$this->userVals['fold'][Application::APP_ID . '/' . LayoutService::USER_LAYOUT_KEY] = json_encode([
+			'version' => 1,
+			'revision' => 3,
+			'items' => [
+				['type' => 'folder', 'id' => 'fld_abcdefgh', 'name' => 'Work', 'children' => ['files', 'calendar']],
+			],
+		], JSON_THROW_ON_ERROR);
+		$this->userVals['fold']['core/defaultapp'] = 'homecheck,files';
+
+		$svc = $this->service([
+			['id' => 'files', 'name' => 'Files', 'href' => '/f', 'order' => 1, 'app' => 'files'],
+			['id' => 'calendar', 'name' => 'Calendar', 'href' => '/c', 'order' => 2, 'app' => 'calendar'],
+		]);
+		$summary = $svc->summarizeForUser('fold');
+		$this->assertSame(2, $summary['appCount']);
+		$this->assertSame(1, $summary['folderCount']);
+		$this->assertSame(1, $summary['tileCount']);
+		$this->assertTrue($summary['isDefaultLanding']);
+		$this->assertTrue($summary['hasPersonalLayout']);
+		$this->assertArrayNotHasKey('core/apporder', $this->userVals['fold'] ?? []);
+	}
 }

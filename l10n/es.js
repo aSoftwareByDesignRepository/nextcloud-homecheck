@@ -54,7 +54,14 @@ OC.L10N.register(
 	"Too many items on the home grid (max 100)" : "Demasiados elementos en el inicio (máx. 100)",
 	"Too many apps in this folder (max 40)" : "Demasiadas apps en esta carpeta (máx. 40)",
 	"Invalid JSON" : "JSON no válido",
-	"Save failed" : "Error al guardar"
-	},
-	"nplurals=2; plural=(n != 1);"
-);
+	"Save failed" : "Error al guardar",
+	"Your apps" : "Tus apps",
+	"Open launcher" : "Abrir el lanzador",
+	"%1$s apps · %2$s folders on your home" : "%1$s apps · %2$s carpetas en tu inicio",
+	"No apps available for you yet." : "Aún no hay apps disponibles para ti.",
+	"Start page after login" : "Página de inicio tras el inicio de sesión",
+	"HomeCheck opens after you sign in" : "HomeCheck se abre después de iniciar sesión",
+	"Not set — open HomeCheck to choose" : "Sin definir — abre HomeCheck para elegir",
+	"Could not load HomeCheck status." : "No se pudo cargar el estado de HomeCheck."
+},
+"nplurals=2; plural=(n != 1);");

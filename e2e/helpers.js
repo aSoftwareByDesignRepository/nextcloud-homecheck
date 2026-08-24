@@ -8,11 +8,36 @@ async function login(page) {
 	const base = process.env.HOMECHECK_BASE_URL || 'http://localhost:8081';
 	const user = process.env.HOMECHECK_E2E_USER || 'admin';
 	const pass = process.env.HOMECHECK_E2E_PASS || 'adminadmin';
-	await page.goto(base + '/login');
-	await page.locator('input[name="user"]').fill(user);
-	await page.locator('input[name="password"]').fill(pass);
-	await page.locator('button[type="submit"], input[type="submit"]').first().click();
-	await page.waitForURL(/apps\//, { timeout: 30000 }).catch(() => {});
+
+	await page.goto(base + '/index.php/apps/homecheck/', { waitUntil: 'domcontentloaded' });
+	if (await page.locator('#homecheck-app').isVisible().catch(function () { return false; })) {
+		return;
+	}
+
+	for (let attempt = 0; attempt < 3; attempt++) {
+		await page.goto(base + '/login', { waitUntil: 'domcontentloaded' });
+		/* NC 34 login is a Vue app — wait for hydrated fields, not the shell HTML. */
+		const userInput = page.locator('#user, input[name="user"]').first();
+		try {
+			await userInput.waitFor({ state: 'visible', timeout: 45000 });
+		} catch (err) {
+			if (attempt === 2) {
+				throw err;
+			}
+			continue;
+		}
+		await userInput.fill(user);
+		await page.locator('#password, input[name="password"]').first().fill(pass);
+		await page.locator('button[type="submit"], input[type="submit"], button.login-button').first().click();
+		try {
+			await page.waitForURL(/apps\/|index\.php\/apps/, { timeout: 45000 });
+			return;
+		} catch (err) {
+			if (attempt === 2) {
+				throw err;
+			}
+		}
+	}
 }
 
 /**

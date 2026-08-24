@@ -54,7 +54,14 @@ OC.L10N.register(
 	"Too many items on the home grid (max 100)" : "For mange elementer på startskærmen (maks. 100)",
 	"Too many apps in this folder (max 40)" : "For mange apps i denne mappe (maks. 40)",
 	"Invalid JSON" : "Ugyldig JSON",
-	"Save failed" : "Gemning mislykkedes"
-	},
-	"nplurals=2; plural=(n != 1);"
-);
+	"Save failed" : "Gemning mislykkedes",
+	"Your apps" : "Dine apps",
+	"Open launcher" : "Åbn launcher",
+	"%1$s apps · %2$s folders on your home" : "%1$s apps · %2$s mapper på din startside",
+	"No apps available for you yet." : "Der er endnu ingen apps til dig.",
+	"Start page after login" : "Startside efter login",
+	"HomeCheck opens after you sign in" : "HomeCheck åbner, når du logger ind",
+	"Not set — open HomeCheck to choose" : "Ikke sat — åbn HomeCheck for at vælge",
+	"Could not load HomeCheck status." : "Kunne ikke hente HomeCheck-status."
+},
+"nplurals=2; plural=(n != 1);");

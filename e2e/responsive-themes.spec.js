@@ -113,6 +113,28 @@ test.describe('HomeCheck responsive + theme matrix', () => {
 		await login(page);
 	});
 
+	test('wide viewport uses full shell width', async ({ page }) => {
+		await page.setViewportSize({ width: 1920, height: 1080 });
+		await openHomeCheck(page);
+		const widths = await page.evaluate(() => {
+			const shell = document.getElementById('app-content-wrapper');
+			const shellRoot = document.getElementById('app-content')
+				|| document.querySelector('#content[class*="app-homecheck"]');
+			return {
+				shell: shell ? shell.getBoundingClientRect().width : 0,
+				root: shellRoot ? shellRoot.getBoundingClientRect().width : 0,
+				viewport: document.documentElement.clientWidth,
+				hasWideShell: shell ? shell.classList.contains('hmk-shell--wide') : false,
+				hasAppClass: shellRoot ? shellRoot.classList.contains('hmk-app') : false,
+			};
+		});
+		expect(widths.hasWideShell).toBe(true);
+		expect(widths.hasAppClass).toBe(true);
+		expect(widths.shell).toBeGreaterThan(900);
+		const contentColumn = widths.root > 0 ? widths.root : widths.viewport * 0.65;
+		expect(widths.shell / contentColumn).toBeGreaterThan(0.85);
+	});
+
 	for (const viewport of VIEWPORTS) {
 		for (const theme of THEME_PRESETS) {
 			const caseName = `${viewport.name} × ${theme.name}`;
@@ -131,7 +153,7 @@ test.describe('HomeCheck responsive + theme matrix', () => {
 				expect(box.width).toBeGreaterThanOrEqual(44);
 
 				await editBtn.click();
-				await expect(page.locator('#hmk-edit-banner')).toBeVisible();
+				await expect(page.locator('#hmk-edit-hint')).toBeVisible();
 				await assertNoHorizontalOverflow(page, `${caseName} edit`);
 			});
 		}
@@ -144,7 +166,7 @@ test.describe('HomeCheck responsive + theme matrix', () => {
 			await applyThemePreset(page, theme);
 			if (mode === 'edit') {
 				await page.locator('#hmk-edit-toggle').click();
-				await expect(page.locator('#hmk-edit-banner')).toBeVisible();
+				await expect(page.locator('#hmk-edit-hint')).toBeVisible();
 			}
 			await scanAxe(page, `${viewport.name}/${theme.name}/${mode}`);
 		});

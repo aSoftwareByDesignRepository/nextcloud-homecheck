@@ -54,6 +54,14 @@
         "Too many items on the home grid (max 100)": "Trop d'éléments sur l'accueil (max. 100)",
         "Too many apps in this folder (max 40)": "Trop d'apps dans ce dossier (max. 40)",
         "Invalid JSON": "JSON non valide",
-        "Save failed": "Échec de l'enregistrement"
+        "Save failed": "Échec de l'enregistrement",
+        "Your apps": "Tes apps",
+        "Open launcher": "Ouvrir le lanceur",
+        "%1$s apps · %2$s folders on your home": "%1$s apps · %2$s dossiers sur ton accueil",
+        "No apps available for you yet.": "Aucune app n’est encore disponible pour toi.",
+        "Start page after login": "Page d’accueil après connexion",
+        "HomeCheck opens after you sign in": "HomeCheck s’ouvre après ta connexion",
+        "Not set — open HomeCheck to choose": "Pas défini — ouvre HomeCheck pour choisir",
+        "Could not load HomeCheck status.": "Impossible de charger l’état HomeCheck."
     }
 }

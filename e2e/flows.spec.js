@@ -11,7 +11,7 @@ test.describe('HomeCheck user journeys', () => {
 	test('toolbar creates folder in one click then renames', async ({ page }) => {
 		await expect(page.locator('#homecheck-app')).toBeVisible();
 		await page.locator('#hmk-edit-toggle').click();
-		await expect(page.locator('#hmk-edit-banner')).toBeVisible();
+		await expect(page.locator('#hmk-edit-hint')).toBeVisible();
 		const before = await folderCount(page);
 		await page.locator('#hmk-new-folder').click();
 		await waitForLayoutSave(page);
@@ -67,7 +67,7 @@ test.describe('HomeCheck user journeys', () => {
 		expect(box.width).toBeGreaterThanOrEqual(44);
 
 		await editBtn.click();
-		await expect(page.locator('#hmk-edit-banner')).toBeVisible();
+		await expect(page.locator('#hmk-edit-hint')).toBeVisible();
 		await expect(page.locator('#hmk-new-folder')).toBeVisible();
 		expect(await page.locator('#hmk-grid .hmk-card').count()).toBeGreaterThan(0);
 	});

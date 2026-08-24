@@ -54,7 +54,14 @@ OC.L10N.register(
 	"Too many items on the home grid (max 100)" : "För många objekt på startskärmen (max 100)",
 	"Too many apps in this folder (max 40)" : "För många appar i den här mappen (max 40)",
 	"Invalid JSON" : "Ogiltig JSON",
-	"Save failed" : "Sparning misslyckades"
-	},
-	"nplurals=2; plural=(n != 1);"
-);
+	"Save failed" : "Sparning misslyckades",
+	"Your apps" : "Dina appar",
+	"Open launcher" : "Öppna launcher",
+	"%1$s apps · %2$s folders on your home" : "%1$s appar · %2$s mappar på din startsida",
+	"No apps available for you yet." : "Det finns inga appar för dig ännu.",
+	"Start page after login" : "Startsida efter inloggning",
+	"HomeCheck opens after you sign in" : "HomeCheck öppnas efter inloggning",
+	"Not set — open HomeCheck to choose" : "Inte inställt — öppna HomeCheck för att välja",
+	"Could not load HomeCheck status." : "Kunde inte läsa HomeCheck-status."
+},
+"nplurals=2; plural=(n != 1);");

@@ -7,6 +7,12 @@
 (function () {
 	'use strict';
 
+	var appContent = document.getElementById('app-content')
+		|| document.querySelector('#content[class*="app-homecheck"]');
+	if (appContent) {
+		appContent.classList.add('hmk-app');
+	}
+
 	const root = document.getElementById('homecheck-app');
 	if (!root) {
 		return;
@@ -87,6 +93,17 @@
 	/** Bumps on every local edit — in-flight saves must not clobber newer local state. */
 	let localEpoch = 0;
 	let dragId = null;
+	/** Pointer DnD (HTML5 drag is unreliable on disabled/button surfaces). */
+	let pointerDnD = {
+		pointerId: null,
+		fromId: null,
+		active: false,
+		startX: 0,
+		startY: 0,
+		suppressClick: false,
+		onMove: null,
+		onUp: null,
+	};
 	/** @type {Promise<void>} */
 	let saveChain = Promise.resolve();
 	/** @type {HTMLElement|null} */
@@ -114,8 +131,6 @@
 		promptError: document.getElementById('hmk-prompt-error'),
 		promptOk: document.getElementById('hmk-prompt-ok'),
 		promptCancel: document.getElementById('hmk-prompt-cancel'),
-		subtitle: document.getElementById('hmk-subtitle'),
-		editBanner: document.getElementById('hmk-edit-banner'),
 		confirmDialog: document.getElementById('hmk-confirm-dialog'),
 		confirmMessage: document.getElementById('hmk-confirm-message'),
 		confirmOk: document.getElementById('hmk-confirm-ok'),
@@ -123,6 +138,8 @@
 		folderPicker: document.getElementById('hmk-folder-picker'),
 		folderPickerList: document.getElementById('hmk-folder-picker-list'),
 		folderPickerCancel: document.getElementById('hmk-folder-picker-cancel'),
+		editHint: document.getElementById('hmk-edit-hint'),
+		instructions: document.getElementById('hmk-instructions'),
 	};
 
 	function generateFolderId() {
@@ -345,6 +362,131 @@
 		});
 	}
 
+	function reorderItemsById(fromId, toId, placeAfter) {
+		if (!fromId || !toId || fromId === toId) {
+			return false;
+		}
+		const from = findItemIndex(fromId);
+		const to = findItemIndex(toId);
+		if (from < 0 || to < 0) {
+			return false;
+		}
+		const items = state.layout.items.slice();
+		const moved = items.splice(from, 1)[0];
+		items.splice(reorderInsertIndex(from, to, !!placeAfter), 0, moved);
+		state.layout.items = items;
+		scheduleSave();
+		render();
+		return true;
+	}
+
+	function clearDropTargets() {
+		if (!el.grid) {
+			return;
+		}
+		el.grid.querySelectorAll('.hmk-card.is-drop-target').forEach(function (node) {
+			node.classList.remove('is-drop-target');
+		});
+	}
+
+	function resetPointerDnD(card) {
+		if (card) {
+			card.classList.remove('is-dragging');
+		}
+		clearDropTargets();
+		if (pointerDnD.onMove) {
+			document.removeEventListener('pointermove', pointerDnD.onMove, true);
+			pointerDnD.onMove = null;
+		}
+		if (pointerDnD.onUp) {
+			document.removeEventListener('pointerup', pointerDnD.onUp, true);
+			document.removeEventListener('pointercancel', pointerDnD.onUp, true);
+			pointerDnD.onUp = null;
+		}
+		pointerDnD.pointerId = null;
+		pointerDnD.fromId = null;
+		pointerDnD.active = false;
+		dragId = null;
+	}
+
+	function cardAtPoint(clientX, clientY) {
+		const under = document.elementFromPoint(clientX, clientY);
+		if (!under || typeof under.closest !== 'function') {
+			return null;
+		}
+		return under.closest('#hmk-grid > .hmk-card');
+	}
+
+	function attachPointerDnD(card, item) {
+		card.addEventListener('pointerdown', function (ev) {
+			if (!editing) {
+				return;
+			}
+			if (typeof ev.button === 'number' && ev.button !== 0) {
+				return;
+			}
+			if (ev.target && ev.target.closest && ev.target.closest('.hmk-card__menu')) {
+				return;
+			}
+
+			resetPointerDnD(card);
+			pointerDnD.pointerId = ev.pointerId;
+			pointerDnD.fromId = item.id;
+			pointerDnD.active = false;
+			pointerDnD.startX = ev.clientX;
+			pointerDnD.startY = ev.clientY;
+			pointerDnD.suppressClick = false;
+
+			pointerDnD.onMove = function (moveEv) {
+				if (pointerDnD.pointerId !== moveEv.pointerId || pointerDnD.fromId !== item.id) {
+					return;
+				}
+				const dx = moveEv.clientX - pointerDnD.startX;
+				const dy = moveEv.clientY - pointerDnD.startY;
+				if (!pointerDnD.active) {
+					if ((dx * dx) + (dy * dy) < 36) {
+						return;
+					}
+					pointerDnD.active = true;
+					pointerDnD.suppressClick = true;
+					dragId = item.id;
+					card.classList.add('is-dragging');
+				}
+				clearDropTargets();
+				const target = cardAtPoint(moveEv.clientX, moveEv.clientY);
+				if (target && target.dataset.id && target.dataset.id !== item.id) {
+					target.classList.add('is-drop-target');
+				}
+				if (moveEv.cancelable) {
+					moveEv.preventDefault();
+				}
+			};
+
+			pointerDnD.onUp = function (upEv) {
+				if (pointerDnD.pointerId !== upEv.pointerId || pointerDnD.fromId !== item.id) {
+					return;
+				}
+				const fromId = pointerDnD.fromId;
+				const wasActive = pointerDnD.active;
+				const target = wasActive ? cardAtPoint(upEv.clientX, upEv.clientY) : null;
+				const toId = target && target.dataset ? target.dataset.id : null;
+				let placeAfter = false;
+				if (target) {
+					const rect = target.getBoundingClientRect();
+					placeAfter = upEv.clientX > (rect.left + (rect.width / 2));
+				}
+				resetPointerDnD(card);
+				if (wasActive && toId) {
+					reorderItemsById(fromId, toId, placeAfter);
+				}
+			};
+
+			document.addEventListener('pointermove', pointerDnD.onMove, true);
+			document.addEventListener('pointerup', pointerDnD.onUp, true);
+			document.addEventListener('pointercancel', pointerDnD.onUp, true);
+		});
+	}
+
 	function moveItem(id, dir) {
 		const idx = findItemIndex(id);
 		if (idx < 0) {
@@ -413,12 +555,15 @@
 		});
 	}
 
-	function reorderInsertIndex(from, to) {
+	function reorderInsertIndex(from, to, placeAfter) {
 		if (from < 0 || to < 0 || from === to) {
 			return to;
 		}
-		// After splice(from,1), indices to the right of `from` shift left by 1.
-		return from < to ? to - 1 : to;
+		if (from < to) {
+			/* After splice(from,1), the old target index shifts left by 1. */
+			return placeAfter ? to : to - 1;
+		}
+		return placeAfter ? to + 1 : to;
 	}
 
 	function createEmptyFolder() {
@@ -687,6 +832,7 @@
 			const img = document.createElement('img');
 			img.src = entry.icon;
 			img.alt = '';
+			img.draggable = false;
 			img.loading = 'lazy';
 			img.addEventListener('error', function () {
 				wrap.textContent = '';
@@ -718,6 +864,7 @@
 				const img = document.createElement('img');
 				img.src = e.icon;
 				img.alt = '';
+				img.draggable = false;
 				stack.appendChild(img);
 			} else {
 				const span = document.createElement('span');
@@ -780,9 +927,13 @@
 			}));
 		} else {
 			if (item.type === 'app') {
+				menu.appendChild(menuButton(t.moveLeft, function () { details.open = false; moveItem(item.id, -1); }));
+				menu.appendChild(menuButton(t.moveRight, function () { details.open = false; moveItem(item.id, 1); }));
 				menu.appendChild(menuButton(t.newFolder, function () { details.open = false; createFolderWithApp(item.id); }));
 				menu.appendChild(menuButton(t.addToFolder, function () { details.open = false; addAppToFolderFlow(item.id); }));
 			} else if (item.type === 'folder') {
+				menu.appendChild(menuButton(t.moveLeft, function () { details.open = false; moveItem(item.id, -1); }));
+				menu.appendChild(menuButton(t.moveRight, function () { details.open = false; moveItem(item.id, 1); }));
 				menu.appendChild(menuButton(t.rename, function () { details.open = false; renameFolder(item.id); }));
 				menu.appendChild(menuButton(t.deleteFolder, function () { details.open = false; deleteFolder(item.id); }));
 			}
@@ -859,7 +1010,13 @@
 			name.textContent = item.name || t.folder;
 			launch.appendChild(name);
 			launch.setAttribute('aria-label', (item.name || t.folder) + ', ' + t.openFolder);
-			launch.addEventListener('click', function () {
+			launch.addEventListener('click', function (ev) {
+				if (pointerDnD.suppressClick) {
+					pointerDnD.suppressClick = false;
+					ev.preventDefault();
+					ev.stopPropagation();
+					return;
+				}
 				openFolder(item, launch);
 			});
 		} else {
@@ -869,12 +1026,14 @@
 			name.className = 'hmk-card__name';
 			name.textContent = entry ? entry.name : item.id;
 			launch.appendChild(name);
-			if (editing && !opts.folderId) {
-				launch.disabled = true;
+			if (editing) {
+				/* Never use disabled=true — it blocks HTML5/pointer drag from the card surface. */
 				launch.setAttribute('aria-disabled', 'true');
-			} else if (editing && opts.folderId) {
-				launch.disabled = true;
-				launch.setAttribute('aria-disabled', 'true');
+				launch.addEventListener('click', function (ev) {
+					ev.preventDefault();
+					ev.stopPropagation();
+					pointerDnD.suppressClick = false;
+				});
 			} else {
 				launch.addEventListener('click', function () { activateApp(entry); });
 			}
@@ -884,39 +1043,8 @@
 		attachEditMenu(card, item, opts);
 
 		if (editing && !opts.folderId) {
-			card.draggable = true;
-			card.addEventListener('dragstart', function (ev) {
-				dragId = item.id;
-				ev.dataTransfer.setData('text/plain', item.id);
-				ev.dataTransfer.effectAllowed = 'move';
-			});
-			card.addEventListener('dragend', function () {
-				dragId = null;
-			});
-			card.addEventListener('dragover', function (ev) {
-				ev.preventDefault();
-				ev.dataTransfer.dropEffect = 'move';
-			});
-			card.addEventListener('drop', function (ev) {
-				ev.preventDefault();
-				const fromId = dragId || ev.dataTransfer.getData('text/plain');
-				const toId = item.id;
-				dragId = null;
-				if (!fromId || fromId === toId) {
-					return;
-				}
-				const from = findItemIndex(fromId);
-				const to = findItemIndex(toId);
-				if (from < 0 || to < 0) {
-					return;
-				}
-				const items = state.layout.items.slice();
-				const moved = items.splice(from, 1)[0];
-				items.splice(reorderInsertIndex(from, to), 0, moved);
-				state.layout.items = items;
-				scheduleSave();
-				render();
-			});
+			card.classList.add('hmk-card--draggable');
+			attachPointerDnD(card, item);
 		}
 
 		return card;
@@ -939,17 +1067,18 @@
 		if (el.editToggle) {
 			el.editToggle.setAttribute('aria-pressed', editing ? 'true' : 'false');
 			el.editToggle.textContent = editing ? t.done : t.edit;
-			el.editToggle.classList.toggle('hmk-btn--primary', !editing);
-			el.editToggle.classList.toggle('hmk-btn--ghost', editing);
+			el.editToggle.classList.toggle('primary', !editing);
+			el.editToggle.classList.toggle('secondary', editing);
+			el.editToggle.setAttribute('aria-label', editing ? t.editSubtitle : t.viewSubtitle);
 		}
 		if (el.newFolder) {
 			el.newFolder.hidden = !editing;
 		}
-		if (el.subtitle) {
-			el.subtitle.textContent = editing ? t.editSubtitle : t.viewSubtitle;
+		if (el.editHint) {
+			el.editHint.hidden = !editing;
 		}
-		if (el.editBanner) {
-			el.editBanner.hidden = !editing;
+		if (el.instructions) {
+			el.instructions.textContent = editing ? t.editSubtitle : t.viewSubtitle;
 		}
 	}
 

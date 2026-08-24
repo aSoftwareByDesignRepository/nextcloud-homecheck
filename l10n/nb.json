@@ -54,6 +54,14 @@
         "Too many items on the home grid (max 100)": "For mange elementer på startskjermen (maks. 100)",
         "Too many apps in this folder (max 40)": "For mange apper i denne mappen (maks. 40)",
         "Invalid JSON": "Ugyldig JSON",
-        "Save failed": "Lagring mislyktes"
+        "Save failed": "Lagring mislyktes",
+        "Your apps": "Dine apper",
+        "Open launcher": "Åpne launcher",
+        "%1$s apps · %2$s folders on your home": "%1$s apper · %2$s mapper på startsiden din",
+        "No apps available for you yet.": "Ingen apper er tilgjengelige for deg ennå.",
+        "Start page after login": "Startside etter innlogging",
+        "HomeCheck opens after you sign in": "HomeCheck åpnes etter innlogging",
+        "Not set — open HomeCheck to choose": "Ikke satt — åpne HomeCheck for å velge",
+        "Could not load HomeCheck status.": "Kunne ikke laste HomeCheck-status."
     }
 }

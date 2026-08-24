@@ -149,7 +149,14 @@ assertTrue(is_string($hrefSrc) && str_contains($hrefSrc, 'originFromParts'), 'Na
 assertTrue(is_string($hrefSrc) && str_contains($hrefSrc, 'strcasecmp($hrefOrigin, $allowedOrigin)'), 'NavigationHrefGuard compares full origins');
 $jsSrc2 = file_get_contents($root . '/js/app.js');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'reorderInsertIndex'), 'client DnD uses reorderInsertIndex');
-assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'from < to ? to - 1 : to'), 'DnD compensates splice index shift');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'placeAfter'), 'DnD supports before/after drop half');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'reorderItemsById'), 'client DnD shared reorder helper');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'attachPointerDnD'), 'pointer DnD attached for touch/mouse');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, "setAttribute('aria-disabled', 'true')"), 'edit mode uses aria-disabled not disabled');
+assertTrue(is_string($jsSrc2) && !preg_match('/launch\.disabled\s*=\s*true/', $jsSrc2), 'launch.disabled=true must not block drag');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'moveItem(item.id, -1)'), 'top-level move left menu');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'moveItem(item.id, 1)'), 'top-level move right menu');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'placeAfter ? to : to - 1'), 'DnD compensates splice index shift');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'nextLen > MAX_ITEMS'), 'deleteFolder checks expand against MAX_ITEMS');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'length >= MAX_ITEMS'), 'removeFromFolder checks MAX_ITEMS');
 $mergerSrc = file_get_contents($root . '/lib/Service/LayoutMerger.php');
@@ -170,6 +177,22 @@ assertTrue(is_string($guardSrc) && str_contains($guardSrc, 'compareAndSwap'), 'L
 $svcSrc = file_get_contents($root . '/lib/Service/LayoutService.php');
 assertTrue(is_string($svcSrc) && str_contains($svcSrc, 'writeGuard->compareAndSwap'), 'LayoutService writes via CAS guard');
 assertTrue(is_string($svcSrc) && str_contains($svcSrc, 'getForUserAfterLostRace') && str_contains($svcSrc, 'syncAppOrder($uid, $layout, $entries)'), 'lost CAS race resyncs apporder');
+assertTrue(is_string($svcSrc) && str_contains($svcSrc, 'function summarizeForUser'), 'LayoutService exposes read-only summarizeForUser');
+if (!preg_match('/public function summarizeForUser\(string \$uid\): array\s*\{(.*?)\n\tpublic function /s', $svcSrc, $sumBody)) {
+	assertTrue(false, 'summarizeForUser body extractable');
+} else {
+	assertTrue(str_contains($sumBody[1], 'return ['), 'summarizeForUser has return payload');
+	assertTrue(!str_contains($sumBody[1], 'compareAndSwap'), 'summarizeForUser must not CAS-write');
+	assertTrue(!str_contains($sumBody[1], 'syncAppOrder'), 'summarizeForUser must not sync apporder');
+}
+$desklet = file_get_contents($root . '/lib/Dashboard/LauncherWidget.php');
+assertTrue(is_string($desklet) && str_contains($desklet, 'summarizeForUser'), 'desklet uses summarizeForUser');
+assertTrue(is_string($desklet) && !preg_match('/(?<![\w>:-])getForUser\s*\(/', $desklet), 'desklet never calls getForUser');
+assertTrue(is_string($desklet) && str_contains($desklet, 'registerDeskletStylesForWidget'), 'desklet registers CSS');
+$appInfo = file_get_contents($root . '/lib/AppInfo/Application.php');
+assertTrue(is_string($appInfo) && str_contains($appInfo, 'registerDashboardWidget(LauncherWidget::class)'), 'desklet registered');
+assertTrue(file_exists($root . '/css/desklet-nextcloud.css'), 'desklet CSS file exists');
+assertTrue(file_exists($root . '/img/app-dashboard.svg'), 'dashboard icon exists');
 $jsSrc = file_get_contents($root . '/js/app.js');
 assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'localEpoch'), 'client tracks localEpoch against in-flight clobber');
 assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'epochAtStart !== localEpoch'), 'client adopts revision when dirty during save');
@@ -179,11 +202,14 @@ assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'sync-apporder'), 'client k
 $routes = file_get_contents($root . '/appinfo/routes.php');
 assertTrue(is_string($routes) && str_contains($routes, 'api#syncAppOrder'), 'route registers syncAppOrder');
 $css = file_get_contents($root . '/css/app.css');
+assertTrue(is_string($css) && str_contains($css, 'justify-content: start'), 'dense grid packs start');
+assertTrue(is_string($css) && str_contains($css, 'minmax(5.5rem, 6.25rem)'), 'dense grid fixed tracks');
+assertTrue(is_string($css) && !preg_match('/\.hmk-grid\s*\{[^}]*\b1fr\b/s', $css), 'grid must not 1fr-stretch tiles');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'confirmAction'), 'delete uses accessible confirm dialog');
 assertTrue(is_string($jsSrc2) && !str_contains($jsSrc2, 'window.confirm'), 'no native confirm dialogs');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'addAppToFolderFlow'), 'smart add-to-folder flow');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'defaultFolderName'), 'instant folder default name');
-assertTrue(is_string($css) && str_contains($css, 'hmk-edit-banner'), 'edit mode visual banner');
+assertTrue(is_string($css) && str_contains($css, 'hmk-edit-hint'), 'edit mode hint line');
 assertTrue(is_string($css) && str_contains($css, 'hmk-status.is-success'), 'success status styling');
 assertTrue(is_string($css) && str_contains($css, '--hmk-space-7'), 'spacing token space-7 defined');
 assertTrue(is_string($css) && str_contains($css, '#app-content .hmk-app'), 'CSS scoped to app-content');
@@ -191,12 +217,25 @@ assertTrue(is_string($css) && str_contains($css, 'dialog.hmk-dialog:not([open])'
 assertTrue(is_string($css) && str_contains($css, 'forced-colors: active'), 'forced-colors rules');
 assertTrue(is_string($css) && str_contains($css, '--color-element-error'), 'danger fill uses element-error');
 $mainTpl = file_get_contents($root . '/templates/main.php');
-assertTrue(is_string($mainTpl) && str_contains($mainTpl, 'button-vue hmk-btn'), 'buttons opt out of NC core mobile fills');
+assertTrue(is_string($css) && str_contains($css, 'hmk-shell--wide'), 'wide shell modifier');
+assertTrue(is_string($css) && str_contains($css, 'hmk-toolbar'), 'compact NC toolbar');
+assertTrue(is_string($css) && str_contains($css, 'color-background-hover'), 'native tile hover');
+assertTrue(is_string($css) && str_contains($css, '--primary-invert-if-dark'), 'app icon invert for theme visibility');
+assertTrue(is_string($css) && str_contains($css, '--hmk-icon-well'), 'icon well size token');
+assertTrue(is_string($css) && str_contains($css, 'background: var(--color-primary-element)'), 'icon well primary fill');
+assertTrue(is_string($css) && !preg_match('/\.hmk-app\s*\{[^}]*max-width:\s*72rem/s', $css), 'no 72rem page cap');
+$shellInit = file_get_contents($root . '/js/shell-init.js');
+assertTrue(is_string($shellInit) && str_contains($shellInit, "classList.add('hmk-app')"), 'shell init script');
+assertTrue(is_string($shellInit) && str_contains($shellInit, 'DOMContentLoaded'), 'shell init waits for DOM');
+assertTrue(is_string($shellInit) && str_contains($shellInit, 'app-homecheck'), 'shell init targets NC34 content root');
+assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'app-homecheck'), 'app.js targets NC34 content root');
+assertTrue(is_string($mainTpl) && str_contains($mainTpl, 'hmk-shell hmk-shell--wide'), 'template wide shell');
+assertTrue(is_string($mainTpl) && str_contains($mainTpl, 'button-vue primary'), 'main uses NC primary buttons');
 assertTrue(is_string($css) && str_contains($css, 'body.theme--dark') && str_contains($css, '--hmk-primary-fill'), 'dark theme primary fill token');
 $enL10n = json_decode((string) file_get_contents($root . '/l10n/en.json'), true, 512, JSON_THROW_ON_ERROR);
 $enKeys = array_keys($enL10n['translations'] ?? []);
 assertTrue(in_array('Drag cards to reorder. Tap Done when finished.', $enKeys, true), 'edit banner msgid in catalog');
 assertTrue(!in_array('Edit mode — use the menu or drag cards. Opening apps is paused.', $enKeys, true), 'stale edit msgid removed');
-assertTrue(count($enKeys) === 54, 'l10n catalog has 54 keys');
+assertTrue(count($enKeys) === 62, 'l10n catalog has 62 keys');
 
 exit($failures > 0 ? 1 : 0);

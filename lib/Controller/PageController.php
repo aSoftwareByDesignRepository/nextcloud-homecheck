@@ -43,6 +43,7 @@ class PageController extends Controller
 			'apporderSynced' => true,
 		];
 
+		Util::addInitScript('homecheck', 'shell-init');
 		Util::addScript('homecheck', 'app');
 		Util::addStyle('homecheck', 'app');
 

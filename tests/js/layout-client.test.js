@@ -97,22 +97,28 @@ ok(appOrderRetryDelayMs(1, 3, 750) === 1500, 'apporder retry delay attempt 1');
 ok(appOrderRetryDelayMs(2, 3, 750) === 3000, 'apporder retry delay attempt 2');
 ok(appOrderRetryDelayMs(3, 3, 750) === null, 'apporder retry stops at max');
 
-function reorderInsertIndex(from, to) {
+function reorderInsertIndex(from, to, placeAfter) {
 	if (from < 0 || to < 0 || from === to) return to;
-	return from < to ? to - 1 : to;
+	if (from < to) {
+		return placeAfter ? to : to - 1;
+	}
+	return placeAfter ? to + 1 : to;
 }
-function applyReorder(ids, fromId, toId) {
+function applyReorder(ids, fromId, toId, placeAfter) {
 	const from = ids.indexOf(fromId);
 	const to = ids.indexOf(toId);
 	const items = ids.slice();
 	const moved = items.splice(from, 1)[0];
-	items.splice(reorderInsertIndex(from, to), 0, moved);
+	items.splice(reorderInsertIndex(from, to, !!placeAfter), 0, moved);
 	return items;
 }
-ok(JSON.stringify(applyReorder(['a', 'b', 'c', 'd'], 'a', 'd')) === JSON.stringify(['b', 'c', 'a', 'd']), 'DnD move right inserts before target after shift');
-ok(JSON.stringify(applyReorder(['a', 'b', 'c', 'd'], 'd', 'b')) === JSON.stringify(['a', 'd', 'b', 'c']), 'DnD move left keeps target index');
-ok(reorderInsertIndex(0, 2) === 1, 'reorderInsertIndex from<to');
-ok(reorderInsertIndex(3, 1) === 1, 'reorderInsertIndex from>to');
+ok(JSON.stringify(applyReorder(['a', 'b', 'c', 'd'], 'a', 'd', false)) === JSON.stringify(['b', 'c', 'a', 'd']), 'DnD move right inserts before target after shift');
+ok(JSON.stringify(applyReorder(['a', 'b', 'c', 'd'], 'd', 'b', false)) === JSON.stringify(['a', 'd', 'b', 'c']), 'DnD move left keeps target index');
+ok(JSON.stringify(applyReorder(['a', 'b', 'c', 'd'], 'a', 'b', true)) === JSON.stringify(['b', 'a', 'c', 'd']), 'DnD adjacent drop on right half swaps');
+ok(JSON.stringify(applyReorder(['a', 'b', 'c', 'd'], 'a', 'b', false)) === JSON.stringify(['a', 'b', 'c', 'd']), 'DnD adjacent drop on left half is no-op');
+ok(reorderInsertIndex(0, 2, false) === 1, 'reorderInsertIndex from<to');
+ok(reorderInsertIndex(3, 1, false) === 1, 'reorderInsertIndex from>to');
+ok(reorderInsertIndex(0, 1, true) === 1, 'reorderInsertIndex adjacent placeAfter');
 
 function wouldExceedOnRemoveFromFolder(topLevelCount, maxItems) {
 	return topLevelCount >= maxItems;

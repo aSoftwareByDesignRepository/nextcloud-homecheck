@@ -11,11 +11,11 @@ test.describe('HomeCheck launcher', () => {
 	test('grid renders and edit toggle works', async ({ page }) => {
 		await page.locator('#hmk-edit-toggle').click();
 		await expect(page.locator('#homecheck-app')).toHaveClass(/is-editing/);
-		await expect(page.locator('#hmk-edit-banner')).toBeVisible();
+		await expect(page.locator('#hmk-edit-hint')).toBeVisible();
 		await expect(page.locator('#hmk-new-folder')).toBeVisible();
 		await page.locator('#hmk-edit-toggle').click();
 		await expect(page.locator('#homecheck-app')).not.toHaveClass(/is-editing/);
-		await expect(page.locator('#hmk-edit-banner')).toBeHidden();
+		await expect(page.locator('#hmk-edit-hint')).toBeHidden();
 	});
 
 	test('creates folder, opens it in edit mode, removes member', async ({ page }) => {

@@ -200,6 +200,51 @@ class LayoutService
 	}
 
 	/**
+	 * Read-only layout summary for the Dashboard desklet.
+	 * Must never persist layout or touch core/apporder (unlike getForUser).
+	 *
+	 * @return array{appCount:int,folderCount:int,tileCount:int,isDefaultLanding:bool,hasPersonalLayout:bool}
+	 */
+	public function summarizeForUser(string $uid): array
+	{
+		$entries = $this->liveEntries();
+		$raw = $this->readPersonalRaw($uid);
+		$stored = null;
+		if ($raw !== null && $raw !== '') {
+			try {
+				$decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+				$stored = $this->validator->validate($decoded, true);
+			} catch (\Throwable) {
+				$stored = null;
+			}
+		}
+		if ($stored === null) {
+			$stored = $this->readSeedTemplate();
+		}
+		$merged = $this->merger->merge($stored, $entries);
+
+		$appCount = 0;
+		$folderCount = 0;
+		foreach ($merged['items'] as $item) {
+			$type = (string)($item['type'] ?? '');
+			if ($type === 'folder') {
+				$folderCount++;
+				$appCount += count($item['children'] ?? []);
+			} elseif ($type === 'app') {
+				$appCount++;
+			}
+		}
+
+		return [
+			'appCount' => $appCount,
+			'folderCount' => $folderCount,
+			'tileCount' => count($merged['items']),
+			'isDefaultLanding' => $this->isDefaultLanding($uid),
+			'hasPersonalLayout' => $raw !== null && $raw !== '',
+		];
+	}
+
+	/**
 	 * @return list<string>
 	 */
 	public function defaultAppParts(string $uid): array

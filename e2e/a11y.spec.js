@@ -24,7 +24,7 @@ test.describe('HomeCheck accessibility', () => {
 	test('edit mode passes axe WCAG 2.1 AA', async ({ page }) => {
 		await openHomeCheck(page);
 		await page.locator('#hmk-edit-toggle').click();
-		await expect(page.locator('#hmk-edit-banner')).toBeVisible();
+		await expect(page.locator('#hmk-edit-hint')).toBeVisible();
 		await scan(page, 'edit mode');
 	});
 
@@ -55,6 +55,6 @@ test.describe('HomeCheck accessibility', () => {
 		await page.locator('#hmk-edit-toggle').focus();
 		await page.keyboard.press('Enter');
 		await expect(page.locator('#homecheck-app')).toHaveClass(/is-editing/);
-		await expect(page.locator('#hmk-edit-banner')).toBeVisible();
+		await expect(page.locator('#hmk-edit-hint')).toBeVisible();
 	});
 });

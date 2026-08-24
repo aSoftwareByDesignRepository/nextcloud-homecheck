@@ -54,6 +54,14 @@
         "Too many items on the home grid (max 100)": "Te veel items op het startscherm (max. 100)",
         "Too many apps in this folder (max 40)": "Te veel apps in deze map (max. 40)",
         "Invalid JSON": "Ongeldige JSON",
-        "Save failed": "Opslaan mislukt"
+        "Save failed": "Opslaan mislukt",
+        "Your apps": "Jouw apps",
+        "Open launcher": "Launcher openen",
+        "%1$s apps · %2$s folders on your home": "%1$s apps · %2$s mappen op je start",
+        "No apps available for you yet.": "Er zijn nog geen apps voor jou beschikbaar.",
+        "Start page after login": "Startpagina na inloggen",
+        "HomeCheck opens after you sign in": "HomeCheck opent na het inloggen",
+        "Not set — open HomeCheck to choose": "Niet ingesteld — open HomeCheck om te kiezen",
+        "Could not load HomeCheck status.": "HomeCheck-status kon niet worden geladen."
     }
 }
