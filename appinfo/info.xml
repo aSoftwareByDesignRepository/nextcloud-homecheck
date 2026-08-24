@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+  - SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+	<id>homecheck</id>
+	<name>HomeCheck</name>
+	<summary>Personal app home — cards, folders, and top-bar order</summary>
+	<summary lang="de">Persönliche App-Startseite — Kacheln, Ordner und Menüleisten-Reihenfolge</summary>
+	<description><![CDATA[
+# HomeCheck — personal app home
+
+Arrange the Nextcloud apps you can open as a card grid with Samsung-style folders. Reordering saves to your personal layout and updates the top-bar app order (folders stay in HomeCheck only).
+
+**Free AGPL web app.** Optional admin seed template for first-time users; every user can fully customise afterwards.
+
+## Requirements
+
+- Nextcloud 32–34 · PHP 8.2–8.5
+	]]></description>
+	<description lang="de"><![CDATA[
+# HomeCheck — persönliche App-Startseite
+
+Ordne die für dich freigeschalteten Nextcloud-Apps als Kachelraster mit Ordnern. Die Reihenfolge speichert dein Layout und aktualisiert die Menüleiste (Ordner bleiben nur in HomeCheck).
+
+**Kostenlose AGPL-Web-App.**
+
+## Voraussetzungen
+
+- Nextcloud 32–34 · PHP 8.2–8.5
+	]]></description>
+	<version>1.0.9</version>
+	<licence>agpl</licence>
+	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Alexander Mäule</author>
+	<namespace>HomeCheck</namespace>
+	<category>organization</category>
+	<category>tools</category>
+	<website>https://nextcloud.software-by-design.de/</website>
+	<bugs>https://github.com/aSoftwareByDesignRepository/nextcloud-homecheck/issues</bugs>
+	<repository type="git">https://github.com/aSoftwareByDesignRepository/nextcloud-homecheck.git</repository>
+	<dependencies>
+		<php min-version="8.2" max-version="8.5"/>
+		<nextcloud min-version="32" max-version="34"/>
+	</dependencies>
+	<navigations>
+		<navigation>
+			<name>HomeCheck</name>
+			<route>homecheck.page.index</route>
+			<icon>app.svg</icon>
+			<order>2</order>
+			<type>link</type>
+		</navigation>
+	</navigations>
+	<settings>
+		<admin>OCA\HomeCheck\Settings\AdminSettings</admin>
+	</settings>
+	<repair-steps>
+		<uninstall>
+			<step>OCA\HomeCheck\Repair\UninstallCleanup</step>
+		</uninstall>
+	</repair-steps>
+</info>

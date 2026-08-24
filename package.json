@@ -1,0 +1,15 @@
+{
+  "name": "homecheck",
+  "private": true,
+  "scripts": {
+	"test:js": "node tests/js/layout-client.test.js",
+	"test:css": "node tests/css/theme-contract.test.js",
+    "e2e:a11y": "playwright test e2e/a11y.spec.js",
+    "e2e:flows": "playwright test e2e/flows.spec.js",
+    "e2e:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.49.0"
+  }
+}
