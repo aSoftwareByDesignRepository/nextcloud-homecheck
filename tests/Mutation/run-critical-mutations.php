@@ -193,5 +193,10 @@ assertTrue(is_string($css) && str_contains($css, '--color-element-error'), 'dang
 $mainTpl = file_get_contents($root . '/templates/main.php');
 assertTrue(is_string($mainTpl) && str_contains($mainTpl, 'button-vue hmk-btn'), 'buttons opt out of NC core mobile fills');
 assertTrue(is_string($css) && str_contains($css, 'body.theme--dark') && str_contains($css, '--hmk-primary-fill'), 'dark theme primary fill token');
+$enL10n = json_decode((string) file_get_contents($root . '/l10n/en.json'), true, 512, JSON_THROW_ON_ERROR);
+$enKeys = array_keys($enL10n['translations'] ?? []);
+assertTrue(in_array('Drag cards to reorder. Tap Done when finished.', $enKeys, true), 'edit banner msgid in catalog');
+assertTrue(!in_array('Edit mode — use the menu or drag cards. Opening apps is paused.', $enKeys, true), 'stale edit msgid removed');
+assertTrue(count($enKeys) === 54, 'l10n catalog has 54 keys');
 
 exit($failures > 0 ? 1 : 0);

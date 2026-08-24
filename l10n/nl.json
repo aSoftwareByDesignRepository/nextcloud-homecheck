@@ -3,7 +3,6 @@
     "translations": {
         "Skip to apps": "Naar apps springen",
         "HomeCheck": "HomeCheck",
-        "Your apps — tap to open, or Edit to rearrange and group.": "Je apps — tik om te openen, of Bewerken om te sorteren en groeperen.",
         "Edit": "Bewerken",
         "Done": "Klaar",
         "New folder": "Nieuwe map",
@@ -34,7 +33,7 @@
         "Name must be 1–40 characters": "Naam moet 1–40 tekens zijn",
         "Name has invalid characters": "Naam bevat ongeldige tekens",
         "More actions": "Meer acties",
-        "Edit mode — use the menu or drag cards. Opening apps is paused.": "Sleep kaarten om te sorteren. Tik op Klaar als je klaar bent.",
+        "Drag cards to reorder. Tap Done when finished.": "Sleep kaarten om te sorteren. Tik op Klaar als je klaar bent.",
         "Tap a card to open an app.": "Tik op een kaart om een app te openen.",
         "Editing your apps": "Apps bewerken",
         "Choose a folder": "Map kiezen",

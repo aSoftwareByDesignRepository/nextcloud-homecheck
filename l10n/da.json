@@ -3,7 +3,6 @@
     "translations": {
         "Skip to apps": "Spring til apps",
         "HomeCheck": "HomeCheck",
-        "Your apps — tap to open, or Edit to rearrange and group.": "Dine apps — tryk for at åbne, eller Rediger for at sortere og gruppere.",
         "Edit": "Rediger",
         "Done": "Færdig",
         "New folder": "Ny mappe",
@@ -34,7 +33,7 @@
         "Name must be 1–40 characters": "Navnet skal være 1–40 tegn",
         "Name has invalid characters": "Navnet indeholder ugyldige tegn",
         "More actions": "Flere handlinger",
-        "Edit mode — use the menu or drag cards. Opening apps is paused.": "Træk kort for at sortere. Tryk Færdig, når du er klar.",
+        "Drag cards to reorder. Tap Done when finished.": "Træk kort for at sortere. Tryk Færdig, når du er klar.",
         "Tap a card to open an app.": "Tryk på et kort for at åbne en app.",
         "Editing your apps": "Redigerer dine apps",
         "Choose a folder": "Vælg mappe",

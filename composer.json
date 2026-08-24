@@ -33,7 +33,12 @@
         "test:unit": "phpunit --testsuite unit",
         "test:integration": "phpunit --testsuite integration",
         "test:all": "phpunit",
-        "test:mutation": "php tests/Mutation/run-critical-mutations.php"
+        "test:mutation": "php tests/Mutation/run-critical-mutations.php",
+        "test:l10n": [
+            "php scripts/check-l10n-parity.php",
+            "php scripts/check-l10n-code-keys.php",
+            "php scripts/check-l10n-native-quality.php"
+        ]
     },
     "config": {
         "optimize-autoloader": true,

@@ -1,9 +1,8 @@
 {
     "name": "homecheck",
     "translations": {
-        "Skip to apps": "Zum Apps-Bereich springen",
+        "Skip to apps": "Zu den Apps springen",
         "HomeCheck": "HomeCheck",
-        "Your apps — tap to open, or Edit to rearrange and group.": "Deine Apps — tippen zum Öffnen, oder Bearbeiten zum Sortieren und Gruppieren.",
         "Edit": "Bearbeiten",
         "Done": "Fertig",
         "New folder": "Neuer Ordner",
@@ -34,9 +33,9 @@
         "Name must be 1–40 characters": "Name muss 1–40 Zeichen haben",
         "Name has invalid characters": "Name enthält ungültige Zeichen",
         "More actions": "Weitere Aktionen",
-        "Edit mode — use the menu or drag cards. Opening apps is paused.": "Karten ziehen zum Sortieren. Fertig tippen, wenn du fertig bist.",
+        "Drag cards to reorder. Tap Done when finished.": "Karten ziehen zum Sortieren. Fertig tippen, wenn du fertig bist.",
         "Tap a card to open an app.": "Tippe eine Karte, um eine App zu öffnen.",
-        "Editing your apps": "Apps werden bearbeitet",
+        "Editing your apps": "Apps bearbeiten",
         "Choose a folder": "Ordner wählen",
         "No folders yet — a new one will be created.": "Noch keine Ordner — es wird ein neuer erstellt.",
         "Delete": "Löschen",

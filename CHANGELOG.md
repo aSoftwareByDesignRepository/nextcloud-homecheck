@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.10 — 2026-08-24
+
+- l10n: fix stale msgids (`Drag cards to reorder…`); remove unused catalog keys; 54 keys synced to PHP templates.
+- l10n: informal native-quality gate; polish DE/FR/ES/IT/PL/nb/pt_BR banner and skip-link copy.
+- l10n: regenerate all `.js` catalogs; add `check-l10n-code-keys.php` and glossary HomeCheck terms.
+
 ## 1.0.9 — 2026-08-24
 
 - Theme: map `hmk-*` tokens to Nextcloud CSS variables under `#app-content` (light/dark/accent/high-contrast).

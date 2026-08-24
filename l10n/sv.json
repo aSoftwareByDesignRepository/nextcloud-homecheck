@@ -3,7 +3,6 @@
     "translations": {
         "Skip to apps": "Hoppa till appar",
         "HomeCheck": "HomeCheck",
-        "Your apps — tap to open, or Edit to rearrange and group.": "Dina appar — tryck för att öppna, eller Redigera för att sortera och gruppera.",
         "Edit": "Redigera",
         "Done": "Klar",
         "New folder": "Ny mapp",
@@ -34,7 +33,7 @@
         "Name must be 1–40 characters": "Namnet måste vara 1–40 tecken",
         "Name has invalid characters": "Namnet innehåller ogiltiga tecken",
         "More actions": "Fler åtgärder",
-        "Edit mode — use the menu or drag cards. Opening apps is paused.": "Dra kort för att sortera. Tryck Klar när du är färdig.",
+        "Drag cards to reorder. Tap Done when finished.": "Dra kort för att sortera. Tryck Klar när du är färdig.",
         "Tap a card to open an app.": "Tryck på ett kort för att öppna en app.",
         "Editing your apps": "Redigerar dina appar",
         "Choose a folder": "Välj mapp",
