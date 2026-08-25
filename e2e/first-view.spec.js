@@ -90,50 +90,105 @@ test.describe('AppHome first view — instant clarity', () => {
 		expect(metrics.bg).toBe(`rgb(${r}, ${g}, ${b})`);
 	});
 
-	test('pane icons use primary fill and theme invert filter', async ({ page }) => {
+	test('pane icon wells keep primary fill with forced white glyphs', async ({ page }) => {
 		const metrics = await page.evaluate(() => {
-			const img = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon');
-			if (!img) {
+			function parseRgb(s) {
+				const m = String(s).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+				return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+			}
+			function relLum(rgb) {
+				const f = (c) => {
+					c /= 255;
+					return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+				};
+				return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]);
+			}
+			function contrast(a, b) {
+				const L1 = relLum(a);
+				const L2 = relLum(b);
+				const hi = Math.max(L1, L2);
+				const lo = Math.min(L1, L2);
+				return (hi + 0.05) / (lo + 0.05);
+			}
+			const well = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon-well');
+			const img = well && well.querySelector('.hmk-pane__icon');
+			const pane = document.querySelector('#hmk-panels .hmk-pane[data-type="app"]');
+			if (!well || !img || !pane) {
 				return null;
 			}
-			const style = getComputedStyle(img);
-			const box = img.getBoundingClientRect();
+			const wellStyle = getComputedStyle(well);
+			const imgStyle = getComputedStyle(img);
+			const html = getComputedStyle(document.documentElement);
+			const primary = html.getPropertyValue('--color-primary-element').trim();
+			const hex = primary.replace('#', '');
+			const r = parseInt(hex.slice(0, 2), 16);
+			const g = parseInt(hex.slice(2, 4), 16);
+			const b = parseInt(hex.slice(4, 6), 16);
+			const wellRgb = parseRgb(wellStyle.backgroundColor) || [r, g, b];
+			const paneRgb = parseRgb(getComputedStyle(pane).backgroundColor)
+				|| parseRgb(html.getPropertyValue('--color-main-background'))
+				|| [255, 255, 255];
+			const filter = imgStyle.filter || '';
 			return {
-				w: box.width,
-				h: box.height,
-				filter: style.filter,
-				bg: style.backgroundColor,
+				wellBg: wellStyle.backgroundColor,
+				expected: `rgb(${r}, ${g}, ${b})`,
+				wellFilter: wellStyle.filter,
+				imgFilter: filter,
+				imgOpacity: imgStyle.opacity,
+				imgVisibility: imgStyle.visibility,
+				naturalW: img.naturalWidth,
+				wellVsPane: contrast(wellRgb, paneRgb),
+				whiteOnPrimary: contrast([255, 255, 255], wellRgb),
+				wellW: well.getBoundingClientRect().width,
 			};
 		});
 		expect(metrics).not.toBeNull();
-		expect(metrics.w).toBeGreaterThanOrEqual(28);
-		expect(metrics.h).toBeGreaterThanOrEqual(28);
-		expect(metrics.filter === 'none' || metrics.filter === '').toBe(false);
-		expect(metrics.bg).not.toBe('rgba(0, 0, 0, 0)');
+		expect(metrics.wellBg).toBe(metrics.expected);
+		expect(metrics.wellFilter === 'none' || metrics.wellFilter === '').toBe(true);
+		expect(metrics.imgFilter).toMatch(/brightness/i);
+		expect(metrics.imgFilter).toMatch(/invert/i);
+		expect(metrics.imgOpacity).toBe('1');
+		expect(metrics.imgVisibility).toBe('visible');
+		expect(metrics.naturalW).toBeGreaterThan(0);
+		expect(metrics.wellVsPane).toBeGreaterThanOrEqual(3);
+		expect(metrics.whiteOnPrimary).toBeGreaterThanOrEqual(3);
+		expect(metrics.wellW).toBeGreaterThanOrEqual(34);
 	});
 
-	test('pane icons stay inverted under dark theme', async ({ page }) => {
+	test('forced white glyph filter stays active for dark and bright primary wells', async ({ page }) => {
 		await page.evaluate(() => {
-			document.body.classList.add('theme--dark');
-			document.documentElement.style.setProperty('--color-main-background', '#181818');
-			document.documentElement.style.setProperty('--color-main-text', '#ededed');
-			document.documentElement.style.setProperty('--color-primary-element', '#0082c9');
-			document.documentElement.style.setProperty('--color-primary-element-text', '#ffffff');
+			document.documentElement.style.setProperty('--color-primary-element', '#00679e');
+			document.documentElement.style.setProperty('--primary-invert-if-bright', 'no');
 			document.documentElement.style.setProperty('--primary-invert-if-dark', 'invert(100%)');
 		});
-		const metrics = await page.evaluate(() => {
-			const img = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon');
-			if (!img) {
-				return null;
-			}
+		let metrics = await page.evaluate(() => {
+			const well = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon-well');
+			const img = well && well.querySelector('.hmk-pane__icon');
 			return {
+				wellBg: getComputedStyle(well).backgroundColor,
 				filter: getComputedStyle(img).filter,
-				bg: getComputedStyle(img).backgroundColor,
 			};
 		});
-		expect(metrics).not.toBeNull();
+		expect(metrics.wellBg).toBe('rgb(0, 103, 158)');
+		expect(metrics.filter).toMatch(/brightness/i);
 		expect(metrics.filter).toMatch(/invert/i);
-		expect(metrics.bg).not.toBe('rgba(0, 0, 0, 0)');
+
+		await page.evaluate(() => {
+			document.documentElement.style.setProperty('--color-primary-element', '#f4f4f4');
+			document.documentElement.style.setProperty('--primary-invert-if-bright', 'invert(100%)');
+			document.documentElement.style.setProperty('--primary-invert-if-dark', 'no');
+		});
+		metrics = await page.evaluate(() => {
+			const well = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon-well');
+			const img = well && well.querySelector('.hmk-pane__icon');
+			return {
+				wellBg: getComputedStyle(well).backgroundColor,
+				filter: getComputedStyle(img).filter,
+			};
+		});
+		expect(metrics.wellBg).toBe('rgb(244, 244, 244)');
+		expect(metrics.filter).toMatch(/brightness/i);
+		expect(metrics.filter).toMatch(/invert/i);
 	});
 
 	test('view mode passes axe on first paint region', async ({ page }) => {

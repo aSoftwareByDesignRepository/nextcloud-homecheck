@@ -434,27 +434,48 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	border-color: var(--color-primary-element);
 }
 
-.hmk-pane__icon {
-	width: 32px;
-	height: 32px;
+/*
+ * Icon well: opaque primary fill (no wallpaper bleed).
+ *
+ * NC ships many nav icons as white (#fff) OR black mono SVGs. Using
+ * --primary-invert-if-bright alone fails when its value is the sentinel `no`
+ * (invalid filter → some engines skip painting) and --primary-invert-if-dark
+ * turns white icons black-on-blue. Force a white glyph silhouette instead:
+ * brightness(0) invert(1) → reliable AA contrast on --color-primary-element.
+ */
+.hmk-pane__icon-well {
+	display: grid;
+	place-items: center;
+	width: 36px;
+	height: 36px;
 	flex-shrink: 0;
-	object-fit: contain;
 	border-radius: var(--border-radius, 8px);
 	background: var(--color-primary-element);
-	padding: 4px;
+	border: 1px solid color-mix(in srgb, var(--color-primary-element-text) 22%, transparent);
+	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-main-text) 18%, transparent);
 	box-sizing: border-box;
-	/* NC app SVGs are often white — same invert as nav / primary wells */
-	filter: var(--primary-invert-if-dark);
+	overflow: hidden;
 }
-
+.hmk-pane__icon {
+	width: 22px;
+	height: 22px;
+	object-fit: contain;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	/* Always white glyph on primary well — never `filter: no` */
+	filter: brightness(0) invert(1);
+}
 .hmk-pane__icon--fallback {
 	display: grid;
 	place-items: center;
+	width: 100%;
+	height: 100%;
 	color: var(--color-primary-element-text);
 	font-weight: 700;
 	font-size: 0.95rem;
+	line-height: 1;
 	filter: none;
-	padding: 0;
 }
 
 .hmk-pane__title-text {
@@ -535,10 +556,15 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	opacity: 0.95;
 }
 
-.hmk-pane__row-icon {
-	width: 22px;
-	height: 22px;
-	flex-shrink: 0;
+.hmk-pane__row-icon.hmk-pane__icon-well {
+	width: 26px;
+	height: 26px;
+	border-radius: var(--border-radius-small, 6px);
+	box-shadow: none;
+}
+.hmk-pane__row-icon .hmk-pane__icon {
+	width: 16px;
+	height: 16px;
 }
 
 .hmk-pane__row-title {
@@ -610,18 +636,20 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	right: 0;
 }
 
-/* CTA frosted strip */
+/* CTA frosted strip — same track as panes */
 #homecheck-app .hmk-cta.notecard {
-	max-width: min(100%, 40rem);
-	margin: 0 auto 8px;
+	max-width: 1800px;
+	margin: 0 auto var(--hmk-space-3);
 	width: calc(100% - 32px);
 	box-sizing: border-box;
-	background-color: var(--color-main-background-blur, var(--color-main-background));
+	padding: var(--hmk-space-3) var(--hmk-space-4);
+	background-color: color-mix(in srgb, var(--color-main-background) 88%, transparent);
 	-webkit-backdrop-filter: var(--filter-background-blur, blur(10px));
 	backdrop-filter: var(--filter-background-blur, blur(10px));
-	border: 2px solid var(--color-border, var(--hmk-border));
+	border: 1px solid color-mix(in srgb, var(--color-main-text) 12%, transparent);
 	border-radius: var(--border-radius-container-large, var(--hmk-radius-lg));
 	color: var(--color-main-text);
+	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-main-text) 8%, transparent);
 }
 
 .hmk-folder-list {
@@ -884,54 +912,73 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	margin-top: var(--hmk-space-4);
 }
 
-/* Vendor credit after panes — in scroll flow, readable contrast (not pinned) */
+/* Vendor credit — soft frosted label after panes (readable on any wallpaper) */
 .hmk-credit {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 100%;
 	box-sizing: border-box;
-	margin-top: var(--hmk-space-5);
-	padding-block: var(--hmk-space-4);
+	margin-top: var(--hmk-space-6);
+	padding: var(--hmk-space-5) var(--hmk-space-3) var(--hmk-space-3);
 	text-align: center;
 }
 .hmk-credit--admin {
-	margin-top: var(--hmk-space-5);
-	padding-block: var(--hmk-space-3);
 	justify-content: flex-start;
 	text-align: left;
+	margin-top: var(--hmk-space-5);
+	padding: var(--hmk-space-4) 0 0;
 }
 .hmk-credit__text {
 	margin: 0;
-	max-width: 40rem;
+	max-width: 36rem;
 }
 .hmk-credit__link {
 	display: inline-block;
 	max-width: 100%;
-	padding: var(--hmk-space-2) var(--hmk-space-3);
-	border-radius: var(--hmk-radius-md, 12px);
-	border: 1px solid color-mix(in srgb, var(--color-primary-element) 40%, var(--hmk-border));
-	background: color-mix(in srgb, var(--color-main-background) 92%, var(--color-primary-element) 8%);
+	padding: 0.55rem 1rem;
+	border-radius: var(--border-radius-pill, 999px);
+	border: 1px solid color-mix(in srgb, var(--color-main-text) 12%, transparent);
+	background: color-mix(in srgb, var(--color-main-background) 86%, transparent);
+	-webkit-backdrop-filter: var(--filter-background-blur, blur(10px));
+	backdrop-filter: var(--filter-background-blur, blur(10px));
 	font-size: var(--hmk-fs-sm);
-	font-weight: 600;
+	font-weight: 500;
 	line-height: 1.4;
+	letter-spacing: 0.01em;
 	color: var(--color-main-text);
 	text-decoration: none;
 	text-shadow: none;
+	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-main-text) 8%, transparent);
 }
 .hmk-credit__link:hover {
-	background: color-mix(in srgb, var(--color-main-background) 85%, var(--color-primary-element) 15%);
-	border-color: color-mix(in srgb, var(--color-primary-element) 60%, var(--hmk-border));
+	background: color-mix(in srgb, var(--color-main-background) 94%, transparent);
+	border-color: color-mix(in srgb, var(--color-primary-element) 45%, transparent);
+	color: var(--color-primary-element);
 	text-decoration: underline;
+	text-underline-offset: 0.18em;
 }
 .hmk-credit__link:focus-visible {
 	outline: var(--hmk-focus);
 	outline-offset: 3px;
 }
+.hmk-credit--admin .hmk-credit__link {
+	background: var(--color-main-background);
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+	.hmk-credit__link {
+		background: var(--color-main-background);
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+	}
+}
 @media (prefers-contrast: more) {
 	.hmk-credit__link {
-		border-width: 2px;
 		font-weight: 700;
+		border-width: 2px;
+		border-color: var(--color-main-text);
 		background: var(--color-main-background);
 	}
 }
@@ -1027,6 +1074,10 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 		text-shadow: none;
 		color: var(--color-main-text);
 	}
+	.hmk-pane__icon-well {
+		background: var(--color-main-background);
+		border: 2px solid var(--color-main-text);
+	}
 	.hmk-pane__icon {
 		filter: none;
 	}
@@ -1053,12 +1104,15 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 		color: CanvasText;
 		text-shadow: none;
 	}
+	.hmk-pane__icon-well {
+		background: Canvas;
+		border: 2px solid CanvasText;
+	}
 	.hmk-pane__icon {
 		filter: none;
 	}
 	.hmk-pane__icon--fallback {
-		background: Canvas;
-		border: 2px solid CanvasText;
+		background: transparent;
 		color: CanvasText;
 	}
 	.hmk-pane__launch:focus-visible,

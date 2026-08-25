@@ -1006,32 +1006,41 @@
 	}
 
 	function buildPaneIcon(entry, isFolder) {
+		const well = document.createElement('span');
+		well.className = 'hmk-pane__icon-well';
+		well.setAttribute('aria-hidden', 'true');
+
 		const img = document.createElement('img');
 		img.className = 'hmk-pane__icon';
 		img.alt = '';
-		img.width = 32;
-		img.height = 32;
+		img.width = 24;
+		img.height = 24;
 		img.decoding = 'async';
 		img.draggable = false;
 		if (isFolder) {
 			img.src = (window.OC && window.OC.imagePath)
 				? window.OC.imagePath('homecheck', 'app-dashboard.svg')
 				: '/apps/homecheck/img/app-dashboard.svg';
-			return img;
+			well.appendChild(img);
+			return well;
 		}
 		if (entry && entry.icon && typeof entry.icon === 'string' && entry.icon.indexOf('javascript:') !== 0) {
 			img.src = entry.icon;
 			img.addEventListener('error', function () {
-				img.removeAttribute('src');
-				img.classList.add('hmk-pane__icon--fallback');
+				img.remove();
+				const span = document.createElement('span');
+				span.className = 'hmk-pane__icon hmk-pane__icon--fallback';
+				span.textContent = iconLetter(entry ? entry.name : '?');
+				well.appendChild(span);
 			});
-			return img;
+			well.appendChild(img);
+			return well;
 		}
 		const span = document.createElement('span');
 		span.className = 'hmk-pane__icon hmk-pane__icon--fallback';
-		span.setAttribute('aria-hidden', 'true');
 		span.textContent = iconLetter(entry ? entry.name : '?');
-		return span;
+		well.appendChild(span);
+		return well;
 	}
 
 	function makeListRow(entry, opts) {

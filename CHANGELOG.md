@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.31 — 2026-08-25
+
+- UX: Remove frosted chip behind the top-right home/Edit actions.
+
+## 1.0.30 — 2026-08-25
+
+- Fix: Icon glyphs always render as white silhouettes on primary wells (`brightness(0) invert(1)`) — restores visibility when NC’s `filter: no` sentinel blanked icons.
+
+## 1.0.29 — 2026-08-25
+
+- Fix: Icon glyphs use `--primary-invert-if-bright` (NC contract) so white app icons stay white on dark primary wells — restores WCAG-readable contrast (was black-on-blue via invert-if-dark).
+- UX: Slightly larger opaque icon wells with a light edge so they separate cleanly from frosted panes.
+
+## 1.0.28 — 2026-08-25
+
+- Fix: Icon wells keep the Nextcloud primary colour — invert only the glyph (was turning blue wells orange).
+- UX: Soft frosted toolbar behind Edit/home actions; vendor credit is a readable frosted label after the panes.
+
 ## 1.0.27 — 2026-08-25
 
 - UX: Vendor credit back after the panes (scroll with content); keep readable contrast, drop the pinned bottom bar.

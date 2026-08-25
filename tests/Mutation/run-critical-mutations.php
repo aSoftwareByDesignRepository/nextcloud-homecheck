@@ -225,8 +225,11 @@ assertTrue(is_string($css) && str_contains($css, 'hmk-greeting'), 'dashboard gre
 assertTrue(is_string($css) && str_contains($css, '--color-main-background-blur'), 'pane blur background token');
 assertTrue(is_string($css) && str_contains($css, '--image-background'), 'themed background image');
 assertTrue(is_string($css) && str_contains($css, 'color-background-hover'), 'native tile hover');
-assertTrue(is_string($css) && str_contains($css, '--primary-invert-if-dark'), 'app icon invert for theme visibility');
+assertTrue(is_string($css) && preg_match('/filter:\s*brightness\(0\)\s*invert\(1\)/', $css) === 1, 'forced white glyph filter');
+assertTrue(is_string($css) && preg_match('/filter:\s*var\(--primary-invert-if-/', $css) !== 1, 'no NC invert sentinel in icon filter');
 assertTrue(is_string($css) && str_contains($css, '--hmk-icon-well'), 'icon well size token');
+assertTrue(is_string($css) && str_contains($css, '.hmk-pane__icon-well'), 'icon well wrapper class');
+assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'hmk-pane__icon-well'), 'JS builds icon wells');
 assertTrue(is_string($css) && str_contains($css, 'background: var(--color-primary-element)'), 'icon primary fill');
 assertTrue(is_string($css) && !preg_match('/\.hmk-app\s*\{[^}]*max-width:\s*72rem/s', $css), 'no 72rem page cap');
 $shellInit = file_get_contents($root . '/js/shell-init.js');
