@@ -30,7 +30,7 @@ Ordne die für dich freigeschalteten Nextcloud-Apps als Dashboard-Kacheln mit Or
 
 - Nextcloud 32–34 · PHP 8.2–8.5
 	]]></description>
-	<version>1.0.37</version>
+	<version>1.0.38</version>
 	<licence>agpl</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Alexander Mäule</author>
 	<namespace>HomeCheck</namespace>

@@ -15,11 +15,50 @@ test.describe('AppHome first view — instant clarity', () => {
 		await expect(credit).toHaveAttribute('href', 'https://nextcloud.software-by-design.de/');
 		await expect(credit).toHaveAttribute('target', '_blank');
 		await expect(credit).toHaveAttribute('rel', /noopener/);
-		/* Lives in the scrollable shell after panes — not a pinned viewport bar */
+		/* Lives after panes in the scrollable app root — not a pinned viewport bar */
 		const inShell = await page.locator('#app-content-wrapper.hmk-shell .hmk-credit, .hmk-shell .hmk-credit').count();
 		expect(inShell).toBeGreaterThan(0);
 		const color = await credit.evaluate((el) => getComputedStyle(el).color);
 		expect(color).not.toBe('rgba(0, 0, 0, 0)');
+	});
+
+	test('vendor credit stays reachable after many panes', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 700 });
+		/* Force tall content so the credit sits below the fold */
+		await page.evaluate(() => {
+			const panels = document.getElementById('hmk-panels');
+			if (!panels) {
+				return;
+			}
+			const spacer = document.createElement('div');
+			spacer.id = 'hmk-e2e-tall-spacer';
+			spacer.setAttribute('aria-hidden', 'true');
+			spacer.style.cssText = 'width:100%;height:2200px;flex:0 0 auto;pointer-events:none;';
+			panels.appendChild(spacer);
+		});
+		const credit = page.locator('.hmk-credit__link');
+		await credit.scrollIntoViewIfNeeded();
+		await expect(credit).toBeVisible();
+		const layout = await page.evaluate(() => {
+			const app = document.getElementById('homecheck-app');
+			const shell = document.getElementById('app-content-wrapper');
+			const footer = document.querySelector('.hmk-credit');
+			const link = document.querySelector('.hmk-credit__link');
+			if (!app || !shell || !footer || !link) {
+				return null;
+			}
+			const last = shell.lastElementChild;
+			const rect = link.getBoundingClientRect();
+			return {
+				scrollable: app.scrollHeight > app.clientHeight + 40,
+				creditIsLast: last === footer || !!last?.contains(footer),
+				linkInViewport: rect.top >= 0 && rect.bottom <= window.innerHeight + 2,
+			};
+		});
+		expect(layout).not.toBeNull();
+		expect(layout.scrollable).toBe(true);
+		expect(layout.creditIsLast).toBe(true);
+		expect(layout.linkInViewport).toBe(true);
 	});
 
 	test('app panes and Edit control visible immediately', async ({ page }) => {

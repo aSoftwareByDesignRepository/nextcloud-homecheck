@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.38 — 2026-08-25
+
+- Fix: AppHome scrolls when there are many apps so the Software by Design link always stays at the end of the page and remains reachable.
+
 ## 1.0.37 — 2026-08-25
 
 - Feature: Hide whole folders from AppHome (Edit → ⋮ → Hide). Restore the folder and its apps together from Hidden apps.
