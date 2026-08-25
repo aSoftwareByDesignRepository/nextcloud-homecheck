@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.39 — 2026-08-25
+
+- App Store: nine 1920×1040 screenshots + `info.xml` listing URLs; Playwright `chromium-store` capture script.
+- Release: Makefile (`release` / `release-signed`) and ready2publish catalog entry.
+
 ## 1.0.38 — 2026-08-25
 
 - Fix: AppHome scrolls when there are many apps so the Software by Design link always stays at the end of the page and remains reachable.
