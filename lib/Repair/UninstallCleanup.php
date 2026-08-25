@@ -16,7 +16,7 @@ use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
 /**
- * Remove HomeCheck preferences and app config on uninstall.
+ * Remove AppHome preferences and app config on uninstall.
  * Strips `homecheck` from core/defaultapp so login is not broken.
  * Does not wipe core/apporder (last synced top-bar order stays).
  */
@@ -30,7 +30,7 @@ class UninstallCleanup implements IRepairStep
 
 	public function getName(): string
 	{
-		return 'Remove HomeCheck preferences and app config';
+		return 'Remove AppHome preferences and app config';
 	}
 
 	public function run(IOutput $output): void
@@ -43,7 +43,7 @@ class UninstallCleanup implements IRepairStep
 		$deleted = $qb->executeStatement();
 
 		$stripped = $this->stripFromDefaultApp();
-		$output->info('HomeCheck: removed app config, ' . $deleted . ' preference row(s), stripped defaultapp for ' . $stripped . ' user(s)');
+		$output->info('AppHome: removed app config, ' . $deleted . ' preference row(s), stripped defaultapp for ' . $stripped . ' user(s)');
 	}
 
 	/**

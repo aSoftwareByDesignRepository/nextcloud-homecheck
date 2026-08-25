@@ -5,13 +5,13 @@
 -->
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>homecheck</id>
-	<name>HomeCheck</name>
-	<summary>Personal app home — cards, folders, and top-bar order</summary>
-	<summary lang="de">Persönliche App-Startseite — Kacheln, Ordner und Menüleisten-Reihenfolge</summary>
+	<name>AppHome</name>
+	<summary>Personal app home — panes, folders, and top-bar order</summary>
+	<summary lang="de">Persönliche App-Startseite — Panels, Ordner und Menüleisten-Reihenfolge</summary>
 	<description><![CDATA[
-# HomeCheck — personal app home
+# AppHome — personal app home
 
-Arrange the Nextcloud apps you can open as a card grid with Samsung-style folders. Reordering saves to your personal layout and updates the top-bar app order (folders stay in HomeCheck only).
+Arrange the Nextcloud apps you can open as Dashboard-style panes with folders. Reordering saves to your personal layout and updates the top-bar app order (folders stay in AppHome only).
 
 **Free AGPL web app.** Optional admin seed template for first-time users; every user can fully customise afterwards.
 
@@ -20,9 +20,9 @@ Arrange the Nextcloud apps you can open as a card grid with Samsung-style folder
 - Nextcloud 32–34 · PHP 8.2–8.5
 	]]></description>
 	<description lang="de"><![CDATA[
-# HomeCheck — persönliche App-Startseite
+# AppHome — persönliche App-Startseite
 
-Ordne die für dich freigeschalteten Nextcloud-Apps als Kachelraster mit Ordnern. Die Reihenfolge speichert dein Layout und aktualisiert die Menüleiste (Ordner bleiben nur in HomeCheck).
+Ordne die für dich freigeschalteten Nextcloud-Apps als Dashboard-Kacheln mit Ordnern. Die Reihenfolge speichert dein Layout und aktualisiert die Menüleiste (Ordner bleiben nur in AppHome).
 
 **Kostenlose AGPL-Web-App.**
 
@@ -30,7 +30,7 @@ Ordne die für dich freigeschalteten Nextcloud-Apps als Kachelraster mit Ordnern
 
 - Nextcloud 32–34 · PHP 8.2–8.5
 	]]></description>
-	<version>1.0.15</version>
+	<version>1.0.27</version>
 	<licence>agpl</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Alexander Mäule</author>
 	<namespace>HomeCheck</namespace>
@@ -45,7 +45,7 @@ Ordne die für dich freigeschalteten Nextcloud-Apps als Kachelraster mit Ordnern
 	</dependencies>
 	<navigations>
 		<navigation>
-			<name>HomeCheck</name>
+			<name>AppHome</name>
 			<route>homecheck.page.index</route>
 			<icon>app.svg</icon>
 			<order>2</order>

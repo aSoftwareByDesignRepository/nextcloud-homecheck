@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * HomeCheck launcher — accessible cards, folders, keyboard parity, CSRF saves.
+ * AppHome launcher — accessible cards, folders, keyboard parity, CSRF saves.
  */
 (function () {
 	'use strict';
@@ -30,15 +30,19 @@
 		}
 	}
 
-	/** @type {{layout:any, entries:any[], ctaDismissed:boolean, isDefaultLanding:boolean}} */
+	/** @type {{layout:any, entries:any[], ctaDismissed:boolean, isDefaultLanding:boolean, displayName?:string}} */
 	let state = readJsonScript('hmk-initial-state', {
 		layout: { version: 1, revision: 0, items: [] },
 		entries: [],
 		ctaDismissed: true,
 		isDefaultLanding: false,
+		displayName: '',
 	});
 	if (!state.layout || !Array.isArray(state.layout.items)) {
 		state.layout = { version: 1, revision: 0, items: [] };
+	}
+	if (typeof state.displayName !== 'string') {
+		state.displayName = '';
 	}
 
 	const t = Object.assign({
@@ -52,7 +56,7 @@
 		removeFromFolder: 'Remove from folder',
 		renameFolder: 'Rename folder',
 		deleteFolder: 'Delete folder',
-		confirmDeleteFolder: 'Delete this folder? Apps inside return to the home grid.',
+		confirmDeleteFolder: 'Delete this folder? Apps inside return to the home screen.',
 		saving: 'Saving…',
 		saved: 'Saved',
 		saveFailed: 'Could not save — try again',
@@ -62,8 +66,8 @@
 		nameInvalid: 'Name must be 1–40 characters',
 		nameChars: 'Name has invalid characters',
 		moreActions: 'More actions',
-		editSubtitle: 'Drag cards to reorder. Tap Done when finished.',
-		viewSubtitle: 'Tap a card to open an app.',
+		editSubtitle: 'Drag panes to rearrange. Tap Done when finished.',
+		viewSubtitle: 'Tap a pane to open an app.',
 		editBanner: 'Editing your apps',
 		chooseFolder: 'Choose a folder',
 		noFoldersYet: 'No folders yet — a new one will be created.',
@@ -71,12 +75,25 @@
 		rename: 'Rename',
 		syncWarn: 'Saved (top-bar sync failed — try again)',
 		syncRetrying: 'Retrying top-bar sync…',
-		startOk: 'HomeCheck is your start page',
+		startOk: 'AppHome is your start page',
+		startCleared: 'AppHome is no longer your start page',
 		startFail: 'Could not update start page',
+		useAsHome: 'Use as home',
+		unsetAsHome: 'Unset as home',
+		useAsHomeHint: 'Open AppHome after you sign in',
+		unsetAsHomeHint: 'Stop opening AppHome after you sign in',
 		unsafeLink: 'This app link is not safe to open',
-		emptyFolder: 'This folder is empty — add apps from the home grid.',
-		limitItems: 'Too many items on the home grid (max 100)',
+		emptyFolder: 'This folder is empty — add apps from Edit.',
+		limitItems: 'Too many items on the home screen (max 100)',
 		limitChildren: 'Too many apps in this folder (max 40)',
+		goodMorning: 'Good morning',
+		goodMorningName: 'Good morning, {name}',
+		goodAfternoon: 'Good afternoon',
+		goodAfternoonName: 'Good afternoon, {name}',
+		goodEvening: 'Good evening',
+		goodEveningName: 'Good evening, {name}',
+		hello: 'Hello',
+		helloName: 'Hello, {name}',
 	}, readJsonScript('hmk-i18n', {}));
 
 	const MAX_ITEMS = 100;
@@ -112,11 +129,12 @@
 	let openFolderId = null;
 
 	const el = {
-		grid: document.getElementById('hmk-grid'),
+		panels: document.getElementById('hmk-panels'),
 		empty: document.getElementById('hmk-empty'),
 		status: document.getElementById('hmk-status'),
 		editToggle: document.getElementById('hmk-edit-toggle'),
 		newFolder: document.getElementById('hmk-new-folder'),
+		homeToggle: document.getElementById('hmk-home-toggle'),
 		cta: document.getElementById('hmk-cta'),
 		ctaYes: document.getElementById('hmk-cta-yes'),
 		ctaNo: document.getElementById('hmk-cta-no'),
@@ -140,7 +158,69 @@
 		folderPickerCancel: document.getElementById('hmk-folder-picker-cancel'),
 		editHint: document.getElementById('hmk-edit-hint'),
 		instructions: document.getElementById('hmk-instructions'),
+		greeting: document.getElementById('hmk-greeting'),
 	};
+	/** @deprecated alias — panes host (Dashboard-style layout) */
+	el.grid = el.panels;
+
+	/**
+	 * NC Dashboard period buckets (hour 0–23).
+	 * night: 22–04, morning: 05–11, afternoon: 12–17, evening: 18–21
+	 * @param {number} hour
+	 * @returns {'morning'|'afternoon'|'evening'|'night'}
+	 */
+	function greetingPeriod(hour) {
+		var h = Number(hour);
+		if (!Number.isFinite(h)) {
+			return 'morning';
+		}
+		h = ((Math.floor(h) % 24) + 24) % 24;
+		if (h >= 22 || h < 5) {
+			return 'night';
+		}
+		if (h >= 18) {
+			return 'evening';
+		}
+		if (h >= 12) {
+			return 'afternoon';
+		}
+		return 'morning';
+	}
+
+	/**
+	 * @param {'morning'|'afternoon'|'evening'|'night'} period
+	 * @param {string} name
+	 * @param {Record<string, string>} dict
+	 * @returns {string}
+	 */
+	function formatGreeting(period, name, dict) {
+		var clean = typeof name === 'string' ? name.trim() : '';
+		var withName = clean !== '';
+		var key;
+		if (period === 'afternoon') {
+			key = withName ? 'goodAfternoonName' : 'goodAfternoon';
+		} else if (period === 'evening') {
+			key = withName ? 'goodEveningName' : 'goodEvening';
+		} else if (period === 'night') {
+			key = withName ? 'helloName' : 'hello';
+		} else {
+			key = withName ? 'goodMorningName' : 'goodMorning';
+		}
+		var tpl = dict[key] || '';
+		return withName ? String(tpl).split('{name}').join(clean) : String(tpl);
+	}
+
+	function paintGreeting() {
+		if (!el.greeting) {
+			return;
+		}
+		var text = formatGreeting(
+			greetingPeriod(new Date().getHours()),
+			state.displayName || '',
+			t
+		);
+		el.greeting.textContent = text;
+	}
 
 	function generateFolderId() {
 		const bytes = new Uint8Array(8);
@@ -381,17 +461,17 @@
 	}
 
 	function clearDropTargets() {
-		if (!el.grid) {
+		if (!el.panels) {
 			return;
 		}
-		el.grid.querySelectorAll('.hmk-card.is-drop-target').forEach(function (node) {
+		el.panels.querySelectorAll('.hmk-pane.is-drop-target').forEach(function (node) {
 			node.classList.remove('is-drop-target');
 		});
 	}
 
-	function resetPointerDnD(card) {
-		if (card) {
-			card.classList.remove('is-dragging');
+	function resetPointerDnD(pane) {
+		if (pane) {
+			pane.classList.remove('is-dragging');
 		}
 		clearDropTargets();
 		if (pointerDnD.onMove) {
@@ -409,33 +489,43 @@
 		dragId = null;
 	}
 
-	function cardAtPoint(clientX, clientY) {
+	function paneAtPoint(clientX, clientY) {
 		const under = document.elementFromPoint(clientX, clientY);
 		if (!under || typeof under.closest !== 'function') {
 			return null;
 		}
-		return under.closest('#hmk-grid > .hmk-card');
+		return under.closest('#hmk-panels > .hmk-pane');
 	}
 
-	function attachPointerDnD(card, item) {
-		card.addEventListener('pointerdown', function (ev) {
+	function attachPointerDnD(pane, item) {
+		pane.addEventListener('pointerdown', function (ev) {
 			if (!editing) {
 				return;
 			}
 			if (typeof ev.button === 'number' && ev.button !== 0) {
 				return;
 			}
-			if (ev.target && ev.target.closest && ev.target.closest('.hmk-card__menu')) {
+			if (ev.target && ev.target.closest && ev.target.closest('.hmk-pane__menu')) {
+				return;
+			}
+			/* Folder child rows keep their own menus; drag those panes from the header. */
+			if (item.type === 'folder' && ev.target && ev.target.closest && ev.target.closest('.hmk-pane__row')) {
 				return;
 			}
 
-			resetPointerDnD(card);
+			resetPointerDnD(pane);
 			pointerDnD.pointerId = ev.pointerId;
 			pointerDnD.fromId = item.id;
 			pointerDnD.active = false;
 			pointerDnD.startX = ev.clientX;
 			pointerDnD.startY = ev.clientY;
 			pointerDnD.suppressClick = false;
+
+			try {
+				pane.setPointerCapture(ev.pointerId);
+			} catch (err) {
+				/* Older engines may reject capture on some surfaces — document listeners still work. */
+			}
 
 			pointerDnD.onMove = function (moveEv) {
 				if (pointerDnD.pointerId !== moveEv.pointerId || pointerDnD.fromId !== item.id) {
@@ -450,10 +540,14 @@
 					pointerDnD.active = true;
 					pointerDnD.suppressClick = true;
 					dragId = item.id;
-					card.classList.add('is-dragging');
+					pane.classList.add('is-dragging');
+					/* Close any open ⋮ menus so they do not steal hit-testing. */
+					el.panels.querySelectorAll('.hmk-pane__menu[open]').forEach(function (node) {
+						node.open = false;
+					});
 				}
 				clearDropTargets();
-				const target = cardAtPoint(moveEv.clientX, moveEv.clientY);
+				const target = paneAtPoint(moveEv.clientX, moveEv.clientY);
 				if (target && target.dataset.id && target.dataset.id !== item.id) {
 					target.classList.add('is-drop-target');
 				}
@@ -468,14 +562,24 @@
 				}
 				const fromId = pointerDnD.fromId;
 				const wasActive = pointerDnD.active;
-				const target = wasActive ? cardAtPoint(upEv.clientX, upEv.clientY) : null;
+				const target = wasActive ? paneAtPoint(upEv.clientX, upEv.clientY) : null;
 				const toId = target && target.dataset ? target.dataset.id : null;
 				let placeAfter = false;
 				if (target) {
 					const rect = target.getBoundingClientRect();
-					placeAfter = upEv.clientX > (rect.left + (rect.width / 2));
+					/* Works for side-by-side and wrapped stacks */
+					const nx = (upEv.clientX - rect.left) / Math.max(rect.width, 1);
+					const ny = (upEv.clientY - rect.top) / Math.max(rect.height, 1);
+					placeAfter = (nx + ny) > 1;
 				}
-				resetPointerDnD(card);
+				try {
+					if (pane.hasPointerCapture && pane.hasPointerCapture(upEv.pointerId)) {
+						pane.releasePointerCapture(upEv.pointerId);
+					}
+				} catch (err) {
+					/* ignore */
+				}
+				resetPointerDnD(pane);
 				if (wasActive && toId) {
 					reorderItemsById(fromId, toId, placeAfter);
 				}
@@ -824,65 +928,6 @@
 		return s ? s.charAt(0).toUpperCase() : '?';
 	}
 
-	function buildIcon(entry) {
-		const wrap = document.createElement('div');
-		wrap.className = 'hmk-card__icon';
-		wrap.setAttribute('aria-hidden', 'true');
-		if (entry && entry.icon && isSafeHref(entry.icon)) {
-			const img = document.createElement('img');
-			img.src = entry.icon;
-			img.alt = '';
-			img.draggable = false;
-			img.loading = 'lazy';
-			img.addEventListener('error', function () {
-				wrap.textContent = '';
-				const span = document.createElement('span');
-				span.className = 'hmk-card__icon-fallback';
-				span.textContent = iconLetter(entry.name);
-				wrap.appendChild(span);
-			});
-			wrap.appendChild(img);
-		} else {
-			const span = document.createElement('span');
-			span.className = 'hmk-card__icon-fallback';
-			span.textContent = iconLetter(entry ? entry.name : '?');
-			wrap.appendChild(span);
-		}
-		return wrap;
-	}
-
-	function buildFolderIcon(folder) {
-		const wrap = document.createElement('div');
-		wrap.className = 'hmk-card__icon';
-		wrap.setAttribute('aria-hidden', 'true');
-		const stack = document.createElement('div');
-		stack.className = 'hmk-card__stack';
-		const kids = (folder.children || []).slice(0, 4);
-		kids.forEach(function (cid) {
-			const e = entriesById[cid];
-			if (e && e.icon && isSafeHref(e.icon)) {
-				const img = document.createElement('img');
-				img.src = e.icon;
-				img.alt = '';
-				img.draggable = false;
-				stack.appendChild(img);
-			} else {
-				const span = document.createElement('span');
-				span.textContent = iconLetter(e ? e.name : cid);
-				stack.appendChild(span);
-			}
-		});
-		if (kids.length === 0) {
-			const span = document.createElement('span');
-			span.className = 'hmk-card__icon-fallback';
-			span.textContent = 'F';
-			wrap.appendChild(span);
-			return wrap;
-		}
-		wrap.appendChild(stack);
-		return wrap;
-	}
-
 	function menuButton(label, onClick) {
 		const b = document.createElement('button');
 		b.type = 'button';
@@ -903,7 +948,7 @@
 		}
 		opts = opts || {};
 		const details = document.createElement('details');
-		details.className = 'hmk-card__menu';
+		details.className = 'hmk-pane__menu';
 		const summary = document.createElement('summary');
 		summary.textContent = '⋮';
 		summary.setAttribute('aria-label', t.moreActions);
@@ -934,14 +979,19 @@
 			} else if (item.type === 'folder') {
 				menu.appendChild(menuButton(t.moveLeft, function () { details.open = false; moveItem(item.id, -1); }));
 				menu.appendChild(menuButton(t.moveRight, function () { details.open = false; moveItem(item.id, 1); }));
+				menu.appendChild(menuButton(t.openFolder, function () { details.open = false; openFolder(item, summary); }));
 				menu.appendChild(menuButton(t.rename, function () { details.open = false; renameFolder(item.id); }));
 				menu.appendChild(menuButton(t.deleteFolder, function () { details.open = false; deleteFolder(item.id); }));
 			}
 		}
 		details.appendChild(menu);
 		details.addEventListener('toggle', function () {
+			const hostPane = details.closest('.hmk-pane');
+			if (hostPane) {
+				hostPane.classList.toggle('is-menu-open', details.open);
+			}
 			if (details.open) {
-				host.scrollIntoView({ block: 'center', behavior: 'instant' });
+				host.scrollIntoView({ block: 'nearest', behavior: 'instant' });
 			}
 		});
 		host.appendChild(details);
@@ -953,6 +1003,72 @@
 			return;
 		}
 		window.location.href = entry.href;
+	}
+
+	function buildPaneIcon(entry, isFolder) {
+		const img = document.createElement('img');
+		img.className = 'hmk-pane__icon';
+		img.alt = '';
+		img.width = 32;
+		img.height = 32;
+		img.decoding = 'async';
+		img.draggable = false;
+		if (isFolder) {
+			img.src = (window.OC && window.OC.imagePath)
+				? window.OC.imagePath('homecheck', 'app-dashboard.svg')
+				: '/apps/homecheck/img/app-dashboard.svg';
+			return img;
+		}
+		if (entry && entry.icon && typeof entry.icon === 'string' && entry.icon.indexOf('javascript:') !== 0) {
+			img.src = entry.icon;
+			img.addEventListener('error', function () {
+				img.removeAttribute('src');
+				img.classList.add('hmk-pane__icon--fallback');
+			});
+			return img;
+		}
+		const span = document.createElement('span');
+		span.className = 'hmk-pane__icon hmk-pane__icon--fallback';
+		span.setAttribute('aria-hidden', 'true');
+		span.textContent = iconLetter(entry ? entry.name : '?');
+		return span;
+	}
+
+	function makeListRow(entry, opts) {
+		opts = opts || {};
+		const li = document.createElement('div');
+		li.className = 'hmk-pane__row';
+		li.setAttribute('role', 'listitem');
+		li.dataset.id = entry ? entry.id : '';
+
+		const btn = document.createElement('button');
+		btn.type = 'button';
+		btn.className = 'button-vue hmk-pane__row-launch';
+
+		const icon = buildPaneIcon(entry, false);
+		icon.classList.add('hmk-pane__row-icon');
+		btn.appendChild(icon);
+
+		const title = document.createElement('span');
+		title.className = 'hmk-pane__row-title';
+		title.textContent = entry ? entry.name : '';
+		btn.appendChild(title);
+
+		if (editing) {
+			btn.setAttribute('aria-disabled', 'true');
+			btn.addEventListener('click', function (ev) {
+				ev.preventDefault();
+				ev.stopPropagation();
+			});
+		} else {
+			btn.addEventListener('click', function () { activateApp(entry); });
+		}
+
+		li.appendChild(btn);
+		if (opts.folderId && entry) {
+			attachEditMenu(li, { type: 'app', id: entry.id }, { folderId: opts.folderId });
+		}
+		return li;
 	}
 
 	function paintFolderDialog(folder) {
@@ -976,7 +1092,7 @@
 			if (!entry) {
 				return;
 			}
-			el.folderGrid.appendChild(makeCard({ type: 'app', id: cid }, { folderId: folder.id }));
+			el.folderGrid.appendChild(makeListRow(entry, { folderId: folder.id }));
 		});
 	}
 
@@ -987,80 +1103,107 @@
 		el.folderClose.focus();
 	}
 
-	function makeCard(item, opts) {
-		opts = opts || {};
-		const card = document.createElement('div');
-		card.className = 'hmk-card' + (item.type === 'folder' ? ' hmk-card--folder' : '');
-		card.setAttribute('role', 'listitem');
-		card.dataset.id = item.id;
-		card.dataset.type = item.type;
+	/**
+	 * Dashboard-style pane for one top-level app or folder.
+	 * App panes: one clickable surface (no redundant “Open” subtitle).
+	 * Folder panes: header + inline app rows (rows stay separate buttons).
+	 */
+	function makePane(item) {
+		const pane = document.createElement('section');
+		pane.className = 'hmk-pane' + (item.type === 'folder' ? ' hmk-pane--folder' : ' hmk-pane--app');
+		pane.setAttribute('role', 'listitem');
+		pane.dataset.id = item.id;
+		pane.dataset.type = item.type;
 
-		const launch = document.createElement('button');
-		launch.type = 'button';
-		launch.className = 'button-vue hmk-card__launch';
+		const header = document.createElement('header');
+		header.className = 'hmk-pane__header';
 
 		if (item.type === 'folder') {
-			launch.appendChild(buildFolderIcon(item));
+			const titleWrap = document.createElement('div');
+			titleWrap.className = 'hmk-pane__title';
+			titleWrap.appendChild(buildPaneIcon(null, true));
+			const text = document.createElement('span');
+			text.className = 'hmk-pane__title-text';
+			text.textContent = item.name || t.folder;
+			titleWrap.appendChild(text);
 			const badge = document.createElement('span');
-			badge.className = 'hmk-card__badge';
+			badge.className = 'hmk-pane__badge';
 			badge.textContent = String((item.children || []).length);
-			card.appendChild(badge);
-			const name = document.createElement('span');
-			name.className = 'hmk-card__name';
-			name.textContent = item.name || t.folder;
-			launch.appendChild(name);
-			launch.setAttribute('aria-label', (item.name || t.folder) + ', ' + t.openFolder);
-			launch.addEventListener('click', function (ev) {
-				if (pointerDnD.suppressClick) {
-					pointerDnD.suppressClick = false;
-					ev.preventDefault();
-					ev.stopPropagation();
+			titleWrap.appendChild(badge);
+			header.appendChild(titleWrap);
+			attachEditMenu(header, item, {});
+			pane.appendChild(header);
+
+			const content = document.createElement('div');
+			content.className = 'hmk-pane__content';
+			const list = document.createElement('div');
+			list.className = 'hmk-pane__list';
+			list.setAttribute('role', 'list');
+			const kids = item.children || [];
+			let shown = 0;
+			kids.forEach(function (cid) {
+				const entry = entriesById[cid];
+				if (!entry) {
 					return;
 				}
-				openFolder(item, launch);
+				list.appendChild(makeListRow(entry, { folderId: item.id }));
+				shown += 1;
 			});
+			if (shown === 0) {
+				const empty = document.createElement('p');
+				empty.className = 'hmk-pane__empty';
+				empty.textContent = t.emptyFolder;
+				content.appendChild(empty);
+			} else {
+				content.appendChild(list);
+			}
+			pane.appendChild(content);
 		} else {
 			const entry = entriesById[item.id];
-			launch.appendChild(buildIcon(entry));
-			const name = document.createElement('span');
-			name.className = 'hmk-card__name';
-			name.textContent = entry ? entry.name : item.id;
-			launch.appendChild(name);
+			const launch = document.createElement('button');
+			launch.type = 'button';
+			launch.className = 'button-vue hmk-pane__launch';
+			launch.appendChild(buildPaneIcon(entry, false));
+			const text = document.createElement('span');
+			text.className = 'hmk-pane__title-text';
+			text.textContent = entry ? entry.name : item.id;
+			launch.appendChild(text);
 			if (editing) {
-				/* Never use disabled=true — it blocks HTML5/pointer drag from the card surface. */
 				launch.setAttribute('aria-disabled', 'true');
 				launch.addEventListener('click', function (ev) {
 					ev.preventDefault();
 					ev.stopPropagation();
-					pointerDnD.suppressClick = false;
 				});
 			} else {
 				launch.addEventListener('click', function () { activateApp(entry); });
 			}
+			header.appendChild(launch);
+			attachEditMenu(header, item, {});
+			pane.appendChild(header);
 		}
 
-		card.appendChild(launch);
-		attachEditMenu(card, item, opts);
-
-		if (editing && !opts.folderId) {
-			card.classList.add('hmk-card--draggable');
-			attachPointerDnD(card, item);
+		if (editing) {
+			pane.classList.add('hmk-pane--draggable');
+			attachPointerDnD(pane, item);
 		}
 
-		return card;
+		return pane;
 	}
 
 	function render() {
 		const items = (state.layout && state.layout.items) ? state.layout.items : [];
-		el.grid.textContent = '';
+		if (!el.panels) {
+			return;
+		}
+		el.panels.textContent = '';
 		if (items.length === 0) {
 			el.empty.hidden = false;
-			el.grid.hidden = true;
+			el.panels.hidden = true;
 		} else {
 			el.empty.hidden = true;
-			el.grid.hidden = false;
+			el.panels.hidden = false;
 			items.forEach(function (item) {
-				el.grid.appendChild(makeCard(item));
+				el.panels.appendChild(makePane(item));
 			});
 		}
 		root.classList.toggle('is-editing', editing);
@@ -1080,6 +1223,41 @@
 		if (el.instructions) {
 			el.instructions.textContent = editing ? t.editSubtitle : t.viewSubtitle;
 		}
+		paintHomeToggle();
+	}
+
+	function paintHomeToggle() {
+		if (!el.homeToggle) {
+			return;
+		}
+		const on = !!state.isDefaultLanding;
+		el.homeToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+		el.homeToggle.textContent = on ? t.unsetAsHome : t.useAsHome;
+		el.homeToggle.setAttribute('aria-label', on ? t.unsetAsHomeHint : t.useAsHomeHint);
+		el.homeToggle.title = on ? t.unsetAsHomeHint : t.useAsHomeHint;
+		el.homeToggle.classList.toggle('primary', on);
+		el.homeToggle.classList.toggle('secondary', !on);
+		el.homeToggle.classList.toggle('hmk-chrome__btn--home-on', on);
+	}
+
+	async function toggleDefaultLanding() {
+		const enable = !state.isDefaultLanding;
+		/* enable:false must not send dismiss:true — API treats that as CTA-only dismiss. */
+		const body = enable ? { enable: true, dismiss: true } : { enable: false };
+		const { data } = await api('POST', defaultLandingUrl(), body);
+		if (!data.ok) {
+			setStatus(t.startFail, true);
+			return;
+		}
+		state.isDefaultLanding = !!(data.data && data.data.isDefaultLanding);
+		if (enable) {
+			state.ctaDismissed = true;
+			if (el.cta) {
+				el.cta.hidden = true;
+			}
+		}
+		paintHomeToggle();
+		setStatus(state.isDefaultLanding ? t.startOk : t.startCleared, false);
 	}
 
 	function setupCta() {
@@ -1097,6 +1275,7 @@
 				state.isDefaultLanding = true;
 				state.ctaDismissed = true;
 				el.cta.hidden = true;
+				paintHomeToggle();
 				setStatus(t.startOk, false);
 			} else {
 				setStatus(t.startFail, true);
@@ -1132,6 +1311,11 @@
 					paintFolderDialog(folder);
 				}
 			}
+		});
+	}
+	if (el.homeToggle) {
+		el.homeToggle.addEventListener('click', function () {
+			toggleDefaultLanding();
 		});
 	}
 	if (el.newFolder) {
@@ -1180,6 +1364,7 @@
 	});
 
 	setupCta();
+	paintGreeting();
 	render();
 	if (state.apporderSynced === false) {
 		scheduleAppOrderRetry();

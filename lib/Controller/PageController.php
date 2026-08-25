@@ -43,6 +43,18 @@ class PageController extends Controller
 			'apporderSynced' => true,
 		];
 
+		// Display name for dashboard-style greeting only — never used in hrefs/IDs.
+		$displayName = '';
+		if ($user !== null) {
+			$raw = trim((string)$user->getDisplayName());
+			// Strip control chars; keep printable Unicode for greetings.
+			$displayName = preg_replace('/[\x00-\x1F\x7F]/u', '', $raw) ?? '';
+			if (mb_strlen($displayName) > 80) {
+				$displayName = mb_substr($displayName, 0, 80);
+			}
+		}
+		$payload['displayName'] = $displayName;
+
 		Util::addInitScript('homecheck', 'shell-init');
 		Util::addScript('homecheck', 'app');
 		Util::addStyle('homecheck', 'app');

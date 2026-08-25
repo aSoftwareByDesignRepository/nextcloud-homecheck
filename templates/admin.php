@@ -19,9 +19,9 @@ $adminI18nJson = json_encode($adminI18n, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_
 ?>
 <script id="hmk-admin-i18n" type="application/json"><?php echo $adminI18nJson; ?></script>
 <div id="hmk-admin" class="hmk-admin section" data-hmk-template="<?php p($json === false ? 'null' : $json); ?>">
-	<h2><?php p($l->t('HomeCheck')); ?></h2>
+	<h2><?php p($l->t('AppHome')); ?></h2>
 	<p class="settings-hint">
-		<?php p($l->t('Optional seed layout for users who have never opened HomeCheck. Applied once; users can change everything afterwards. Folders never appear in the top bar.')); ?>
+		<?php p($l->t('Optional seed layout for users who have never opened AppHome. Applied once; users can change everything afterwards. Folders never appear in the top bar.')); ?>
 	</p>
 	<label class="hmk-label" for="hmk-admin-json"><?php p($l->t('Seed template JSON')); ?></label>
 	<textarea id="hmk-admin-json" class="hmk-textarea" rows="12" spellcheck="false" aria-describedby="hmk-admin-hint"></textarea>
@@ -34,4 +34,14 @@ $adminI18nJson = json_encode($adminI18n, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_
 		<button type="button" class="button-vue hmk-btn hmk-btn--primary" id="hmk-admin-save"><?php p($l->t('Save seed template')); ?></button>
 		<button type="button" class="button-vue hmk-btn hmk-btn--ghost" id="hmk-admin-clear"><?php p($l->t('Clear seed')); ?></button>
 	</div>
+	<footer class="hmk-credit hmk-credit--admin" role="contentinfo">
+		<p class="hmk-credit__text">
+			<a
+				class="hmk-credit__link"
+				href="https://nextcloud.software-by-design.de/"
+				target="_blank"
+				rel="noopener noreferrer"
+			><?php p($l->t('More Nextcloud apps from Software by Design')); ?><span class="hidden-visually"> <?php p($l->t('(opens in a new window)')); ?></span></a>
+		</p>
+	</footer>
 </div>

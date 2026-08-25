@@ -108,7 +108,7 @@ async function scanAxe(page, label) {
 	expect(results.violations, `${label}: ${JSON.stringify(results.violations, null, 2)}`).toEqual([]);
 }
 
-test.describe('HomeCheck responsive + theme matrix', () => {
+test.describe('AppHome responsive + theme matrix', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 	});
@@ -144,7 +144,7 @@ test.describe('HomeCheck responsive + theme matrix', () => {
 				await applyThemePreset(page, theme);
 
 				await assertNoHorizontalOverflow(page, caseName);
-				await expect(page.locator('#hmk-grid .hmk-card__launch').first()).toBeVisible();
+				await expect(page.locator('#hmk-panels .hmk-pane__launch, #hmk-panels .hmk-pane__row-launch').first()).toBeVisible();
 
 				const editBtn = page.locator('#hmk-edit-toggle');
 				const box = await editBtn.boundingBox();
@@ -182,7 +182,7 @@ test.describe('HomeCheck responsive + theme matrix', () => {
 			(r) => r.url().includes('/api/layout') && r.request().method() === 'PUT',
 			{ timeout: 20000 },
 		);
-		const folder = page.locator('#hmk-grid .hmk-card[data-type="folder"]').last();
+		const folder = page.locator('#hmk-panels .hmk-pane[data-type="folder"]').last();
 		await folder.evaluate((el) => el.scrollIntoView({ block: 'center' }));
 		await folder.locator('summary').evaluate((el) => /** @type {HTMLElement} */ (el).click());
 		await folder.getByRole('menuitem', { name: /Delete folder|Ordner löschen/i }).evaluate((el) => /** @type {HTMLElement} */ (el).click());

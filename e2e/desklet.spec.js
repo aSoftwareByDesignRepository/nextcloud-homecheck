@@ -2,36 +2,42 @@
 const { test, expect } = require('@playwright/test');
 const { login, openHomeCheck } = require('./helpers');
 
-test.describe('HomeCheck dense launcher + desklet API', () => {
+test.describe('AppHome responsive panes + desklet API', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 	});
 
-	test('tiles pack densely — no full-width stretch on wide viewport', async ({ page }) => {
+	test('panes stay dashboard-sized and wrap on wide viewport', async ({ page }) => {
 		await page.setViewportSize({ width: 1280, height: 800 });
 		await openHomeCheck(page);
 		const metrics = await page.evaluate(() => {
-			const card = document.querySelector('#hmk-grid .hmk-card');
-			const grid = document.querySelector('#hmk-grid');
-			if (!card || !grid) {
+			const panes = Array.from(document.querySelectorAll('#hmk-panels > .hmk-pane'));
+			const host = document.querySelector('#hmk-panels');
+			if (!host || panes.length < 2) {
 				return null;
 			}
-			const cardBox = card.getBoundingClientRect();
-			const gridBox = grid.getBoundingClientRect();
+			const hostBox = host.getBoundingClientRect();
+			const widths = panes.map((p) => p.getBoundingClientRect().width);
+			const tops = panes.map((p) => Math.round(p.getBoundingClientRect().top));
+			const uniqueRows = new Set(tops).size;
 			return {
-				cardW: cardBox.width,
-				gridW: gridBox.width,
+				hostW: hostBox.width,
+				minW: Math.min(...widths),
+				maxW: Math.max(...widths),
+				count: panes.length,
+				uniqueRows,
 			};
 		});
 		expect(metrics).not.toBeNull();
-		expect(metrics.gridW).toBeGreaterThan(900);
-		// Dense tracks max ~7rem; must not stretch toward half the grid.
-		expect(metrics.cardW).toBeLessThanOrEqual(120);
-		expect(metrics.cardW).toBeGreaterThanOrEqual(80);
-		expect(metrics.cardW / metrics.gridW).toBeLessThan(0.2);
+		expect(metrics.hostW).toBeGreaterThan(600);
+		expect(metrics.maxW).toBeLessThanOrEqual(360);
+		expect(metrics.minW).toBeGreaterThanOrEqual(240);
+		/* At least two panes fit side-by-side on a 1280px viewport. */
+		expect(metrics.hostW / metrics.maxW).toBeGreaterThan(2);
+		expect(metrics.count).toBeGreaterThan(1);
 	});
 
-	test('dashboard OCS returns HomeCheck launcher desklet items', async ({ page }) => {
+	test('dashboard OCS returns AppHome launcher desklet items', async ({ page }) => {
 		await openHomeCheck(page); // ensure session + layout warm
 		const result = await page.evaluate(async () => {
 			const token = window.OC?.requestToken

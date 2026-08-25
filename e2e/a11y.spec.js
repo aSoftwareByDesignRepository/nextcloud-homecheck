@@ -11,7 +11,7 @@ async function scan(page, label) {
 	expect(results.violations, `${label} a11y violations: ${JSON.stringify(results.violations, null, 2)}`).toEqual([]);
 }
 
-test.describe('HomeCheck accessibility', () => {
+test.describe('AppHome accessibility', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 	});
@@ -30,15 +30,15 @@ test.describe('HomeCheck accessibility', () => {
 
 	test('folder dialog passes axe WCAG 2.1 AA', async ({ page }) => {
 		await openHomeCheck(page);
+		await page.locator('#hmk-edit-toggle').click();
 		const count = await folderCount(page);
 		if (count > 0) {
 			await openFolderCard(folderAt(page, 0));
 		} else {
-			await page.locator('#hmk-edit-toggle').click();
 			const before = await folderCount(page);
 			await page.locator('#hmk-new-folder').click();
 			await expect(page.locator('#hmk-status')).toContainText(/Saved|Gespeichert/i, { timeout: 15000 });
-			await expect(page.locator('#hmk-grid .hmk-card[data-type="folder"]')).toHaveCount(before + 1);
+			await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before + 1);
 			await openFolderCard(folderAt(page, before));
 		}
 		await expect(page.locator('#hmk-folder-dialog')).toBeVisible();

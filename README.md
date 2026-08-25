@@ -1,4 +1,4 @@
-# HomeCheck
+# AppHome
 
 Personal Nextcloud **app home**: card grid of apps you can open, Samsung-style **folders**, personal order that **syncs to the top bar**, optional start-page CTA, and an admin **seed** template (applied once).
 
@@ -11,9 +11,9 @@ cd nextcloud
 docker compose exec -u www-data nextcloud php occ app:enable homecheck
 ```
 
-Open **HomeCheck** in the app menu. Use **Edit** to rearrange / group. Saving updates `core`/`apporder` (folders stay in HomeCheck only).
+Open **AppHome** in the app menu. Use **Edit** to rearrange / group. Saving updates `core`/`apporder` (folders stay in AppHome only).
 
-Admin: **Settings → Administration → Additional settings → HomeCheck** for the seed JSON.
+Admin: **Settings → Administration → Additional settings → AppHome** for the seed JSON.
 
 ## Tests
 

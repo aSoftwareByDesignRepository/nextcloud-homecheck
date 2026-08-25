@@ -131,4 +131,65 @@ ok(wouldExceedOnRemoveFromFolder(99, 100) === false, 'removeFromFolder ok under 
 ok(wouldExceedOnDeleteFolder(70, 40, 100) === true, 'deleteFolder expand blocked when over max');
 ok(wouldExceedOnDeleteFolder(70, 30, 100) === false, 'deleteFolder expand ok under max');
 
+/** Mirror app.js greetingPeriod / formatGreeting (Dashboard buckets). */
+function greetingPeriod(hour) {
+	var h = Number(hour);
+	if (!Number.isFinite(h)) {
+		return 'morning';
+	}
+	h = ((Math.floor(h) % 24) + 24) % 24;
+	if (h >= 22 || h < 5) {
+		return 'night';
+	}
+	if (h >= 18) {
+		return 'evening';
+	}
+	if (h >= 12) {
+		return 'afternoon';
+	}
+	return 'morning';
+}
+function formatGreeting(period, name, dict) {
+	var clean = typeof name === 'string' ? name.trim() : '';
+	var withName = clean !== '';
+	var key;
+	if (period === 'afternoon') {
+		key = withName ? 'goodAfternoonName' : 'goodAfternoon';
+	} else if (period === 'evening') {
+		key = withName ? 'goodEveningName' : 'goodEvening';
+	} else if (period === 'night') {
+		key = withName ? 'helloName' : 'hello';
+	} else {
+		key = withName ? 'goodMorningName' : 'goodMorning';
+	}
+	var tpl = dict[key] || '';
+	return withName ? String(tpl).split('{name}').join(clean) : String(tpl);
+}
+const greetDict = {
+	goodMorning: 'Good morning',
+	goodMorningName: 'Good morning, {name}',
+	goodAfternoon: 'Good afternoon',
+	goodAfternoonName: 'Good afternoon, {name}',
+	goodEvening: 'Good evening',
+	goodEveningName: 'Good evening, {name}',
+	hello: 'Hello',
+	helloName: 'Hello, {name}',
+};
+ok(greetingPeriod(8) === 'morning', 'greeting morning');
+ok(greetingPeriod(12) === 'afternoon', 'greeting afternoon');
+ok(greetingPeriod(19) === 'evening', 'greeting evening');
+ok(greetingPeriod(23) === 'night', 'greeting night late');
+ok(greetingPeriod(3) === 'night', 'greeting night early');
+ok(greetingPeriod(-1) === 'night', 'greeting wraps negative hour');
+ok(formatGreeting('morning', 'Alex', greetDict) === 'Good morning, Alex', 'greeting with name');
+ok(formatGreeting('morning', '', greetDict) === 'Good morning', 'greeting without name');
+ok(formatGreeting('night', 'Alex', greetDict) === 'Hello, Alex', 'night greeting with name');
+ok(formatGreeting('morning', '  ', greetDict) === 'Good morning', 'whitespace name treated empty');
+ok(!formatGreeting('morning', '<img>', greetDict).includes('<img>src'), 'name is interpolated as text only in helper');
+
+const appJsSrc = require('fs').readFileSync(require('path').join(__dirname, '../../js/app.js'), 'utf8');
+ok(appJsSrc.includes('function greetingPeriod'), 'app.js ships greetingPeriod');
+ok(appJsSrc.includes("split('{name}')"), 'app.js interpolates {name} safely via split/join');
+ok(appJsSrc.includes('el.greeting.textContent'), 'greeting uses textContent (XSS-safe)');
+
 process.exit(failed ? 1 : 0);

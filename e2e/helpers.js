@@ -1,5 +1,5 @@
 // @ts-check
-/** Shared Playwright helpers for HomeCheck e2e journeys. */
+/** Shared Playwright helpers for AppHome e2e journeys. */
 
 /**
  * @param {import('@playwright/test').Page} page
@@ -47,43 +47,45 @@ async function openHomeCheck(page) {
 	const base = process.env.HOMECHECK_BASE_URL || 'http://localhost:8081';
 	await page.goto(base + '/index.php/apps/homecheck/');
 	await page.locator('#homecheck-app').waitFor({ state: 'visible', timeout: 20000 });
-	await page.locator('#hmk-grid .hmk-card__launch').first().waitFor({ state: 'visible', timeout: 20000 });
+	await page.locator('#hmk-panels .hmk-pane').first().waitFor({ state: 'visible', timeout: 20000 });
 }
 
 /**
  * @param {import('@playwright/test').Page} page
  */
 async function folderCount(page) {
-	return page.locator('#hmk-grid .hmk-card[data-type="folder"]').count();
+	return page.locator('#hmk-panels .hmk-pane[data-type="folder"]').count();
 }
 
 /**
- * Folder card created most recently (by index after count bump).
+ * Folder pane created most recently (by index after count bump).
  * @param {import('@playwright/test').Page} page
  * @param {number} index
  */
 function folderAt(page, index) {
-	return page.locator('#hmk-grid .hmk-card[data-type="folder"]').nth(index);
+	return page.locator('#hmk-panels .hmk-pane[data-type="folder"]').nth(index);
 }
 
 /**
- * @param {import('@playwright/test').Locator} card
+ * @param {import('@playwright/test').Locator} pane
  * @param {RegExp} name
  */
-async function clickCardMenuItem(card, name) {
-	await card.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
-	await card.locator('summary').evaluate((el) => /** @type {HTMLElement} */ (el).click());
-	const item = card.getByRole('menuitem', { name: name });
+async function clickCardMenuItem(pane, name) {
+	await pane.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+	/* Top-level panes: menu in header. Folder dialog rows: menu on the row. */
+	await pane.locator('summary').first()
+		.evaluate((el) => /** @type {HTMLElement} */ (el).click());
+	const item = pane.getByRole('menuitem', { name: name });
 	await item.waitFor({ state: 'visible', timeout: 5000 });
 	await item.evaluate((el) => /** @type {HTMLElement} */ (el).click());
 }
 
 /**
- * @param {import('@playwright/test').Locator} folderCard
+ * Open folder dialog via edit menu (children also show inline in the pane).
+ * @param {import('@playwright/test').Locator} folderPane
  */
-async function openFolderCard(folderCard) {
-	await folderCard.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
-	await folderCard.locator('.hmk-card__launch').evaluate((el) => /** @type {HTMLElement} */ (el).click());
+async function openFolderCard(folderPane) {
+	await clickCardMenuItem(folderPane, /Open folder|Ordner öffnen|Ouvrir le dossier|Abrir carpeta/i);
 }
 
 /**
@@ -138,7 +140,7 @@ async function resetLayoutToFlatApps(page) {
 		}
 	});
 	await page.reload({ waitUntil: 'domcontentloaded' });
-	await page.locator('#hmk-grid .hmk-card__launch').first().waitFor({ state: 'visible', timeout: 20000 });
+	await page.locator('#hmk-panels .hmk-pane').first().waitFor({ state: 'visible', timeout: 20000 });
 }
 
 /**
@@ -153,7 +155,7 @@ async function waitForLayoutSave(page) {
 	const data = await res.json();
 	if (!data.ok && res.status === 409) {
 		await page.reload({ waitUntil: 'domcontentloaded' });
-		await page.locator('#hmk-grid .hmk-card__launch').first().waitFor({ state: 'visible', timeout: 20000 });
+		await page.locator('#hmk-panels .hmk-pane').first().waitFor({ state: 'visible', timeout: 20000 });
 		return;
 	}
 	if (!data.ok) {

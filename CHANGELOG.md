@@ -1,5 +1,61 @@
 # Changelog
 
+## 1.0.27 — 2026-08-25
+
+- UX: Vendor credit back after the panes (scroll with content); keep readable contrast, drop the pinned bottom bar.
+
+## 1.0.26 — 2026-08-25
+
+- Fix: Primary/secondary/danger buttons use Nextcloud Appearance colours (vanilla `button-vue` was unstyled and ignored theme primary).
+- UX: Frosted panes use a denser surface so warm wallpapers tint less heavily against a blue primary.
+
+## 1.0.25 — 2026-08-25
+
+- UX: Pin vendor credit to the bottom of the AppHome viewport as a frosted pill (always visible while browsing panes).
+
+## 1.0.24 — 2026-08-25
+
+- UX: Quiet footer credit linking to [nextcloud.software-by-design.de](https://nextcloud.software-by-design.de/) (launcher + admin seed settings).
+
+## 1.0.23 — 2026-08-25
+
+- Rename: user-facing product name **AppHome** (technical app id remains `homecheck`).
+
+## 1.0.22 — 2026-08-25
+
+- Rename: user-facing product name **AppCheck** (technical app id remains `homecheck`). Superseded by AppHome in 1.0.23.
+
+## 1.0.21 — 2026-08-25
+
+- UX: Always-visible **Use as home** / **Unset as home** toggle in the sticky top bar (set or clear Nextcloud start page after login).
+
+## 1.0.20 — 2026-08-25
+
+- Fix: ⋮ edit menus paint above neighbouring frosted panes (stacking / `backdrop-filter`).
+- Fix: drag-and-drop hit-testing — dragged pane uses `pointer-events: none` + pointer capture so drop targets resolve.
+- UX: sticky frosted top bar with greeting + pill Edit / New folder controls.
+
+## 1.0.19 — 2026-08-25
+
+- Fix: home scroll — app root height uses viewport minus header (`--hmk-overlay-height`) so the last panes are not clipped below the fold; extra bottom padding on the shell.
+
+## 1.0.18 — 2026-08-25
+
+- UX: App panes are one clickable surface — drop the useless “Open” subtitle line; folder rows stay single-line.
+
+## 1.0.17 — 2026-08-25
+
+- UX: Individual Dashboard-style frosted panes (~320px) you can drag to rearrange; wrap responsively on narrow screens.
+- UX: Folder panes list apps inline; greeting + themed background kept from 1.0.16.
+- Tests: pane selectors in e2e/contracts/mutation; l10n “pane” / “home screen” msgids.
+
+## 1.0.16 — 2026-08-25
+
+- UX: Native Nextcloud Dashboard look — themed background, time-of-day greeting with display name, frosted `hmk-panel` chrome around the launcher grid.
+- a11y: reduced-transparency / high-contrast / forced-colors fallbacks for blur panels; greeting uses `--color-background-plain-text`.
+- Security: greeting name via `textContent` + PHP `p()`; displayName stripped of control chars (max 80).
+- Tests: greeting period/formatter contracts; CSS dashboard chrome; first-view e2e for greeting + panel.
+
 ## 1.0.15 — 2026-08-25
 
 - Feature: Nextcloud Dashboard desklet (`homecheck-launcher`) — layout status + start-page hint + **Open launcher** button.

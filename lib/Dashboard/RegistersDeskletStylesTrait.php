@@ -13,7 +13,7 @@ use OCA\HomeCheck\AppInfo\Application;
 use OCP\Util;
 
 /**
- * Dashboard widgets render outside HomeCheck page templates — they must
+ * Dashboard widgets render outside AppHome page templates — they must
  * register desklet styles in {@see \OCP\Dashboard\IWidget::load()} themselves.
  */
 trait RegistersDeskletStylesTrait

@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * HomeCheck desklet chrome contracts — CSS + load() registration.
+ * AppHome desklet chrome contracts — CSS + load() registration.
  */
 'use strict';
 
@@ -51,9 +51,10 @@ const app = read('lib/AppInfo/Application.php');
 ok(app.includes('registerDashboardWidget(LauncherWidget::class)'), 'widget registered at boot');
 
 const appCss = read('css/app.css');
-ok(appCss.includes('justify-content: start'), 'dense grid packs start');
-ok(appCss.includes('minmax(5.5rem, 6.25rem)'), 'fixed-ish tile tracks (no fluid stretch)');
-ok(!/\.hmk-grid\s*\{[^}]*\b1fr\b/s.test(appCss), 'grid does not use 1fr stretch');
-ok(appCss.includes('max-width: 7rem'), 'card max-width caps empty space');
+ok(appCss.includes('flex-wrap: wrap'), 'panes wrap responsively');
+ok(appCss.includes('width: 320px'), 'dashboard-sized pane width');
+ok(!appCss.includes('.hmk-grid'), 'legacy dense grid removed');
+ok(!appCss.includes('.hmk-card'), 'legacy card tiles removed');
+ok(appCss.includes('hmk-pane'), 'individual frosted panes');
 
 process.exit(failed ? 1 : 0);

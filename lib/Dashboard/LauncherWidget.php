@@ -25,7 +25,7 @@ use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
 /**
- * HomeCheck status desklet — compact launcher summary on the NC Dashboard.
+ * AppHome status desklet — compact launcher summary on the NC Dashboard.
  *
  * Red-team:
  * - Desklet loads must stay read-only: call summarizeForUser() only (never the
@@ -97,12 +97,12 @@ class LauncherWidget implements IAPIWidgetV2, IButtonWidget, IIconWidget, IReloa
 		try {
 			$summary = $this->layoutService->summarizeForUser($userId);
 		} catch (\Throwable $e) {
-			$this->logger->error('HomeCheck dashboard desklet failed', [
+			$this->logger->error('AppHome dashboard desklet failed', [
 				'app' => Application::APP_ID,
 				'userId' => $userId,
 				'exception' => $e,
 			]);
-			return new WidgetItems([], $this->l10n->t('Could not load HomeCheck status.'));
+			return new WidgetItems([], $this->l10n->t('Could not load AppHome status.'));
 		}
 
 		$appCount = (int)$summary['appCount'];
@@ -114,7 +114,7 @@ class LauncherWidget implements IAPIWidgetV2, IButtonWidget, IIconWidget, IReloa
 		}
 
 		$items[] = new WidgetItem(
-			$this->l10n->t('HomeCheck'),
+			$this->l10n->t('AppHome'),
 			$this->l10n->t('%1$s apps · %2$s folders on your home', [
 				(string)$appCount,
 				(string)$folderCount,
@@ -127,7 +127,7 @@ class LauncherWidget implements IAPIWidgetV2, IButtonWidget, IIconWidget, IReloa
 		if ($summary['isDefaultLanding']) {
 			$items[] = new WidgetItem(
 				$this->l10n->t('Start page after login'),
-				$this->l10n->t('HomeCheck opens after you sign in'),
+				$this->l10n->t('AppHome opens after you sign in'),
 				$url,
 				$icon,
 				'hmk-landing-on',
@@ -135,7 +135,7 @@ class LauncherWidget implements IAPIWidgetV2, IButtonWidget, IIconWidget, IReloa
 		} else {
 			$items[] = new WidgetItem(
 				$this->l10n->t('Start page after login'),
-				$this->l10n->t('Not set — open HomeCheck to choose'),
+				$this->l10n->t('Not set — open AppHome to choose'),
 				$url,
 				$icon,
 				'hmk-landing-off',

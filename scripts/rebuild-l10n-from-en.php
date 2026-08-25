@@ -14,7 +14,12 @@ $enKeys = array_keys($en['translations'] ?? []);
 
 $retired = [
 	'Your apps — tap to open, or Edit to rearrange and group.' => null,
-	'Edit mode — use the menu or drag cards. Opening apps is paused.' => 'Drag cards to reorder. Tap Done when finished.',
+	'Edit mode — use the menu or drag cards. Opening apps is paused.' => 'Drag panes to rearrange. Tap Done when finished.',
+	'Drag cards to reorder. Tap Done when finished.' => 'Drag panes to rearrange. Tap Done when finished.',
+	'Tap a card to open an app.' => 'Tap a pane to open an app.',
+	'Delete this folder? Apps inside return to the home grid.' => 'Delete this folder? Apps inside return to the home screen.',
+	'This folder is empty — add apps from the home grid.' => 'This folder is empty — add apps from Edit.',
+	'Too many items on the home grid (max 100)' => 'Too many items on the home screen (max 100)',
 ];
 
 $locales = ['de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR'];
