@@ -231,4 +231,46 @@ test.describe('AppHome responsive + theme matrix', () => {
 		await scanAxe(page, 'confirm dark mobile');
 		await assertNoHorizontalOverflow(page, 'confirm dialog');
 	});
+
+	test('chrome secondary buttons stay opaque AA on wallpaper (dark + custom accent)', async ({ page }) => {
+		await page.setViewportSize({ width: 1440, height: 900 });
+		await openHomeCheck(page);
+		for (const theme of [THEME_PRESETS[1], THEME_PRESETS[3]]) {
+			await applyThemePreset(page, theme);
+			const contrast = await page.evaluate(() => {
+				const btn = document.querySelector('#hmk-home-toggle');
+				if (!btn) {
+					return null;
+				}
+				const cs = getComputedStyle(btn);
+				const parse = (c) => {
+					const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+					return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+				};
+				const lum = (rgb) => {
+					const n = rgb.map((v) => {
+						const s = v / 255;
+						return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+					});
+					return 0.2126 * n[0] + 0.7152 * n[1] + 0.0722 * n[2];
+				};
+				const fg = parse(cs.color);
+				const bg = parse(cs.backgroundColor);
+				if (!fg || !bg) {
+					return { ok: false, reason: 'unparsed', color: cs.color, backgroundColor: cs.backgroundColor };
+				}
+				const L1 = lum(fg);
+				const L2 = lum(bg);
+				const ratio = (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+				return {
+					ok: ratio >= 4.5,
+					ratio: Math.round(ratio * 100) / 100,
+					color: cs.color,
+					backgroundColor: cs.backgroundColor,
+				};
+			});
+			expect(contrast, theme.name).not.toBeNull();
+			expect(contrast.ok, `${theme.name}: ${JSON.stringify(contrast)}`).toBe(true);
+		}
+	});
 });

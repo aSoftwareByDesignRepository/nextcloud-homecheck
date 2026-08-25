@@ -52,7 +52,14 @@ function contrast(a, b) {
 ok(css.includes('.hmk-pane__icon-well'), 'icon well class');
 ok(appJs.includes('hmk-pane__icon-well'), 'JS builds wells');
 ok(/filter:\s*brightness\(0\)\s*;/.test(css), 'black glyph via brightness(0)');
-ok(!/filter:\s*brightness\(0\)\s*invert\(1\)/.test(css), 'does not force white-on-primary');
+ok(
+	/\.hmk-pane__icon \{[^}]*filter:\s*brightness\(0\)\s*;/s.test(css),
+	'default icons are black silhouette (not inverted)',
+);
+ok(
+	/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
+	'dark theme scopes invert(1) so glyphs stay visible on dark wells',
+);
 ok(!/filter:\s*var\(--primary-invert-if-/.test(css), 'does not pipe NC invert sentinels into filter');
 ok(/background:\s*var\(--color-primary-element-light/.test(css), 'well uses primary-element-light');
 ok(/border:\s*2px solid var\(--color-primary-element\)/.test(css), 'well bordered with primary');
@@ -61,6 +68,7 @@ const pairs = [
 	['#000000', '#e5eff5', 'black on default primary-light'],
 	['#000000', '#ffffff', 'black on white'],
 	['#000000', '#d9e3e8', 'black on soft primary-light'],
+	['#ffffff', '#243a48', 'white glyph on dark well (dark theme)'],
 	['#00679e', '#ffffff', 'primary border vs white pane'],
 ];
 for (const [fg, bg, label] of pairs) {

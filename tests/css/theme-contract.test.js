@@ -41,6 +41,14 @@ ok(css.includes('overflow-x: clip'), 'prevents horizontal page scroll');
 ok(/#homecheck-app\s*\{[^}]*overflow-y:\s*auto/s.test(css), 'app root is vertical scrollport');
 ok(/\.hmk-credit\s*\{[^}]*margin-top:\s*auto/s.test(css), 'vendor credit pinned to page end via margin-top auto');
 ok(/\.hmk-credit\s*\{[^}]*flex-shrink:\s*0/s.test(css), 'vendor credit never collapses');
+ok(
+	/button\.button-vue\.secondary\.hmk-chrome__btn[\s\S]*?background-color:\s*var\(--color-main-background\)/.test(css),
+	'chrome secondary uses opaque main-background for wallpaper AA',
+);
+ok(
+	/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
+	'dark theme icon glyphs invert for AA on dark wells',
+);
 ok(css.includes('hmk-shell--wide'), 'wide shell modifier present');
 ok(css.includes('color-background-hover'), 'native NC hover on tiles');
 ok(css.includes('hmk-pane'), 'dashboard individual panes');
@@ -67,7 +75,14 @@ ok(/filter:\s*brightness\(0\)\s*;/.test(css), 'black glyph on light well');
 ok(/--color-primary-element-light/.test(css), 'icon well uses primary-element-light');
 ok(/border:\s*2px\s+solid\s+var\(--color-primary-element\)/.test(css), 'icon well bordered with primary');
 ok(!/filter:\s*var\(--primary-invert-if-/.test(css), 'no NC invert sentinel in icon filter');
-ok(!/filter:\s*brightness\(0\)\s*invert\(1\)/.test(css), 'no forced white-on-primary glyphs');
+ok(
+	/\.hmk-pane__icon \{[^}]*filter:\s*brightness\(0\)\s*;/s.test(css),
+	'default icon filter is black silhouette (not inverted)',
+);
+ok(
+	/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
+	'dark theme scopes invert(1) for icon AA',
+);
 ok(css.includes('button.button-vue.primary'), 'vanilla primary buttons styled to NC primary');
 ok(css.includes('background-color: var(--hmk-primary-fill'), 'primary button fill uses AA-safe hmk-primary-fill');
 ok(css.includes('--hmk-secondary-fill'), 'secondary fill token defined');

@@ -184,10 +184,16 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	width: 100%;
 	padding: var(--hmk-space-2) var(--hmk-space-3);
 	box-sizing: border-box;
-	background: color-mix(in srgb, var(--color-background-plain, var(--color-main-background)) 55%, transparent);
-	-webkit-backdrop-filter: var(--filter-background-blur, blur(10px));
-	backdrop-filter: var(--filter-background-blur, blur(10px));
-	border-radius: 0 0 var(--border-radius-container-large, var(--hmk-radius-lg)) var(--border-radius-container-large, var(--hmk-radius-lg));
+	/*
+	 * Soft frosted strip — never a solid primary/plain slab.
+	 * Mix main-background so Light / Dark / custom accents stay readable without
+	 * painting a second header colour over the wallpaper.
+	 */
+	background: color-mix(in srgb, var(--color-main-background) 42%, transparent);
+	-webkit-backdrop-filter: var(--filter-background-blur, blur(12px));
+	backdrop-filter: var(--filter-background-blur, blur(12px));
+	border-bottom: 1px solid color-mix(in srgb, var(--color-border, var(--hmk-border)) 55%, transparent);
+	border-radius: 0;
 }
 
 /* Dashboard-style greeting — on background, high contrast via theming tokens */
@@ -230,6 +236,20 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	font-weight: 600;
 	border-radius: var(--border-radius-pill, 999px);
 	box-shadow: var(--hmk-shadow);
+}
+/*
+ * Chrome secondary sits on wallpaper — use an opaque NC surface + main text so
+ * Light / Dark / High Contrast / custom accents always clear 4.5:1 (never mid-gray
+ * on mid-gray from translucent background-dark over the themed backdrop).
+ */
+#homecheck-app button.button-vue.secondary.hmk-chrome__btn {
+	background-color: var(--color-main-background);
+	color: var(--color-main-text);
+	border: 1px solid var(--color-border-maxcontrast, var(--color-border, var(--hmk-border)));
+}
+#homecheck-app button.button-vue.secondary.hmk-chrome__btn:hover:not(:disabled) {
+	background-color: var(--color-background-hover, var(--hmk-bg-soft));
+	color: var(--color-main-text);
 }
 #homecheck-app .hmk-chrome__btn--home-on {
 	outline: 2px solid var(--color-primary-element);
@@ -458,8 +478,9 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 .hmk-pane__icon-well {
 	display: grid;
 	place-items: center;
-	width: 36px;
-	height: 36px;
+	/* 48px well — meets adjacent-icon readability; launch hit area is the full pane control */
+	width: var(--hmk-touch);
+	height: var(--hmk-touch);
 	flex-shrink: 0;
 	border-radius: var(--border-radius, 8px);
 	background: var(--color-primary-element-light, var(--color-background-dark, var(--color-main-background)));
@@ -469,8 +490,8 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	overflow: hidden;
 }
 .hmk-pane__icon {
-	width: 22px;
-	height: 22px;
+	width: 1.375rem;
+	height: 1.375rem;
 	object-fit: contain;
 	padding: 0;
 	border: 0;
@@ -478,6 +499,17 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	/* Valid filters only — never NC `no` sentinel */
 	filter: brightness(0);
 	opacity: 0.92;
+}
+/* Dark themes: primary-element-light is often a dark tint — invert silhouette to white */
+body.theme--dark #homecheck-app .hmk-pane__icon,
+body.theme-dark #homecheck-app .hmk-pane__icon,
+body[data-theme-dark] #homecheck-app .hmk-pane__icon {
+	filter: brightness(0) invert(1);
+}
+body.theme--dark #homecheck-app .hmk-pane__icon-well,
+body.theme-dark #homecheck-app .hmk-pane__icon-well,
+body[data-theme-dark] #homecheck-app .hmk-pane__icon-well {
+	background: color-mix(in srgb, var(--color-primary-element) 32%, var(--color-main-background));
 }
 .hmk-pane__icon--fallback {
 	display: grid;
@@ -520,7 +552,7 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 .hmk-pane__list {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: var(--hmk-space-1);
 	margin: 0;
 	padding: 0;
 	min-width: 0;
@@ -571,8 +603,10 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 }
 
 .hmk-pane__row-icon.hmk-pane__icon-well {
-	width: 26px;
-	height: 26px;
+	width: 2rem;
+	height: 2rem;
+	min-width: 2rem;
+	min-height: 2rem;
 	border-radius: var(--border-radius-small, 6px);
 	box-shadow: none;
 }
@@ -1086,9 +1120,19 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 		border-width: 2px;
 		border-color: var(--color-main-text);
 	}
+	.hmk-topbar {
+		background: var(--color-main-background);
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+		border-bottom: 2px solid var(--color-main-text);
+	}
 	.hmk-greeting {
 		text-shadow: none;
 		color: var(--color-main-text);
+	}
+	#homecheck-app button.button-vue.secondary.hmk-chrome__btn {
+		border-width: 2px;
+		border-color: var(--color-main-text);
 	}
 	.hmk-pane__icon-well {
 		background: var(--color-main-background);

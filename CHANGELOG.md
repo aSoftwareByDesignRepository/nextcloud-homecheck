@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.40 — 2026-08-25
+
+- A11y/Theme: Chrome secondary buttons use opaque `main-background` + maxcontrast border so wallpaper/dark themes keep ≥4.5:1.
+- Theme: Soft sticky topbar (main-background frost) instead of a solid plain-colour slab; high-contrast solid fallback.
+- A11y: Dark-theme icon wells invert glyphs; 48px icon wells; design-system spacing on folder rows.
+- Tests: Chrome secondary luminance check; theme-contract + icon-contrast updated for dark invert.
+
 ## 1.0.39 — 2026-08-25
 
 - App Store: nine 1920×1040 screenshots + `info.xml` listing URLs; Playwright `chromium-store` capture script.
