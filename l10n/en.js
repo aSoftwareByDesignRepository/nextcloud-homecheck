@@ -66,7 +66,6 @@ OC.L10N.register(
 	"Hello" : "Hello",
 	"Hello, {name}" : "Hello, {name}",
 	"Delete this folder? Apps inside return to the home screen." : "Delete this folder? Apps inside return to the home screen.",
-	"Drag panes to rearrange. Tap Done when finished." : "Drag panes to rearrange. Tap Done when finished.",
 	"Tap a pane to open an app." : "Tap a pane to open an app.",
 	"This folder is empty — add apps from Edit." : "This folder is empty — add apps from Edit.",
 	"Too many items on the home screen (max 100)" : "Too many items on the home screen (max 100)",
@@ -77,6 +76,14 @@ OC.L10N.register(
 	"Open AppHome after you sign in" : "Open AppHome after you sign in",
 	"Stop opening AppHome after you sign in" : "Stop opening AppHome after you sign in",
 	"More Nextcloud apps from Software by Design" : "More Nextcloud apps from Software by Design",
-	"(opens in a new window)" : "(opens in a new window)"
-},
-"nplurals=2; plural=(n != 1);");
+	"(opens in a new window)" : "(opens in a new window)",
+	"Hide" : "Hide",
+	"Hidden apps" : "Hidden apps",
+	"Show again" : "Show again",
+	"No hidden apps." : "No hidden apps.",
+	"Hidden from AppHome" : "Hidden from AppHome",
+	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Drag panes to rearrange. Hide apps you do not need. Tap Done when finished.",
+	"Folder hidden from AppHome" : "Folder hidden from AppHome"
+	},
+	"nplurals=2; plural=(n != 1);"
+);

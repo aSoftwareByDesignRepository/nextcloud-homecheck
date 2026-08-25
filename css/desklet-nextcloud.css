@@ -14,8 +14,14 @@
 	overflow: visible;
 }
 
+/* Dark surface glyph — never NC invert sentinel `no` (invalid filter) */
 #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img {
-	filter: var(--background-invert-if-dark);
+	filter: none;
+}
+body.theme--dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img,
+body.theme-dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img,
+body[data-theme-dark] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img {
+	filter: brightness(0) invert(1);
 }
 
 #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .dashboard-widget {
@@ -54,13 +60,13 @@
 #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry {
 	border-radius: var(--border-radius-element, 8px);
 	min-height: 44px;
-	padding: 8px 6px;
+	padding: var(--hmk-space-2, 8px) var(--hmk-space-2, 8px);
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: flex-start;
 	justify-content: flex-start;
-	gap: 10px;
+	gap: var(--hmk-space-3, 12px);
 	width: 100%;
 	min-width: 0;
 	max-width: 100%;
@@ -79,7 +85,12 @@
 	margin-top: 0.1rem;
 	align-self: flex-start;
 	background: url('../img/app-dashboard.svg') center / contain no-repeat;
-	filter: var(--background-invert-if-dark);
+	filter: none;
+}
+body.theme--dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before,
+body.theme-dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before,
+body[data-theme-dark] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before {
+	filter: brightness(0) invert(1);
 }
 
 #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry :is(

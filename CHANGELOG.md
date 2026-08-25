@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.37 — 2026-08-25
+
+- Feature: Hide whole folders from AppHome (Edit → ⋮ → Hide). Restore the folder and its apps together from Hidden apps.
+
+## 1.0.36 — 2026-08-25
+
+- Feature: Hide apps from your AppHome (Edit → ⋮ → Hide). Restore anytime via Hidden apps.
+- Layout: Personal `hidden` id list; merger no longer re-appends hidden live nav entries.
+
+## 1.0.35 — 2026-08-25
+
+- A11y/Theme: Primary/secondary/danger buttons use AA-safe fills (`color-mix` + surface tokens; dark + bright accents).
+- Theme: Secondary chrome paints `var(--color-background-dark)` + main text — never pale `--color-primary-element-light` under dark ink.
+- Responsive: Replace one-off px spacing with `hmk-space-*`; pane width token `--hmk-pane-width`.
+- Desklet: Drop NC invert sentinel; dark UI uses valid `brightness(0) invert(1)`.
+- Tests: Theme/axe matrix covers dark/HC/custom accents; secondary fill contract asserts background-dark.
+
+## 1.0.34 — 2026-08-25
+
+- Security: LayoutMerger sanitizes hostile/corrupt folder names (defense-in-depth if preferences bypass LayoutValidator).
+- Tests: Full API auth matrix (unauthenticated 401 + non-admin 403); stronger cross-user isolation; JSON size limit unit test.
+- QA: Momos FULL engagement 2026-08-25.
+
+## 1.0.33 — 2026-08-25
+
+- Security: Icon URLs use the same `isSafeHref` allowlist as launch links (blocks `javascript:`, `data:`, foreign origins).
+- Security: Dashboard desklet `getItemsV2` binds session UID before summarizing (BOLA defense-in-depth).
+- Audit: Argus FULL AUDIT 2026-08-25.
+
+## 1.0.32 — 2026-08-25
+
+- Fix: Icon wells use light primary surface + black silhouette (`brightness(0)`) — visible with AA contrast; avoids NC `filter: no` and white-on-bright-primary failure.
+- Audit: Zeus FULL AUDIT 2026-08-25 (architecture No-Go gate `tests/Architecture/absolute-no-gos.php`).
+
 ## 1.0.31 — 2026-08-25
 
 - UX: Remove frosted chip behind the top-right home/Edit actions.

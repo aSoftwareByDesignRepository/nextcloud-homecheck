@@ -18,6 +18,8 @@ final class LayoutValidator
 {
 	public const MAX_ITEMS = 100;
 	public const MAX_CHILDREN = 40;
+	public const MAX_HIDDEN = 200;
+	public const MAX_HIDDEN_FOLDERS = 50;
 	public const MAX_NAME_LEN = 40;
 	public const MAX_JSON_BYTES = 32768;
 	public const FOLDER_ID_PATTERN = '/^fld_[A-Za-z0-9]{8,64}$/';
@@ -25,7 +27,7 @@ final class LayoutValidator
 
 	/**
 	 * @param mixed $layout
-	 * @return array{version:int,revision:int,items:list<array<string,mixed>>}
+	 * @return array{version:int,revision:int,items:list<array<string,mixed>>,hidden:list<string>,hiddenFolders:list<array<string,mixed>>}
 	 */
 	public function validate(mixed $layout, bool $requireRevision = true): array
 	{
@@ -122,10 +124,85 @@ final class LayoutValidator
 			throw new DomainException('layout_limit', 'Unknown item type', 400);
 		}
 
+		$hiddenRaw = $layout['hidden'] ?? [];
+		if ($hiddenRaw === null) {
+			$hiddenRaw = [];
+		}
+		if (!is_array($hiddenRaw)) {
+			throw new DomainException('layout_limit', 'hidden must be an array', 400);
+		}
+		if (count($hiddenRaw) > self::MAX_HIDDEN) {
+			throw new DomainException('layout_limit', 'Too many hidden apps', 400);
+		}
+		$hidden = [];
+		foreach ($hiddenRaw as $hid) {
+			$id = $this->requireNavId($hid);
+			if (isset($hidden[$id])) {
+				continue;
+			}
+			if (isset($seenAppIds[$id])) {
+				throw new DomainException('duplicate_entry', 'Hidden app also on home screen: ' . $id, 400);
+			}
+			$hidden[$id] = true;
+		}
+
+		$hiddenFoldersRaw = $layout['hiddenFolders'] ?? [];
+		if ($hiddenFoldersRaw === null) {
+			$hiddenFoldersRaw = [];
+		}
+		if (!is_array($hiddenFoldersRaw)) {
+			throw new DomainException('layout_limit', 'hiddenFolders must be an array', 400);
+		}
+		if (count($hiddenFoldersRaw) > self::MAX_HIDDEN_FOLDERS) {
+			throw new DomainException('layout_limit', 'Too many hidden folders', 400);
+		}
+		$hiddenFolders = [];
+		foreach ($hiddenFoldersRaw as $folder) {
+			if (!is_array($folder)) {
+				throw new DomainException('layout_limit', 'Invalid hidden folder', 400);
+			}
+			$fid = $folder['id'] ?? '';
+			if (!is_string($fid) || preg_match(self::FOLDER_ID_PATTERN, $fid) !== 1) {
+				throw new DomainException('folder_id', 'Invalid folder id', 400);
+			}
+			if (isset($folderIds[$fid])) {
+				throw new DomainException('folder_id', 'Duplicate folder id', 400);
+			}
+			$folderIds[$fid] = true;
+			$name = $this->validateFolderName($folder['name'] ?? null);
+			$children = $folder['children'] ?? null;
+			if (!is_array($children)) {
+				throw new DomainException('folder_children', 'Folder children must be an array', 400);
+			}
+			if (count($children) > self::MAX_CHILDREN) {
+				throw new DomainException('folder_children', 'Too many apps in folder', 400);
+			}
+			$childIds = [];
+			foreach ($children as $child) {
+				$cid = $this->requireNavId($child);
+				if (isset($seenAppIds[$cid]) || isset($childIds[$cid]) || isset($hidden[$cid])) {
+					throw new DomainException('duplicate_entry', 'Duplicate app entry: ' . $cid, 400);
+				}
+				if (preg_match(self::FOLDER_ID_PATTERN, $cid) === 1) {
+					throw new DomainException('folder_children', 'Nested folders are not allowed', 400);
+				}
+				$childIds[$cid] = true;
+				$seenAppIds[$cid] = true;
+			}
+			$hiddenFolders[] = [
+				'type' => 'folder',
+				'id' => $fid,
+				'name' => $name,
+				'children' => array_keys($childIds),
+			];
+		}
+
 		return [
 			'version' => 1,
 			'revision' => $revision,
 			'items' => $normalized,
+			'hidden' => array_keys($hidden),
+			'hiddenFolders' => $hiddenFolders,
 		];
 	}
 

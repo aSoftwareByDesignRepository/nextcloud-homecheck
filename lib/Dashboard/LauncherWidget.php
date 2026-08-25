@@ -94,12 +94,18 @@ class LauncherWidget implements IAPIWidgetV2, IButtonWidget, IIconWidget, IReloa
 		$icon = $this->getIconUrl();
 		$url = $this->launcherUrl();
 
+		/* Defense-in-depth: never summarize another user's home (BOLA). Dashboard API
+		 * already passes the session UID — bind here so a future caller cannot IDOR. */
+		$sessionUser = $this->userSession->getUser();
+		if ($sessionUser === null || $sessionUser->getUID() !== $userId) {
+			return new WidgetItems([], '');
+		}
+
 		try {
 			$summary = $this->layoutService->summarizeForUser($userId);
 		} catch (\Throwable $e) {
 			$this->logger->error('AppHome dashboard desklet failed', [
 				'app' => Application::APP_ID,
-				'userId' => $userId,
 				'exception' => $e,
 			]);
 			return new WidgetItems([], $this->l10n->t('Could not load AppHome status.'));

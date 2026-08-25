@@ -31,7 +31,8 @@ ok(css.includes('.panel--header img[src*="/homecheck/"]'), 'scoped to homecheck 
 ok(css.includes('min-height: 44px'), '44px touch targets');
 ok(css.includes(':focus-visible'), 'focus-visible rings');
 ok(css.includes('app-dashboard.svg'), 'uses dark surface glyph');
-ok(css.includes('background-invert-if-dark'), 'theme invert for dark UI');
+ok(/filter:\s*brightness\(0\)\s*invert\(1\)/.test(css), 'theme invert for dark UI without NC sentinel');
+ok(!/filter:\s*var\(--background-invert-if-dark\)/.test(css), 'desklet avoids NC invert sentinel');
 ok(css.includes('prefers-reduced-motion'), 'reduced motion');
 ok(css.includes('a.more'), 'primary more button chrome');
 ok(css.includes('forced-colors: active'), 'forced-colors AA');
@@ -44,6 +45,7 @@ ok(widget.includes('RegistersDeskletStylesTrait'), 'widget uses desklet trait');
 ok(widget.includes('registerDeskletStylesForWidget()'), 'widget load registers styles');
 ok(widget.includes('linkToRouteAbsolute'), 'absolute route URLs');
 ok(widget.includes('summarizeForUser'), 'read-only summarize');
+ok(widget.includes('getUID() !== $userId'), 'desklet binds session UID for items');
 ok(!/\bgetForUser\s*\(/.test(widget), 'never persists via getForUser');
 ok(widget.includes("APP_ID . '-launcher'") || widget.includes('homecheck-launcher'), 'stable widget id');
 
@@ -52,7 +54,7 @@ ok(app.includes('registerDashboardWidget(LauncherWidget::class)'), 'widget regis
 
 const appCss = read('css/app.css');
 ok(appCss.includes('flex-wrap: wrap'), 'panes wrap responsively');
-ok(appCss.includes('width: 320px'), 'dashboard-sized pane width');
+ok(appCss.includes('--hmk-pane-width') || appCss.includes('width: var(--hmk-pane-width'), 'dashboard-sized pane width');
 ok(!appCss.includes('.hmk-grid'), 'legacy dense grid removed');
 ok(!appCss.includes('.hmk-card'), 'legacy card tiles removed');
 ok(appCss.includes('hmk-pane'), 'individual frosted panes');

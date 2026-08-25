@@ -187,6 +187,7 @@ if (!preg_match('/public function summarizeForUser\(string \$uid\): array\s*\{(.
 }
 $desklet = file_get_contents($root . '/lib/Dashboard/LauncherWidget.php');
 assertTrue(is_string($desklet) && str_contains($desklet, 'summarizeForUser'), 'desklet uses summarizeForUser');
+assertTrue(is_string($desklet) && str_contains($desklet, 'getUID() !== $userId'), 'desklet binds session UID for getItemsV2');
 assertTrue(is_string($desklet) && !preg_match('/(?<![\w>:-])getForUser\s*\(/', $desklet), 'desklet never calls getForUser');
 assertTrue(is_string($desklet) && str_contains($desklet, 'registerDeskletStylesForWidget'), 'desklet registers CSS');
 $appInfo = file_get_contents($root . '/lib/AppInfo/Application.php');
@@ -194,6 +195,8 @@ assertTrue(is_string($appInfo) && str_contains($appInfo, 'registerDashboardWidge
 assertTrue(file_exists($root . '/css/desklet-nextcloud.css'), 'desklet CSS file exists');
 assertTrue(file_exists($root . '/img/app-dashboard.svg'), 'dashboard icon exists');
 $jsSrc = file_get_contents($root . '/js/app.js');
+assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'isSafeHref(entry.icon)'), 'icon src uses isSafeHref');
+assertTrue(is_string($jsSrc) && !preg_match('/entry\.icon\.indexOf\([\'"]javascript:/', $jsSrc), 'icon src not javascript: prefix-only');
 assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'localEpoch'), 'client tracks localEpoch against in-flight clobber');
 assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'epochAtStart !== localEpoch'), 'client adopts revision when dirty during save');
 assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'scheduleAppOrderRetry'), 'client retries apporder after 502');
@@ -203,7 +206,10 @@ $routes = file_get_contents($root . '/appinfo/routes.php');
 assertTrue(is_string($routes) && str_contains($routes, 'api#syncAppOrder'), 'route registers syncAppOrder');
 $css = file_get_contents($root . '/css/app.css');
 assertTrue(is_string($css) && str_contains($css, 'flex-wrap: wrap'), 'panes wrap responsively');
-assertTrue(is_string($css) && str_contains($css, 'width: 320px'), 'dashboard-sized pane width');
+assertTrue(is_string($css) && (str_contains($css, '--hmk-pane-width') || str_contains($css, 'width: var(--hmk-pane-width')), 'dashboard-sized pane width');
+assertTrue(is_string($css) && str_contains($css, '--hmk-primary-fill'), 'AA-safe primary fill token');
+assertTrue(is_string($css) && str_contains($css, '--hmk-danger-fill-solid'), 'AA-safe danger fill token');
+assertTrue(is_string($css) && str_contains($css, '--hmk-secondary-fill'), 'theme-safe secondary fill token');
 assertTrue(is_string($css) && !str_contains($css, '.hmk-grid'), 'legacy dense grid removed');
 assertTrue(is_string($css) && !str_contains($css, '.hmk-card'), 'legacy card tiles removed');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'confirmAction'), 'delete uses accessible confirm dialog');
@@ -225,12 +231,13 @@ assertTrue(is_string($css) && str_contains($css, 'hmk-greeting'), 'dashboard gre
 assertTrue(is_string($css) && str_contains($css, '--color-main-background-blur'), 'pane blur background token');
 assertTrue(is_string($css) && str_contains($css, '--image-background'), 'themed background image');
 assertTrue(is_string($css) && str_contains($css, 'color-background-hover'), 'native tile hover');
-assertTrue(is_string($css) && preg_match('/filter:\s*brightness\(0\)\s*invert\(1\)/', $css) === 1, 'forced white glyph filter');
+assertTrue(is_string($css) && preg_match('/filter:\s*brightness\(0\)\s*;/', $css) === 1, 'black glyph brightness(0)');
+assertTrue(is_string($css) && str_contains($css, '--color-primary-element-light'), 'light primary icon well');
 assertTrue(is_string($css) && preg_match('/filter:\s*var\(--primary-invert-if-/', $css) !== 1, 'no NC invert sentinel in icon filter');
 assertTrue(is_string($css) && str_contains($css, '--hmk-icon-well'), 'icon well size token');
 assertTrue(is_string($css) && str_contains($css, '.hmk-pane__icon-well'), 'icon well wrapper class');
 assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'hmk-pane__icon-well'), 'JS builds icon wells');
-assertTrue(is_string($css) && str_contains($css, 'background: var(--color-primary-element)'), 'icon primary fill');
+assertTrue(is_string($css) && preg_match('/border:\s*2px\s+solid\s+var\(--color-primary-element\)/', $css) === 1, 'icon well primary border');
 assertTrue(is_string($css) && !preg_match('/\.hmk-app\s*\{[^}]*max-width:\s*72rem/s', $css), 'no 72rem page cap');
 $shellInit = file_get_contents($root . '/js/shell-init.js');
 assertTrue(is_string($shellInit) && str_contains($shellInit, "classList.add('hmk-app')"), 'shell init script');
@@ -246,7 +253,8 @@ assertTrue(is_string($mainTpl) && str_contains($mainTpl, 'button-vue primary'), 
 assertTrue(is_string($css) && str_contains($css, 'body.theme--dark') && str_contains($css, '--hmk-primary-fill'), 'dark theme primary fill token');
 $enL10n = json_decode((string) file_get_contents($root . '/l10n/en.json'), true, 512, JSON_THROW_ON_ERROR);
 $enKeys = array_keys($enL10n['translations'] ?? []);
-assertTrue(in_array('Drag panes to rearrange. Tap Done when finished.', $enKeys, true), 'edit banner msgid in catalog');
+assertTrue(in_array('Drag panes to rearrange. Hide apps you do not need. Tap Done when finished.', $enKeys, true), 'edit banner msgid in catalog');
+assertTrue(!in_array('Drag panes to rearrange. Tap Done when finished.', $enKeys, true), 'stale short edit hint removed');
 assertTrue(!in_array('Drag cards to reorder. Tap Done when finished.', $enKeys, true), 'stale card edit msgid removed');
 assertTrue(!in_array('Edit mode — use the menu or drag cards. Opening apps is paused.', $enKeys, true), 'stale edit msgid removed');
 assertTrue(in_array('Good morning, {name}', $enKeys, true), 'greeting msgid in catalog');
@@ -254,7 +262,8 @@ assertTrue(in_array('Use as home', $enKeys, true), 'home toggle msgid in catalog
 assertTrue(in_array('Unset as home', $enKeys, true), 'unset home msgid in catalog');
 assertTrue(!in_array('Open', $enKeys, true), 'unused Open msgid removed');
 assertTrue(in_array('More Nextcloud apps from Software by Design', $enKeys, true), 'vendor credit msgid in catalog');
-assertTrue(count($enKeys) === 77, 'l10n catalog has 77 keys');
+assertTrue(count($enKeys) === 83, 'l10n catalog has 83 keys');
+assertTrue(in_array('Hide', $enKeys, true) && in_array('Hidden apps', $enKeys, true) && in_array('Show again', $enKeys, true) && in_array('Folder hidden from AppHome', $enKeys, true), 'hide-app msgids present');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'hmk-pane__launch'), 'app pane whole-surface launch');
 assertTrue(is_string($jsSrc2) && !str_contains($jsSrc2, 'hmk-pane__row-message'), 'no Open subtitle line');
 

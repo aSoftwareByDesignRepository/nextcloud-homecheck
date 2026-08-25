@@ -110,15 +110,56 @@ final class LayoutServiceIntegrationTest extends TestCase
 		$uid2 = $this->uid . '_b';
 		$users->createUser($uid2, 'TestTest1!');
 		try {
-			$svc->getForUser($uid2);
+			$b = $svc->getForUser($uid2);
+			$ids = array_map(static fn (array $e) => $e['id'], $a['entries']);
+			if (count($ids) < 2) {
+				/* Isolation still checked via distinct folder marker when nav is tiny. */
+				$folderId = 'fld_iso' . substr(bin2hex(random_bytes(4)), 0, 8);
+				$svc->saveForUser($this->uid, [
+					'version' => 1,
+					'revision' => $a['layout']['revision'],
+					'items' => [
+						['type' => 'folder', 'id' => $folderId, 'name' => 'IsoA', 'children' => $ids === [] ? [] : [$ids[0]]],
+					],
+				]);
+				$a2 = $svc->getForUser($this->uid);
+				$b2 = $svc->getForUser($uid2);
+				$aHas = false;
+				foreach ($a2['layout']['items'] as $it) {
+					if (($it['type'] ?? '') === 'folder' && ($it['id'] ?? '') === $folderId) {
+						$aHas = true;
+					}
+				}
+				$bHas = false;
+				foreach ($b2['layout']['items'] as $it) {
+					if (($it['type'] ?? '') === 'folder' && ($it['id'] ?? '') === $folderId) {
+						$bHas = true;
+					}
+				}
+				$this->assertTrue($aHas, 'user A must keep their folder');
+				$this->assertFalse($bHas, 'user B must not inherit user A folder');
+				return;
+			}
+			$itemsA = array_map(static fn (string $id) => ['type' => 'app', 'id' => $id], $ids);
+			$itemsB = array_reverse($itemsA);
 			$svc->saveForUser($this->uid, [
 				'version' => 1,
 				'revision' => $a['layout']['revision'],
-				'items' => array_map(static fn (array $e) => ['type' => 'app', 'id' => $e['id']], $a['entries']),
+				'items' => $itemsA,
 			]);
-			$b = $svc->getForUser($uid2);
-			// uid2 should still be at revision from its own first get (1), not alice's bump unless same
-			$this->assertSame(1, $b['layout']['revision']);
+			$svc->saveForUser($uid2, [
+				'version' => 1,
+				'revision' => $b['layout']['revision'],
+				'items' => $itemsB,
+			]);
+			$a2 = $svc->getForUser($this->uid);
+			$b2 = $svc->getForUser($uid2);
+			$this->assertSame($ids[0], $a2['layout']['items'][0]['id'] ?? null);
+			$this->assertSame($ids[count($ids) - 1], $b2['layout']['items'][0]['id'] ?? null);
+			$this->assertNotSame(
+				$a2['layout']['items'][0]['id'] ?? null,
+				$b2['layout']['items'][0]['id'] ?? null,
+			);
 		} finally {
 			$config = Server::get(IConfig::class);
 			$config->deleteUserValue($uid2, Application::APP_ID, LayoutService::USER_LAYOUT_KEY);

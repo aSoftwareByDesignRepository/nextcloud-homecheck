@@ -13,8 +13,12 @@ const THEME_PRESETS = [
 			'--color-main-background': '#181818',
 			'--color-main-text': '#ededed',
 			'--color-text-maxcontrast': '#a8a8a8',
+			'--color-background-dark': '#222222',
+			'--color-background-hover': '#2a2a2a',
 			'--color-primary-element': '#0082c9',
 			'--color-primary-element-text': '#ffffff',
+			'--color-primary-element-light': '#243a48',
+			'--color-primary-element-light-text': '#ededed',
 			'--color-border': '#3a3a3a',
 			'--color-border-maxcontrast': '#6a6a6a',
 			'--color-element-error': '#ff5050',
@@ -22,10 +26,29 @@ const THEME_PRESETS = [
 		},
 	},
 	{
+		name: 'high-contrast',
+		vars: {
+			'--color-main-background': '#000000',
+			'--color-main-text': '#ffffff',
+			'--color-text-maxcontrast': '#ffffff',
+			'--color-background-dark': '#000000',
+			'--color-primary-element': '#ffff00',
+			'--color-primary-element-text': '#000000',
+			'--color-primary-element-light': '#333300',
+			'--color-primary-element-light-text': '#ffff00',
+			'--color-border': '#ffffff',
+			'--color-border-maxcontrast': '#ffffff',
+			'--color-element-error': '#ff0000',
+			'--color-error-text': '#ff6666',
+		},
+	},
+	{
 		name: 'custom-accent-purple',
 		vars: {
 			'--color-primary-element': '#6b21a8',
 			'--color-primary-element-text': '#ffffff',
+			'--color-primary-element-light': '#f3e8ff',
+			'--color-primary-element-light-text': '#1d1d1d',
 		},
 	},
 	{
@@ -33,6 +56,8 @@ const THEME_PRESETS = [
 		vars: {
 			'--color-primary-element': '#d9e3e8',
 			'--color-primary-element-text': '#1d1d1d',
+			'--color-primary-element-light': '#eef3f5',
+			'--color-primary-element-light-text': '#1d1d1d',
 			'--color-main-background': '#ffffff',
 			'--color-main-text': '#1d1d1d',
 		},
@@ -52,8 +77,9 @@ const VIEWPORTS = [
 const AXE_MATRIX = [
 	{ viewport: VIEWPORTS[1], theme: THEME_PRESETS[0], mode: 'view' },
 	{ viewport: VIEWPORTS[1], theme: THEME_PRESETS[1], mode: 'edit' },
-	{ viewport: VIEWPORTS[3], theme: THEME_PRESETS[2], mode: 'view' },
-	{ viewport: VIEWPORTS[3], theme: THEME_PRESETS[3], mode: 'edit' },
+	{ viewport: VIEWPORTS[1], theme: THEME_PRESETS[2], mode: 'view' },
+	{ viewport: VIEWPORTS[3], theme: THEME_PRESETS[3], mode: 'view' },
+	{ viewport: VIEWPORTS[3], theme: THEME_PRESETS[4], mode: 'edit' },
 ];
 
 /**
@@ -62,17 +88,30 @@ const AXE_MATRIX = [
  */
 async function applyThemePreset(page, preset) {
 	await page.evaluate(({ bodyClass, vars }) => {
-		document.body.classList.remove('theme--dark');
+		document.body.classList.remove('theme--dark', 'theme-dark');
 		if (bodyClass) {
 			document.body.classList.add(bodyClass);
 		}
-		const targets = [document.body, document.documentElement];
-		const app = document.getElementById('homecheck-app');
-		if (app) {
-			targets.push(app);
+		const merged = Object.assign({}, vars);
+		/* Guarantee secondary chrome AA: surface + main text, never pale primary-light */
+		if (!merged['--color-background-dark']) {
+			merged['--color-background-dark'] = merged['--color-main-background'] || '#eeeeee';
 		}
+		if (bodyClass && bodyClass.indexOf('dark') !== -1) {
+			merged['--hmk-secondary-fill'] = merged['--color-background-dark'];
+			merged['--hmk-secondary-ink'] = merged['--color-main-text'] || '#ededed';
+		}
+		const targets = [
+			document.body,
+			document.documentElement,
+			document.getElementById('content'),
+			document.getElementById('app-content'),
+			document.getElementById('homecheck-app'),
+			document.querySelector('#content[class*="app-homecheck"]'),
+			document.querySelector('.hmk-app'),
+		].filter(Boolean);
 		targets.forEach((el) => {
-			Object.entries(vars).forEach(([key, value]) => {
+			Object.entries(merged).forEach(([key, value]) => {
 				el.style.setProperty(key, value);
 			});
 		});
@@ -167,6 +206,8 @@ test.describe('AppHome responsive + theme matrix', () => {
 			if (mode === 'edit') {
 				await page.locator('#hmk-edit-toggle').click();
 				await expect(page.locator('#hmk-edit-hint')).toBeVisible();
+				/* Re-apply after edit chrome mounts so secondary tokens win */
+				await applyThemePreset(page, theme);
 			}
 			await scanAxe(page, `${viewport.name}/${theme.name}/${mode}`);
 		});

@@ -36,6 +36,52 @@ final class LayoutValidatorTest extends TestCase
 		$this->assertSame(3, $out['revision']);
 		$this->assertCount(2, $out['items']);
 		$this->assertSame(['calendar'], $out['items'][1]['children']);
+		$this->assertSame([], $out['hidden']);
+		$this->assertSame([], $out['hiddenFolders']);
+	}
+
+	public function testAcceptsHiddenApps(): void
+	{
+		$out = $this->v->validate([
+			'version' => 1,
+			'revision' => 1,
+			'items' => [
+				['type' => 'app', 'id' => 'files'],
+			],
+			'hidden' => ['calendar', 'dashboard'],
+		]);
+		$this->assertSame(['calendar', 'dashboard'], $out['hidden']);
+		$this->assertSame([], $out['hiddenFolders']);
+	}
+
+	public function testAcceptsHiddenFolders(): void
+	{
+		$out = $this->v->validate([
+			'version' => 1,
+			'revision' => 1,
+			'items' => [
+				['type' => 'app', 'id' => 'files'],
+			],
+			'hiddenFolders' => [
+				['type' => 'folder', 'id' => 'fld_abcdefgh', 'name' => 'Work', 'children' => ['calendar']],
+			],
+		]);
+		$this->assertCount(1, $out['hiddenFolders']);
+		$this->assertSame(['calendar'], $out['hiddenFolders'][0]['children']);
+	}
+
+	public function testRejectsHiddenAlsoOnHome(): void
+	{
+		$this->expectException(DomainException::class);
+		$this->expectExceptionMessageMatches('/Hidden app also on home/i');
+		$this->v->validate([
+			'version' => 1,
+			'revision' => 0,
+			'items' => [
+				['type' => 'app', 'id' => 'files'],
+			],
+			'hidden' => ['files'],
+		]);
 	}
 
 	public function testRejectsDuplicateApp(): void
@@ -137,5 +183,17 @@ final class LayoutValidatorTest extends TestCase
 			'items' => [],
 		], false);
 		$this->assertSame(0, $out['revision']);
+	}
+
+	public function testRejectsOversizedJsonPayload(): void
+	{
+		$this->expectException(DomainException::class);
+		$this->expectExceptionMessageMatches('/size limit/i');
+		$this->v->validate([
+			'version' => 1,
+			'revision' => 0,
+			'items' => [],
+			'pad' => str_repeat('x', LayoutValidator::MAX_JSON_BYTES),
+		]);
 	}
 }

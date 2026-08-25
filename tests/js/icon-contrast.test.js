@@ -2,8 +2,8 @@
  * SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Icon well contrast + visibility contract.
- * Glyphs must never rely on NC sentinel `filter: no` (can skip painting).
+ * Icon well visibility + WCAG non-text contrast (≥3:1).
+ * Glyphs: brightness(0) on primary-element-light — never NC invert sentinels.
  */
 'use strict';
 
@@ -51,25 +51,21 @@ function contrast(a, b) {
 
 ok(css.includes('.hmk-pane__icon-well'), 'icon well class');
 ok(appJs.includes('hmk-pane__icon-well'), 'JS builds wells');
-ok(/filter:\s*brightness\(0\)\s*invert\(1\)/.test(css), 'forced white glyph filter');
+ok(/filter:\s*brightness\(0\)\s*;/.test(css), 'black glyph via brightness(0)');
+ok(!/filter:\s*brightness\(0\)\s*invert\(1\)/.test(css), 'does not force white-on-primary');
 ok(!/filter:\s*var\(--primary-invert-if-/.test(css), 'does not pipe NC invert sentinels into filter');
-ok(/\.hmk-pane__icon-well\s*\{[^}]*background:\s*var\(--color-primary-element\)/s.test(css), 'well fill is primary-element');
-ok(/\.hmk-pane__icon-well\s*\{[^}]*width:\s*36px/s.test(css), 'well is large enough to read');
+ok(/background:\s*var\(--color-primary-element-light/.test(css), 'well uses primary-element-light');
+ok(/border:\s*2px solid var\(--color-primary-element\)/.test(css), 'well bordered with primary');
 
 const pairs = [
-	['#00679e', '#ffffff', 'default blue on white pane'],
-	['#00679e', '#f5f5f5', 'default blue on soft pane'],
-	['#0082c9', '#ffffff', 'classic NC blue on white'],
-	['#1a1a1a', '#ffffff', 'near-black primary on white'],
+	['#000000', '#e5eff5', 'black on default primary-light'],
+	['#000000', '#ffffff', 'black on white'],
+	['#000000', '#d9e3e8', 'black on soft primary-light'],
+	['#00679e', '#ffffff', 'primary border vs white pane'],
 ];
 for (const [fg, bg, label] of pairs) {
 	const ratio = contrast(parseHex(fg), parseHex(bg));
 	ok(ratio >= 3, `WCAG UI contrast ≥3:1 for ${label} (${ratio.toFixed(2)})`);
 }
-
-const whiteOnBlue = contrast(parseHex('#ffffff'), parseHex('#00679e'));
-const blackOnBlue = contrast(parseHex('#000000'), parseHex('#00679e'));
-ok(whiteOnBlue > blackOnBlue, 'white-on-primary beats black-on-primary');
-ok(whiteOnBlue >= 4.5, `white glyph on default primary meets text-like floor (${whiteOnBlue.toFixed(2)})`);
 
 process.exit(failed ? 1 : 0);

@@ -66,7 +66,6 @@ OC.L10N.register(
 	"Hello" : "Hallo",
 	"Hello, {name}" : "Hallo, {name}",
 	"Delete this folder? Apps inside return to the home screen." : "Deze map verwijderen? Apps erin keren terug naar het startscherm.",
-	"Drag panes to rearrange. Tap Done when finished." : "Sleep panelen om te sorteren. Tik op Klaar als je klaar bent.",
 	"Tap a pane to open an app." : "Tik op een paneel om een app te openen.",
 	"This folder is empty — add apps from Edit." : "Deze map is leeg — voeg apps toe via Bewerken.",
 	"Too many items on the home screen (max 100)" : "Te veel items op het startscherm (max. 100)",
@@ -77,6 +76,14 @@ OC.L10N.register(
 	"Open AppHome after you sign in" : "AppHome openen na inloggen",
 	"Stop opening AppHome after you sign in" : "AppHome niet meer openen na inloggen",
 	"More Nextcloud apps from Software by Design" : "Meer Nextcloud-apps van Software by Design",
-	"(opens in a new window)" : "(opent in een nieuw venster)"
-},
-"nplurals=2; plural=(n != 1);");
+	"(opens in a new window)" : "(opent in een nieuw venster)",
+	"Hide" : "Verbergen",
+	"Hidden apps" : "Verborgen apps",
+	"Show again" : "Opnieuw tonen",
+	"No hidden apps." : "Geen verborgen apps.",
+	"Hidden from AppHome" : "Verborgen in AppHome",
+	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Sleep panelen om te herschikken. Verberg apps die je niet nodig hebt. Tik op Klaar als je klaar bent.",
+	"Folder hidden from AppHome" : "Map verborgen in AppHome"
+	},
+	"nplurals=2; plural=(n != 1);"
+);

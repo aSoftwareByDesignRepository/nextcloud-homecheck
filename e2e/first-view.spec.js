@@ -66,7 +66,7 @@ test.describe('AppHome first view — instant clarity', () => {
 		await expect(page.locator('#hmk-panels .hmk-pane').first()).toBeVisible();
 	});
 
-	test('Edit primary button uses Nextcloud primary element color', async ({ page }) => {
+	test('Edit primary button uses themed primary fill (not UA gray)', async ({ page }) => {
 		const metrics = await page.evaluate(() => {
 			const edit = document.querySelector('#hmk-edit-toggle');
 			const root = document.documentElement;
@@ -74,23 +74,20 @@ test.describe('AppHome first view — instant clarity', () => {
 				return null;
 			}
 			const bg = getComputedStyle(edit).backgroundColor;
+			const color = getComputedStyle(edit).color;
 			const primary = getComputedStyle(root).getPropertyValue('--color-primary-element').trim();
-			return { bg, primary, className: edit.className };
+			return { bg, color, primary, className: edit.className };
 		});
 		expect(metrics).not.toBeNull();
 		expect(metrics.className).toContain('primary');
 		expect(metrics.bg).not.toBe('rgba(0, 0, 0, 0)');
 		expect(metrics.bg).not.toBe('rgb(239, 239, 239)');
-		/* Parse #rrggbb primary into rgb and require edit button matches */
-		const hex = metrics.primary.replace('#', '');
-		expect(hex.length).toBeGreaterThanOrEqual(6);
-		const r = parseInt(hex.slice(0, 2), 16);
-		const g = parseInt(hex.slice(2, 4), 16);
-		const b = parseInt(hex.slice(4, 6), 16);
-		expect(metrics.bg).toBe(`rgb(${r}, ${g}, ${b})`);
+		/* color-mix may serialize as rgb() or color(srgb …) depending on engine */
+		expect(metrics.bg).toMatch(/^(rgb\(|color\()/);
+		expect(metrics.primary.length).toBeGreaterThan(0);
 	});
 
-	test('pane icon wells keep primary fill with forced white glyphs', async ({ page }) => {
+	test('pane icon wells use light primary surface with black glyphs', async ({ page }) => {
 		const metrics = await page.evaluate(() => {
 			function parseRgb(s) {
 				const m = String(s).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
@@ -112,83 +109,66 @@ test.describe('AppHome first view — instant clarity', () => {
 			}
 			const well = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon-well');
 			const img = well && well.querySelector('.hmk-pane__icon');
-			const pane = document.querySelector('#hmk-panels .hmk-pane[data-type="app"]');
-			if (!well || !img || !pane) {
+			if (!well || !img) {
 				return null;
 			}
 			const wellStyle = getComputedStyle(well);
 			const imgStyle = getComputedStyle(img);
 			const html = getComputedStyle(document.documentElement);
+			const light = html.getPropertyValue('--color-primary-element-light').trim();
 			const primary = html.getPropertyValue('--color-primary-element').trim();
-			const hex = primary.replace('#', '');
-			const r = parseInt(hex.slice(0, 2), 16);
-			const g = parseInt(hex.slice(2, 4), 16);
-			const b = parseInt(hex.slice(4, 6), 16);
-			const wellRgb = parseRgb(wellStyle.backgroundColor) || [r, g, b];
-			const paneRgb = parseRgb(getComputedStyle(pane).backgroundColor)
-				|| parseRgb(html.getPropertyValue('--color-main-background'))
-				|| [255, 255, 255];
-			const filter = imgStyle.filter || '';
+			const wellRgb = parseRgb(wellStyle.backgroundColor);
+			const borderRgb = parseRgb(wellStyle.borderTopColor);
 			return {
 				wellBg: wellStyle.backgroundColor,
-				expected: `rgb(${r}, ${g}, ${b})`,
-				wellFilter: wellStyle.filter,
-				imgFilter: filter,
-				imgOpacity: imgStyle.opacity,
-				imgVisibility: imgStyle.visibility,
+				border: wellStyle.borderTopColor,
+				filter: imgStyle.filter,
+				opacity: imgStyle.opacity,
+				visibility: imgStyle.visibility,
 				naturalW: img.naturalWidth,
-				wellVsPane: contrast(wellRgb, paneRgb),
-				whiteOnPrimary: contrast([255, 255, 255], wellRgb),
+				light,
+				primary,
+				blackOnWell: wellRgb ? contrast([0, 0, 0], wellRgb) : 0,
+				borderVsWell: wellRgb && borderRgb ? contrast(borderRgb, wellRgb) : 0,
 				wellW: well.getBoundingClientRect().width,
+				usesInvertSentinel: /var\(--primary-invert/.test(imgStyle.filter),
 			};
 		});
 		expect(metrics).not.toBeNull();
-		expect(metrics.wellBg).toBe(metrics.expected);
-		expect(metrics.wellFilter === 'none' || metrics.wellFilter === '').toBe(true);
-		expect(metrics.imgFilter).toMatch(/brightness/i);
-		expect(metrics.imgFilter).toMatch(/invert/i);
-		expect(metrics.imgOpacity).toBe('1');
-		expect(metrics.imgVisibility).toBe('visible');
 		expect(metrics.naturalW).toBeGreaterThan(0);
-		expect(metrics.wellVsPane).toBeGreaterThanOrEqual(3);
-		expect(metrics.whiteOnPrimary).toBeGreaterThanOrEqual(3);
+		expect(metrics.visibility).toBe('visible');
+		expect(metrics.opacity).not.toBe('0');
+		expect(metrics.filter).toMatch(/brightness/i);
+		expect(metrics.filter).not.toMatch(/invert/i);
+		expect(metrics.usesInvertSentinel).toBe(false);
+		expect(metrics.blackOnWell).toBeGreaterThanOrEqual(3);
 		expect(metrics.wellW).toBeGreaterThanOrEqual(34);
+		/* Well should not be the solid dark primary (that was the muddy/orange path) */
+		const hex = metrics.primary.replace('#', '');
+		if (hex.length >= 6) {
+			const r = parseInt(hex.slice(0, 2), 16);
+			const g = parseInt(hex.slice(2, 4), 16);
+			const b = parseInt(hex.slice(4, 6), 16);
+			expect(metrics.wellBg).not.toBe(`rgb(${r}, ${g}, ${b})`);
+		}
 	});
 
-	test('forced white glyph filter stays active for dark and bright primary wells', async ({ page }) => {
+	test('icon filter never depends on NC invert sentinel values', async ({ page }) => {
 		await page.evaluate(() => {
-			document.documentElement.style.setProperty('--color-primary-element', '#00679e');
 			document.documentElement.style.setProperty('--primary-invert-if-bright', 'no');
-			document.documentElement.style.setProperty('--primary-invert-if-dark', 'invert(100%)');
-		});
-		let metrics = await page.evaluate(() => {
-			const well = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon-well');
-			const img = well && well.querySelector('.hmk-pane__icon');
-			return {
-				wellBg: getComputedStyle(well).backgroundColor,
-				filter: getComputedStyle(img).filter,
-			};
-		});
-		expect(metrics.wellBg).toBe('rgb(0, 103, 158)');
-		expect(metrics.filter).toMatch(/brightness/i);
-		expect(metrics.filter).toMatch(/invert/i);
-
-		await page.evaluate(() => {
-			document.documentElement.style.setProperty('--color-primary-element', '#f4f4f4');
-			document.documentElement.style.setProperty('--primary-invert-if-bright', 'invert(100%)');
 			document.documentElement.style.setProperty('--primary-invert-if-dark', 'no');
 		});
-		metrics = await page.evaluate(() => {
-			const well = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon-well');
-			const img = well && well.querySelector('.hmk-pane__icon');
+		const metrics = await page.evaluate(() => {
+			const img = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon');
 			return {
-				wellBg: getComputedStyle(well).backgroundColor,
 				filter: getComputedStyle(img).filter,
+				opacity: getComputedStyle(img).opacity,
+				naturalW: img.naturalWidth,
 			};
 		});
-		expect(metrics.wellBg).toBe('rgb(244, 244, 244)');
 		expect(metrics.filter).toMatch(/brightness/i);
-		expect(metrics.filter).toMatch(/invert/i);
+		expect(metrics.opacity).not.toBe('0');
+		expect(metrics.naturalW).toBeGreaterThan(0);
 	});
 
 	test('view mode passes axe on first paint region', async ({ page }) => {

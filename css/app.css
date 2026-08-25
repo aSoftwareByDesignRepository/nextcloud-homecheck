@@ -25,6 +25,7 @@
 	--hmk-line-base: 1.45;
 	--hmk-icon-well: 4.5rem;
 	--hmk-icon-inner: 2.75rem;
+	--hmk-pane-width: 20rem; /* ~320px dashboard pane; fluid via max-width:100% */
 	--hmk-breakpoint-sm: 480px;
 	--hmk-breakpoint-md: 768px;
 }
@@ -49,9 +50,17 @@
 	--hmk-tint-info: color-mix(in srgb, var(--color-primary-element) 16%, var(--color-main-background));
 	--hmk-danger-ink: var(--color-error-text, var(--color-error));
 	--hmk-danger-fill: var(--color-element-error, var(--color-error-text, var(--color-error)));
-	--hmk-danger-on-fill: var(--color-primary-element-text, var(--color-main-text));
-	--hmk-primary-fill: color-mix(in srgb, var(--hmk-primary) 92%, var(--color-main-text));
-	--hmk-danger-fill-solid: var(--hmk-danger-fill);
+	/* Text on solid danger/primary fills: prefer NC on-primary ink */
+	--hmk-danger-on-fill: var(--color-primary-element-text, var(--color-main-background));
+	/*
+	 * Solid fills darkened enough for on-primary text ≥ 4.5:1
+	 * (bright NC accents fail AA when used as raw solid fills under white ink).
+	 */
+	--hmk-primary-fill: color-mix(in srgb, var(--hmk-primary) 88%, var(--color-main-text) 12%);
+	--hmk-danger-fill-solid: color-mix(in srgb, var(--hmk-danger-fill) 82%, var(--color-main-text) 18%);
+	/* Secondary: never pale primary-light + inverted ink (fails AA in dark themes) */
+	--hmk-secondary-fill: var(--color-background-dark, var(--hmk-bg-soft));
+	--hmk-secondary-ink: var(--color-main-text);
 	--hmk-overlay-top: var(--header-height, 50px);
 	--hmk-overlay-height: calc(100dvh - var(--header-height, 50px));
 	color: var(--hmk-text);
@@ -63,8 +72,8 @@ body.theme-dark #app-content .hmk-app,
 body.theme-dark #content[class*="app-homecheck"].hmk-app,
 body[data-theme-dark] #app-content .hmk-app,
 body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
-	--hmk-primary-fill: color-mix(in srgb, var(--hmk-primary) 78%, var(--color-main-background));
-	--hmk-danger-fill-solid: color-mix(in srgb, var(--hmk-danger-fill) 65%, var(--color-main-background));
+	--hmk-primary-fill: color-mix(in srgb, var(--hmk-primary) 62%, var(--color-main-background));
+	--hmk-danger-fill-solid: color-mix(in srgb, var(--hmk-danger-fill) 48%, var(--color-main-background));
 }
 
 /* Design-system shell — full width; themed background like NC Dashboard */
@@ -251,9 +260,9 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 #homecheck-app button.button-vue.primary,
 #homecheck-app button.button-vue.hmk-btn--primary,
 #hmk-admin button.button-vue.hmk-btn--primary {
-	background-color: var(--color-primary-element);
-	color: var(--color-primary-element-text);
-	border: 1px solid var(--color-primary-element);
+	background-color: var(--hmk-primary-fill, var(--color-primary-element));
+	color: var(--hmk-primary-text, var(--color-primary-element-text));
+	border: 1px solid var(--hmk-primary-fill, var(--color-primary-element));
 	border-radius: var(--border-radius-element, var(--border-radius, 8px));
 	box-shadow: none;
 	font-weight: 600;
@@ -261,15 +270,16 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 #homecheck-app button.button-vue.primary:hover:not(:disabled),
 #homecheck-app button.button-vue.hmk-btn--primary:hover:not(:disabled),
 #hmk-admin button.button-vue.hmk-btn--primary:hover:not(:disabled) {
-	background-color: var(--color-primary-element-hover, var(--color-primary-element));
-	border-color: var(--color-primary-element-hover, var(--color-primary-element));
+	background-color: var(--color-primary-element-hover, var(--hmk-primary-fill, var(--color-primary-element)));
+	border-color: var(--color-primary-element-hover, var(--hmk-primary-fill, var(--color-primary-element)));
 }
 #homecheck-app button.button-vue.secondary,
 #homecheck-app button.button-vue.hmk-btn--ghost,
 #hmk-admin button.button-vue.hmk-btn--ghost {
-	background-color: var(--color-primary-element-light, var(--color-background-dark));
+	/* Direct NC surface tokens — avoid primary-light (pale) under dark ink */
+	background-color: var(--color-background-dark, var(--hmk-bg-soft, var(--color-main-background)));
 	color: var(--color-main-text);
-	border: 1px solid transparent;
+	border: 1px solid var(--color-border, var(--hmk-border, transparent));
 	border-radius: var(--border-radius-element, var(--border-radius, 8px));
 	box-shadow: none;
 	font-weight: 600;
@@ -277,7 +287,7 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 #homecheck-app button.button-vue.secondary:hover:not(:disabled),
 #homecheck-app button.button-vue.hmk-btn--ghost:hover:not(:disabled),
 #hmk-admin button.button-vue.hmk-btn--ghost:hover:not(:disabled) {
-	background-color: var(--color-primary-element-light-hover, var(--color-background-hover));
+	background-color: var(--color-background-hover, var(--hmk-bg-soft));
 }
 #homecheck-app button.button-vue.tertiary {
 	background-color: transparent;
@@ -290,14 +300,14 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 }
 #homecheck-app button.button-vue.hmk-btn--danger,
 #homecheck-app button.button-vue.primary.hmk-btn--danger {
-	background-color: var(--color-element-error, var(--color-error));
-	color: var(--color-primary-element-text);
-	border: 1px solid var(--color-element-error, var(--color-error));
+	background-color: var(--hmk-danger-fill-solid);
+	color: var(--hmk-danger-on-fill);
+	border: 1px solid var(--hmk-danger-fill-solid);
 }
 #homecheck-app button.button-vue.hmk-btn--danger:hover:not(:disabled),
 #homecheck-app button.button-vue.primary.hmk-btn--danger:hover:not(:disabled) {
-	background-color: var(--color-element-error-hover, var(--color-error-hover, var(--color-element-error, var(--color-error))));
-	border-color: var(--color-element-error-hover, var(--color-error-hover, var(--color-element-error, var(--color-error))));
+	background-color: color-mix(in srgb, var(--hmk-danger-fill-solid) 88%, var(--color-main-text));
+	border-color: color-mix(in srgb, var(--hmk-danger-fill-solid) 88%, var(--color-main-text));
 }
 
 /* Pane launch / row controls: keep transparent — never inherit UA button chrome */
@@ -336,9 +346,9 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 
 .hmk-pane {
 	--color-text-maxcontrast: var(--color-text-maxcontrast-background-blur, var(--color-main-text));
-	width: 320px;
+	width: var(--hmk-pane-width, 20rem);
 	max-width: 100%;
-	margin: 16px;
+	margin: var(--hmk-space-4);
 	align-self: stretch;
 	/*
 	 * Prefer a denser surface so warm wallpapers do not turn frosted panes
@@ -380,7 +390,7 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	align-items: center;
 	justify-content: space-between;
 	gap: var(--hmk-space-2);
-	padding: 16px;
+	padding: var(--hmk-space-4);
 	z-index: 1;
 }
 
@@ -390,12 +400,12 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	flex: 1 1 auto;
 	min-width: 0;
 	margin: 0;
-	padding: 8px;
-	font-size: 1.25rem;
+	padding: var(--hmk-space-2);
+	font-size: var(--hmk-fs-xl);
 	line-height: 1.2;
 	font-weight: 700;
 	color: var(--color-main-text);
-	gap: 12px;
+	gap: var(--hmk-space-3);
 }
 
 /* Whole app pane is one launch control */
@@ -404,11 +414,11 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	align-items: center;
 	flex: 1 1 auto;
 	min-width: 0;
-	gap: 12px;
+	gap: var(--hmk-space-3);
 	margin: 0;
-	padding: 8px;
+	padding: var(--hmk-space-2);
 	border: 0;
-	border-radius: var(--border-radius-element, 8px);
+	border-radius: var(--border-radius-element, var(--hmk-radius-sm));
 	background: transparent;
 	color: var(--color-main-text);
 	font-size: 1.25rem;
@@ -435,13 +445,13 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 }
 
 /*
- * Icon well: opaque primary fill (no wallpaper bleed).
+ * Icon well: light primary surface + black glyph silhouette.
  *
- * NC ships many nav icons as white (#fff) OR black mono SVGs. Using
- * --primary-invert-if-bright alone fails when its value is the sentinel `no`
- * (invalid filter → some engines skip painting) and --primary-invert-if-dark
- * turns white icons black-on-blue. Force a white glyph silhouette instead:
- * brightness(0) invert(1) → reliable AA contrast on --color-primary-element.
+ * Why not dark primary + invert tokens?
+ * - `--primary-invert-if-*` uses sentinel `no` (invalid filter → icons can vanish)
+ * - Forced `brightness(0) invert(1)` (white) fails AA when primary-element is bright
+ * - Nav SVGs are mixed white/black/colour; brightness(0) normalises to black
+ * Black on --color-primary-element-light is high-contrast; primary border defines the well.
  */
 .hmk-pane__icon-well {
 	display: grid;
@@ -450,9 +460,9 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	height: 36px;
 	flex-shrink: 0;
 	border-radius: var(--border-radius, 8px);
-	background: var(--color-primary-element);
-	border: 1px solid color-mix(in srgb, var(--color-primary-element-text) 22%, transparent);
-	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-main-text) 18%, transparent);
+	background: var(--color-primary-element-light, var(--color-background-dark, var(--color-main-background)));
+	border: 2px solid var(--color-primary-element);
+	box-shadow: none;
 	box-sizing: border-box;
 	overflow: hidden;
 }
@@ -463,19 +473,21 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	padding: 0;
 	border: 0;
 	background: transparent;
-	/* Always white glyph on primary well — never `filter: no` */
-	filter: brightness(0) invert(1);
+	/* Valid filters only — never NC `no` sentinel */
+	filter: brightness(0);
+	opacity: 0.92;
 }
 .hmk-pane__icon--fallback {
 	display: grid;
 	place-items: center;
 	width: 100%;
 	height: 100%;
-	color: var(--color-primary-element-text);
+	color: var(--color-primary-element-light-text, var(--color-primary-element));
 	font-weight: 700;
 	font-size: 0.95rem;
 	line-height: 1;
 	filter: none;
+	opacity: 1;
 }
 
 .hmk-pane__title-text {
@@ -499,7 +511,7 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 }
 
 .hmk-pane__content {
-	margin: 0 16px 16px;
+	margin: 0 var(--hmk-space-4) var(--hmk-space-4);
 	min-width: 0;
 }
 
@@ -530,12 +542,12 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 10px;
+	gap: var(--hmk-space-3);
 	width: 100%;
 	min-height: 44px;
-	padding: 8px 6px;
+	padding: var(--hmk-space-2) var(--hmk-space-2);
 	border: 0;
-	border-radius: var(--border-radius-element, 8px);
+	border-radius: var(--border-radius-element, var(--hmk-radius-sm));
 	background: transparent;
 	color: inherit;
 	text-align: left;
@@ -998,13 +1010,13 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	}
 	.hmk-pane {
 		width: 100%;
-		margin: 12px 8px;
+		margin: var(--hmk-space-3) var(--hmk-space-2);
 	}
 	.hmk-pane__header {
-		padding: 12px;
+		padding: var(--hmk-space-3);
 	}
 	.hmk-pane__content {
-		margin: 0 12px 12px;
+		margin: 0 var(--hmk-space-3) var(--hmk-space-3);
 	}
 	.hmk-toolbar__actions {
 		width: 100%;
@@ -1079,7 +1091,8 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 		border: 2px solid var(--color-main-text);
 	}
 	.hmk-pane__icon {
-		filter: none;
+		filter: brightness(0);
+		opacity: 1;
 	}
 	.hmk-dialog {
 		border-width: 2px;
@@ -1109,7 +1122,9 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 		border: 2px solid CanvasText;
 	}
 	.hmk-pane__icon {
-		filter: none;
+		/* Forced-colors: keep silhouette so white SVGs stay visible on Canvas */
+		filter: brightness(0);
+		opacity: 1;
 	}
 	.hmk-pane__icon--fallback {
 		background: transparent;
@@ -1123,4 +1138,33 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	.hmk-dialog::backdrop {
 		background: transparent;
 	}
+}
+
+
+/* Hidden apps restore dialog */
+.hmk-hidden-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--hmk-space-3, 12px);
+	max-height: min(50vh, 24rem);
+	overflow: auto;
+	padding: var(--hmk-space-2, 8px) 0;
+}
+.hmk-hidden-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--hmk-space-3, 12px);
+	min-height: var(--hmk-touch, 44px);
+}
+.hmk-hidden-row__name {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-weight: 600;
+	color: var(--color-main-text);
+	overflow-wrap: anywhere;
+}
+.hmk-empty-inline {
+	margin: 0;
+	color: var(--color-text-maxcontrast, var(--color-main-text));
 }

@@ -58,8 +58,14 @@ function isSafeHref(href) {
 }
 ok(isSafeHref('/apps/files'), 'safe relative');
 ok(!isSafeHref('javascript:alert(1)'), 'block javascript');
+ok(!isSafeHref('JaVaScRiPt:alert(1)'), 'block mixed-case javascript');
+ok(!isSafeHref('data:image/svg+xml,<svg></svg>'), 'block data URI');
 ok(!isSafeHref('//evil'), 'block protocol-relative');
 ok(!isSafeHref('https://evil.example/x'), 'block foreign absolute in js helper without matching origin');
+
+const appJs = require('fs').readFileSync(require('path').join(__dirname, '../../js/app.js'), 'utf8');
+ok(appJs.includes('isSafeHref(entry.icon)'), 'icon src uses isSafeHref allowlist');
+ok(!/entry\.icon\.indexOf\(['"]javascript:/.test(appJs), 'icon src no longer uses javascript: prefix-only check');
 
 /** Apply server save result without clobbering newer local edits (Zeus MF). */
 function applySaveResult(layout, serverLayout, epochAtStart, localEpoch) {

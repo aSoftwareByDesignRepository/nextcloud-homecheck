@@ -54,17 +54,27 @@ ok(css.includes('is-drop-target'), 'drop target visual feedback');
 ok(css.includes('is-dragging'), 'dragging visual feedback');
 ok(css.includes('touch-action: none'), 'edit panes allow pointer capture DnD');
 ok(css.includes('flex-wrap: wrap'), 'panes wrap responsively');
-ok(css.includes('width: 320px'), 'dashboard-sized pane track');
+ok(css.includes('--hmk-pane-width') || css.includes('width: var(--hmk-pane-width'), 'dashboard-sized pane track');
 ok(!css.includes('.hmk-grid'), 'legacy dense grid removed');
 ok(!css.includes('.hmk-card'), 'legacy card tiles removed');
 ok(css.includes('--hmk-icon-well'), 'icon well token defined');
 ok(css.includes('--hmk-icon-inner'), 'icon glyph size token defined');
-ok(css.includes('background: var(--color-primary-element)'), 'icon well uses primary fill');
 ok(css.includes('.hmk-pane__icon-well'), 'icon well wrapper present');
-ok(/filter:\s*brightness\(0\)\s*invert\(1\)/.test(css), 'forced white glyph on primary wells');
+ok(/filter:\s*brightness\(0\)\s*;/.test(css), 'black glyph on light well');
+ok(/--color-primary-element-light/.test(css), 'icon well uses primary-element-light');
+ok(/border:\s*2px\s+solid\s+var\(--color-primary-element\)/.test(css), 'icon well bordered with primary');
 ok(!/filter:\s*var\(--primary-invert-if-/.test(css), 'no NC invert sentinel in icon filter');
+ok(!/filter:\s*brightness\(0\)\s*invert\(1\)/.test(css), 'no forced white-on-primary glyphs');
 ok(css.includes('button.button-vue.primary'), 'vanilla primary buttons styled to NC primary');
-ok(css.includes('background-color: var(--color-primary-element)'), 'primary button fill uses NC primary');
+ok(css.includes('background-color: var(--hmk-primary-fill'), 'primary button fill uses AA-safe hmk-primary-fill');
+ok(css.includes('--hmk-secondary-fill'), 'secondary fill token defined');
+ok(css.includes('button.button-vue.secondary'), 'vanilla secondary buttons styled');
+ok(
+	/button\.button-vue\.secondary[\s\S]*?background-color:\s*var\(--color-background-dark/.test(css),
+	'secondary fill uses background-dark (not pale primary-light)',
+);
+ok(css.includes('--hmk-danger-fill-solid'), 'danger uses AA-safe solid fill token');
+ok(css.includes('--hmk-pane-width'), 'pane width token defined');
 ok(!css.includes('#homecheck-app .hmk-btn--danger {\n\t--color-primary-element:'), 'danger no longer remaps primary token');
 
 const deskletCss = fs.readFileSync(path.join(root, 'css/desklet-nextcloud.css'), 'utf8');

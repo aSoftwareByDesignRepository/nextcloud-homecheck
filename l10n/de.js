@@ -66,7 +66,6 @@ OC.L10N.register(
 	"Hello" : "Hallo",
 	"Hello, {name}" : "Hallo, {name}",
 	"Delete this folder? Apps inside return to the home screen." : "Diesen Ordner löschen? Apps darin kehren zum Startbildschirm zurück.",
-	"Drag panes to rearrange. Tap Done when finished." : "Kacheln ziehen zum Sortieren. Fertig tippen, wenn du fertig bist.",
 	"Tap a pane to open an app." : "Tippe eine Kachel, um eine App zu öffnen.",
 	"This folder is empty — add apps from Edit." : "Dieser Ordner ist leer — füge Apps über Bearbeiten hinzu.",
 	"Too many items on the home screen (max 100)" : "Zu viele Einträge auf dem Startbildschirm (max. 100)",
@@ -77,6 +76,14 @@ OC.L10N.register(
 	"Open AppHome after you sign in" : "AppHome nach der Anmeldung öffnen",
 	"Stop opening AppHome after you sign in" : "AppHome nicht mehr nach der Anmeldung öffnen",
 	"More Nextcloud apps from Software by Design" : "Weitere Nextcloud-Apps von Software by Design",
-	"(opens in a new window)" : "(öffnet in einem neuen Fenster)"
-},
-"nplurals=2; plural=(n != 1);");
+	"(opens in a new window)" : "(öffnet in einem neuen Fenster)",
+	"Hide" : "Ausblenden",
+	"Hidden apps" : "Ausgeblendete Apps",
+	"Show again" : "Wieder anzeigen",
+	"No hidden apps." : "Keine ausgeblendeten Apps.",
+	"Hidden from AppHome" : "In AppHome ausgeblendet",
+	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Ziehe Kacheln zum Sortieren. Blende Apps aus, die du nicht brauchst. Tippe auf Fertig, wenn du fertig bist.",
+	"Folder hidden from AppHome" : "Ordner in AppHome ausgeblendet"
+	},
+	"nplurals=2; plural=(n != 1);"
+);

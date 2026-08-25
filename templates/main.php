@@ -19,6 +19,12 @@ $i18n = [
 	'newFolder' => $l->t('New folder'),
 	'addToFolder' => $l->t('Add to folder'),
 	'removeFromFolder' => $l->t('Remove from folder'),
+	'hideApp' => $l->t('Hide'),
+	'hiddenApps' => $l->t('Hidden apps'),
+	'showApp' => $l->t('Show again'),
+	'hiddenEmpty' => $l->t('No hidden apps.'),
+	'appHidden' => $l->t('Hidden from AppHome'),
+	'folderHidden' => $l->t('Folder hidden from AppHome'),
 	'renameFolder' => $l->t('Rename folder'),
 	'deleteFolder' => $l->t('Delete folder'),
 	'confirmDeleteFolder' => $l->t('Delete this folder? Apps inside return to the home screen.'),
@@ -32,7 +38,7 @@ $i18n = [
 	'nameChars' => $l->t('Name has invalid characters'),
 	'moreActions' => $l->t('More actions'),
 	'viewSubtitle' => $l->t('Tap a pane to open an app.'),
-	'editSubtitle' => $l->t('Drag panes to rearrange. Tap Done when finished.'),
+	'editSubtitle' => $l->t('Drag panes to rearrange. Hide apps you do not need. Tap Done when finished.'),
 	'editBanner' => $l->t('Editing your apps'),
 	'chooseFolder' => $l->t('Choose a folder'),
 	'noFoldersYet' => $l->t('No folders yet — a new one will be created.'),
@@ -100,6 +106,9 @@ if ($hour >= 22 || $hour < 5) {
 					<button type="button" class="button-vue secondary hmk-touch-btn hmk-chrome__btn" id="hmk-new-folder" hidden>
 						<?php p($l->t('New folder')); ?>
 					</button>
+					<button type="button" class="button-vue secondary hmk-touch-btn hmk-chrome__btn" id="hmk-hidden-apps" hidden>
+						<?php p($l->t('Hidden apps')); ?>
+					</button>
 					<button type="button" class="button-vue primary hmk-touch-btn hmk-chrome__btn" id="hmk-edit-toggle" aria-pressed="false" aria-describedby="hmk-instructions">
 						<?php p($l->t('Edit')); ?>
 					</button>
@@ -107,7 +116,7 @@ if ($hour >= 22 || $hour < 5) {
 			</header>
 		</div>
 
-		<p id="hmk-edit-hint" class="hmk-edit-hint" hidden><?php p($l->t('Drag panes to rearrange. Tap Done when finished.')); ?></p>
+		<p id="hmk-edit-hint" class="hmk-edit-hint" hidden><?php p($l->t('Drag panes to rearrange. Hide apps you do not need. Tap Done when finished.')); ?></p>
 
 		<div id="hmk-cta" class="notecard hmk-cta" hidden role="region" aria-label="<?php p($l->t('Start page')); ?>">
 			<p class="hmk-cta__text"><?php p($l->t('Make AppHome your start page after login?')); ?></p>
@@ -171,6 +180,17 @@ if ($hour >= 22 || $hour < 5) {
 		<div id="hmk-folder-picker-list" class="hmk-picker-list" role="list"></div>
 		<div class="hmk-dialog__actions">
 			<button type="button" class="button-vue secondary hmk-touch-btn" id="hmk-folder-picker-cancel"><?php p($l->t('Cancel')); ?></button>
+		</div>
+	</dialog>
+
+	<dialog id="hmk-hidden-dialog" class="hmk-dialog hmk-dialog--picker" aria-labelledby="hmk-hidden-title">
+		<div class="hmk-dialog__head">
+			<h2 id="hmk-hidden-title" class="hmk-dialog__title"><?php p($l->t('Hidden apps')); ?></h2>
+			<button type="button" class="button-vue tertiary hmk-touch-btn hmk-dialog__close" id="hmk-hidden-close" aria-label="<?php p($l->t('Close')); ?>">×</button>
+		</div>
+		<div id="hmk-hidden-list" class="hmk-hidden-list" role="list"></div>
+		<div class="hmk-dialog__actions">
+			<button type="button" class="button-vue secondary hmk-touch-btn" id="hmk-hidden-cancel"><?php p($l->t('Close')); ?></button>
 		</div>
 	</dialog>
 </div>

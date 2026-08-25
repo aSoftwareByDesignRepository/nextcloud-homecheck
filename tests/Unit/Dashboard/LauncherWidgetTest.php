@@ -33,6 +33,9 @@ final class LauncherWidgetTest extends TestCase
 		parent::setUp();
 		$this->layout = $this->createMock(LayoutService::class);
 		$this->session = $this->createMock(IUserSession::class);
+		$user = $this->createMock(IUser::class);
+		$user->method('getUID')->willReturn('alice');
+		$this->session->method('getUser')->willReturn($user);
 		$url = $this->createMock(IURLGenerator::class);
 		$url->method('imagePath')->willReturn('/apps/homecheck/img/app-dashboard.svg');
 		$url->method('getAbsoluteURL')->willReturnCallback(static fn (string $p) => 'https://nc.test' . $p);
@@ -113,15 +116,11 @@ final class LauncherWidgetTest extends TestCase
 		$this->assertStringContainsString('opens after you sign in', $items[1]->getSubtitle());
 	}
 
-	public function testButtonsRequireMatchingSessionUser(): void
+	public function testItemsRequireMatchingSessionUser(): void
 	{
-		$this->session->method('getUser')->willReturn(null);
-		$this->assertSame([], $this->widget->getWidgetButtons('alice'));
-
-		$user = $this->createMock(IUser::class);
-		$user->method('getUID')->willReturn('alice');
+		$this->layout->expects($this->never())->method('summarizeForUser');
 		$session = $this->createMock(IUserSession::class);
-		$session->method('getUser')->willReturn($user);
+		$session->method('getUser')->willReturn(null);
 		$url = $this->createMock(IURLGenerator::class);
 		$url->method('linkToRouteAbsolute')->willReturn('https://nc.test/apps/homecheck/');
 		$url->method('imagePath')->willReturn('/apps/homecheck/img/app-dashboard.svg');
@@ -136,6 +135,62 @@ final class LauncherWidgetTest extends TestCase
 			$session,
 			$this->layout,
 			new AppIconService($url, $apps),
+			$this->createMock(LoggerInterface::class),
+		);
+		$items = $widget->getItemsV2('alice');
+		$this->assertSame([], $items->getItems());
+		$this->assertSame('', $items->getEmptyContentMessage());
+
+		$user = $this->createMock(IUser::class);
+		$user->method('getUID')->willReturn('bob');
+		$sessionMismatch = $this->createMock(IUserSession::class);
+		$sessionMismatch->method('getUser')->willReturn($user);
+		$widget2 = new LauncherWidget(
+			$l10n,
+			$url,
+			$sessionMismatch,
+			$this->layout,
+			new AppIconService($url, $apps),
+			$this->createMock(LoggerInterface::class),
+		);
+		$items2 = $widget2->getItemsV2('alice');
+		$this->assertSame([], $items2->getItems());
+	}
+
+	public function testButtonsRequireMatchingSessionUser(): void
+	{
+		$url = $this->createMock(IURLGenerator::class);
+		$url->method('linkToRouteAbsolute')->willReturn('https://nc.test/apps/homecheck/');
+		$url->method('imagePath')->willReturn('/apps/homecheck/img/app-dashboard.svg');
+		$url->method('getAbsoluteURL')->willReturnCallback(static fn (string $p) => 'https://nc.test' . $p);
+		$l10n = $this->createMock(IL10N::class);
+		$l10n->method('t')->willReturnArgument(0);
+		$apps = $this->createMock(IAppManager::class);
+		$apps->method('getAppVersion')->willReturn('1.0.15');
+		$icons = new AppIconService($url, $apps);
+
+		$sessionNull = $this->createMock(IUserSession::class);
+		$sessionNull->method('getUser')->willReturn(null);
+		$widgetNull = new LauncherWidget(
+			$l10n,
+			$url,
+			$sessionNull,
+			$this->layout,
+			$icons,
+			$this->createMock(LoggerInterface::class),
+		);
+		$this->assertSame([], $widgetNull->getWidgetButtons('alice'));
+
+		$user = $this->createMock(IUser::class);
+		$user->method('getUID')->willReturn('alice');
+		$session = $this->createMock(IUserSession::class);
+		$session->method('getUser')->willReturn($user);
+		$widget = new LauncherWidget(
+			$l10n,
+			$url,
+			$session,
+			$this->layout,
+			$icons,
 			$this->createMock(LoggerInterface::class),
 		);
 		$buttons = $widget->getWidgetButtons('alice');

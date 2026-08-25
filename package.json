@@ -4,7 +4,8 @@
   "scripts": {
 	"test:js": "node tests/js/layout-client.test.js && node tests/js/desklet-chrome.test.js && node tests/js/icon-contrast.test.js",
 	"test:css": "node tests/css/theme-contract.test.js",
-	"test:unit": "npm run test:js && npm run test:css",
+	"test:arch": "php tests/Architecture/absolute-no-gos.php",
+	"test:unit": "npm run test:js && npm run test:css && npm run test:arch",
     "e2e:a11y": "playwright test e2e/a11y.spec.js",
     "e2e:flows": "playwright test e2e/flows.spec.js",
     "e2e:install": "playwright install chromium"

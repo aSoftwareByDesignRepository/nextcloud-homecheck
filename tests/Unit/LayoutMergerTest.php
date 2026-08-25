@@ -79,10 +79,79 @@ final class LayoutMergerTest extends TestCase
 				['type' => 'app', 'id' => 'files'],
 				['type' => 'app', 'id' => 'calendar'],
 			],
+			'hidden' => [],
 		], [
 			['id' => 'files', 'order' => 1],
 			['id' => 'calendar', 'order' => 2],
 		]);
+		$this->assertFalse($merged['changed']);
+		$this->assertSame([], $merged['hidden']);
+	}
+
+	public function testHiddenAppsAreNotReAppended(): void
+	{
+		$merged = $this->m->merge([
+			'version' => 1,
+			'revision' => 2,
+			'items' => [
+				['type' => 'app', 'id' => 'files'],
+			],
+			'hidden' => ['calendar', 'dashboard'],
+		], [
+			['id' => 'files', 'order' => 1],
+			['id' => 'calendar', 'order' => 5],
+			['id' => 'dashboard', 'order' => 2],
+		]);
+
+		$this->assertCount(1, $merged['items']);
+		$this->assertSame('files', $merged['items'][0]['id']);
+		$this->assertSame(['calendar', 'dashboard'], $merged['hidden']);
+		$this->assertFalse($merged['changed']);
+	}
+
+	public function testHiddenDropsUninstalledAndStripsFromItems(): void
+	{
+		$merged = $this->m->merge([
+			'version' => 1,
+			'revision' => 1,
+			'items' => [
+				['type' => 'app', 'id' => 'files'],
+				['type' => 'app', 'id' => 'calendar'],
+			],
+			'hidden' => ['calendar', 'gone'],
+		], [
+			['id' => 'files', 'order' => 1],
+			['id' => 'calendar', 'order' => 2],
+		]);
+
+		$this->assertCount(1, $merged['items']);
+		$this->assertSame('files', $merged['items'][0]['id']);
+		$this->assertSame(['calendar'], $merged['hidden']);
+		$this->assertTrue($merged['changed']);
+	}
+
+	public function testHiddenFoldersKeepChildrenOffHome(): void
+	{
+		$merged = $this->m->merge([
+			'version' => 1,
+			'revision' => 3,
+			'items' => [
+				['type' => 'app', 'id' => 'files'],
+			],
+			'hidden' => [],
+			'hiddenFolders' => [
+				['type' => 'folder', 'id' => 'fld_abcdefgh', 'name' => 'Work', 'children' => ['calendar', 'mail']],
+			],
+		], [
+			['id' => 'files', 'order' => 1],
+			['id' => 'calendar', 'order' => 2],
+			['id' => 'mail', 'order' => 3],
+		]);
+
+		$this->assertCount(1, $merged['items']);
+		$this->assertSame('files', $merged['items'][0]['id']);
+		$this->assertCount(1, $merged['hiddenFolders']);
+		$this->assertSame(['calendar', 'mail'], $merged['hiddenFolders'][0]['children']);
 		$this->assertFalse($merged['changed']);
 	}
 
@@ -135,5 +204,22 @@ final class LayoutMergerTest extends TestCase
 		$this->assertContains('files', $appIds);
 		$this->assertContains('extra0', $appIds);
 		$this->assertNotContains('extra9', $appIds);
+	}
+
+	public function testReplacesHostileFolderNames(): void
+	{
+		$merged = $this->m->merge([
+			'version' => 1,
+			'revision' => 1,
+			'items' => [
+				['type' => 'folder', 'id' => 'fld_abcdefgh', 'name' => '<script>x</script>', 'children' => []],
+			],
+		], [
+			['id' => 'files', 'order' => 1],
+		]);
+		$this->assertSame('folder', $merged['items'][0]['type']);
+		$this->assertSame('Folder', $merged['items'][0]['name']);
+		$this->assertTrue($merged['changed']);
+		$this->assertStringNotContainsString('<', $merged['items'][0]['name']);
 	}
 }

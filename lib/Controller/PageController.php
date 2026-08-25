@@ -36,7 +36,7 @@ class PageController extends Controller
 		$user = $this->userSession->getUser();
 		$uid = $user !== null ? $user->getUID() : '';
 		$payload = $uid !== '' ? $this->layouts->getForUser($uid) : [
-			'layout' => ['version' => 1, 'revision' => 0, 'items' => []],
+			'layout' => ['version' => 1, 'revision' => 0, 'items' => [], 'hidden' => [], 'hiddenFolders' => []],
 			'entries' => [],
 			'ctaDismissed' => true,
 			'isDefaultLanding' => false,

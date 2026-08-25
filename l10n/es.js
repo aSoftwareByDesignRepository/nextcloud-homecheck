@@ -66,7 +66,6 @@ OC.L10N.register(
 	"Hello" : "Hola",
 	"Hello, {name}" : "Hola, {name}",
 	"Delete this folder? Apps inside return to the home screen." : "¿Eliminar esta carpeta? Las apps vuelven a la pantalla de inicio.",
-	"Drag panes to rearrange. Tap Done when finished." : "Arrastra los paneles para reordenar. Toca Listo cuando termines.",
 	"Tap a pane to open an app." : "Toca un panel para abrir una app.",
 	"This folder is empty — add apps from Edit." : "Esta carpeta está vacía — añade apps desde Editar.",
 	"Too many items on the home screen (max 100)" : "Demasiados elementos en la pantalla de inicio (máx. 100)",
@@ -77,6 +76,14 @@ OC.L10N.register(
 	"Open AppHome after you sign in" : "Abrir AppHome al iniciar sesión",
 	"Stop opening AppHome after you sign in" : "Dejar de abrir AppHome al iniciar sesión",
 	"More Nextcloud apps from Software by Design" : "Más apps de Nextcloud de Software by Design",
-	"(opens in a new window)" : "(se abre en una ventana nueva)"
-},
-"nplurals=2; plural=(n != 1);");
+	"(opens in a new window)" : "(se abre en una ventana nueva)",
+	"Hide" : "Ocultar",
+	"Hidden apps" : "Apps ocultas",
+	"Show again" : "Mostrar de nuevo",
+	"No hidden apps." : "No hay apps ocultas.",
+	"Hidden from AppHome" : "Oculta en AppHome",
+	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Arrastra los paneles para reordenar. Oculta las apps que no necesites. Toca Listo cuando termines.",
+	"Folder hidden from AppHome" : "Carpeta oculta en AppHome"
+	},
+	"nplurals=2; plural=(n != 1);"
+);

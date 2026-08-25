@@ -66,7 +66,6 @@ OC.L10N.register(
 	"Hello" : "Hei",
 	"Hello, {name}" : "Hei, {name}",
 	"Delete this folder? Apps inside return to the home screen." : "Slette denne mappen? Appene inni går tilbake til startskjermen.",
-	"Drag panes to rearrange. Tap Done when finished." : "Dra paneler for å sortere. Trykk Ferdig når du er ferdig.",
 	"Tap a pane to open an app." : "Trykk på et panel for å åpne en app.",
 	"This folder is empty — add apps from Edit." : "Denne mappen er tom — legg til apper fra Rediger.",
 	"Too many items on the home screen (max 100)" : "For mange elementer på startskjermen (maks. 100)",
@@ -77,6 +76,14 @@ OC.L10N.register(
 	"Open AppHome after you sign in" : "Åpne AppHome etter innlogging",
 	"Stop opening AppHome after you sign in" : "Slutt å åpne AppHome etter innlogging",
 	"More Nextcloud apps from Software by Design" : "Flere Nextcloud-apper fra Software by Design",
-	"(opens in a new window)" : "(åpnes i et nytt vindu)"
-},
-"nplurals=2; plural=(n != 1);");
+	"(opens in a new window)" : "(åpnes i et nytt vindu)",
+	"Hide" : "Skjul",
+	"Hidden apps" : "Skjulte apper",
+	"Show again" : "Vis igjen",
+	"No hidden apps." : "Ingen skjulte apper.",
+	"Hidden from AppHome" : "Skjult i AppHome",
+	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Dra paneler for å sortere. Skjul apper du ikke trenger. Trykk Ferdig når du er ferdig.",
+	"Folder hidden from AppHome" : "Mappe skjult i AppHome"
+	},
+	"nplurals=2; plural=(n != 1);"
+);

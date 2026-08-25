@@ -39,7 +39,13 @@
 		displayName: '',
 	});
 	if (!state.layout || !Array.isArray(state.layout.items)) {
-		state.layout = { version: 1, revision: 0, items: [] };
+		state.layout = { version: 1, revision: 0, items: [], hidden: [], hiddenFolders: [] };
+	}
+	if (!Array.isArray(state.layout.hidden)) {
+		state.layout.hidden = [];
+	}
+	if (!Array.isArray(state.layout.hiddenFolders)) {
+		state.layout.hiddenFolders = [];
 	}
 	if (typeof state.displayName !== 'string') {
 		state.displayName = '';
@@ -54,6 +60,12 @@
 		newFolder: 'New folder',
 		addToFolder: 'Add to folder',
 		removeFromFolder: 'Remove from folder',
+		hideApp: 'Hide',
+		hiddenApps: 'Hidden apps',
+		showApp: 'Show again',
+		hiddenEmpty: 'No hidden apps.',
+		appHidden: 'Hidden from AppHome',
+		folderHidden: 'Folder hidden from AppHome',
 		renameFolder: 'Rename folder',
 		deleteFolder: 'Delete folder',
 		confirmDeleteFolder: 'Delete this folder? Apps inside return to the home screen.',
@@ -66,7 +78,7 @@
 		nameInvalid: 'Name must be 1–40 characters',
 		nameChars: 'Name has invalid characters',
 		moreActions: 'More actions',
-		editSubtitle: 'Drag panes to rearrange. Tap Done when finished.',
+		editSubtitle: 'Drag panes to rearrange. Hide apps you do not need. Tap Done when finished.',
 		viewSubtitle: 'Tap a pane to open an app.',
 		editBanner: 'Editing your apps',
 		chooseFolder: 'Choose a folder',
@@ -134,6 +146,7 @@
 		status: document.getElementById('hmk-status'),
 		editToggle: document.getElementById('hmk-edit-toggle'),
 		newFolder: document.getElementById('hmk-new-folder'),
+		hiddenAppsBtn: document.getElementById('hmk-hidden-apps'),
 		homeToggle: document.getElementById('hmk-home-toggle'),
 		cta: document.getElementById('hmk-cta'),
 		ctaYes: document.getElementById('hmk-cta-yes'),
@@ -156,6 +169,10 @@
 		folderPicker: document.getElementById('hmk-folder-picker'),
 		folderPickerList: document.getElementById('hmk-folder-picker-list'),
 		folderPickerCancel: document.getElementById('hmk-folder-picker-cancel'),
+		hiddenDialog: document.getElementById('hmk-hidden-dialog'),
+		hiddenList: document.getElementById('hmk-hidden-list'),
+		hiddenClose: document.getElementById('hmk-hidden-close'),
+		hiddenCancel: document.getElementById('hmk-hidden-cancel'),
 		editHint: document.getElementById('hmk-edit-hint'),
 		instructions: document.getElementById('hmk-instructions'),
 		greeting: document.getElementById('hmk-greeting'),
@@ -369,6 +386,12 @@
 			return;
 		}
 		state.layout = data.data.layout;
+		if (!Array.isArray(state.layout.hidden)) {
+			state.layout.hidden = [];
+		}
+		if (!Array.isArray(state.layout.hiddenFolders)) {
+			state.layout.hiddenFolders = [];
+		}
 		if (data.data.entries) {
 			state.entries = data.data.entries;
 			Object.keys(entriesById).forEach(function (k) { delete entriesById[k]; });
@@ -765,6 +788,186 @@
 		render();
 	}
 
+	function ensureHiddenList() {
+		if (!Array.isArray(state.layout.hidden)) {
+			state.layout.hidden = [];
+		}
+		return state.layout.hidden;
+	}
+
+	function ensureHiddenFolders() {
+		if (!Array.isArray(state.layout.hiddenFolders)) {
+			state.layout.hiddenFolders = [];
+		}
+		return state.layout.hiddenFolders;
+	}
+
+	function hasAnyHidden() {
+		return ensureHiddenList().length > 0 || ensureHiddenFolders().length > 0;
+	}
+
+	function hideApp(appId, folderId) {
+		if (!appId) {
+			return;
+		}
+		const hidden = ensureHiddenList();
+		if (hidden.indexOf(appId) === -1) {
+			hidden.push(appId);
+		}
+		if (folderId) {
+			const idx = findItemIndex(folderId);
+			if (idx >= 0) {
+				const folder = Object.assign({}, state.layout.items[idx]);
+				folder.children = (folder.children || []).filter(function (c) { return c !== appId; });
+				const items = state.layout.items.slice();
+				items[idx] = folder;
+				state.layout.items = items;
+				if (el.folderDialog && el.folderDialog.open) {
+					paintFolderDialog(folder);
+				}
+			}
+		} else {
+			state.layout.items = state.layout.items.filter(function (it) {
+				return !(it.type === 'app' && it.id === appId);
+			});
+		}
+		scheduleSave();
+		setStatus(t.appHidden, false);
+		render();
+	}
+
+	function hideFolder(folderId) {
+		const idx = findItemIndex(folderId);
+		if (idx < 0) {
+			return;
+		}
+		const folder = Object.assign({}, state.layout.items[idx]);
+		if (folder.type !== 'folder') {
+			return;
+		}
+		const kids = (folder.children || []).slice();
+		// Flat-hidden apps that are in this folder move into the folder hide entry.
+		state.layout.hidden = ensureHiddenList().filter(function (id) {
+			return kids.indexOf(id) === -1;
+		});
+		ensureHiddenFolders().push({
+			type: 'folder',
+			id: folder.id,
+			name: folder.name || t.folder,
+			children: kids,
+		});
+		state.layout.items = state.layout.items.filter(function (it) {
+			return !(it.type === 'folder' && it.id === folderId);
+		});
+		if (openFolderId === folderId && el.folderDialog && el.folderDialog.open) {
+			el.folderDialog.close();
+		}
+		scheduleSave();
+		setStatus(t.folderHidden, false);
+		render();
+	}
+
+	function showAppAgain(appId) {
+		state.layout.hidden = ensureHiddenList().filter(function (id) { return id !== appId; });
+		const placed = state.layout.items.some(function (it) {
+			if (it.type === 'app' && it.id === appId) {
+				return true;
+			}
+			if (it.type === 'folder' && (it.children || []).indexOf(appId) !== -1) {
+				return true;
+			}
+			return false;
+		}) || ensureHiddenFolders().some(function (f) {
+			return (f.children || []).indexOf(appId) !== -1;
+		});
+		if (!placed && (state.layout.items || []).length < MAX_ITEMS) {
+			state.layout.items = state.layout.items.concat([{ type: 'app', id: appId }]);
+		}
+		scheduleSave();
+		render();
+		paintHiddenDialog();
+	}
+
+	function showFolderAgain(folderId) {
+		const folders = ensureHiddenFolders();
+		const fIdx = folders.findIndex(function (f) { return f.id === folderId; });
+		if (fIdx < 0) {
+			return;
+		}
+		if ((state.layout.items || []).length >= MAX_ITEMS) {
+			setStatus(t.limitItems, true);
+			return;
+		}
+		const folder = Object.assign({}, folders[fIdx]);
+		folders.splice(fIdx, 1);
+		state.layout.hiddenFolders = folders;
+		state.layout.items = state.layout.items.concat([folder]);
+		scheduleSave();
+		render();
+		paintHiddenDialog();
+	}
+
+	function paintHiddenDialog() {
+		if (!el.hiddenList) {
+			return;
+		}
+		el.hiddenList.textContent = '';
+		const hidden = ensureHiddenList();
+		const hiddenFolders = ensureHiddenFolders();
+		if (hidden.length === 0 && hiddenFolders.length === 0) {
+			const p = document.createElement('p');
+			p.className = 'hmk-empty-inline';
+			p.textContent = t.hiddenEmpty;
+			el.hiddenList.appendChild(p);
+			return;
+		}
+		hiddenFolders.forEach(function (folder) {
+			const row = document.createElement('div');
+			row.className = 'hmk-hidden-row';
+			row.setAttribute('role', 'listitem');
+			const label = document.createElement('span');
+			label.className = 'hmk-hidden-row__name';
+			const count = (folder.children || []).length;
+			label.textContent = (folder.name || t.folder) + ' (' + count + ')';
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'button-vue primary hmk-touch-btn';
+			btn.textContent = t.showApp;
+			btn.addEventListener('click', function () {
+				showFolderAgain(folder.id);
+			});
+			row.appendChild(label);
+			row.appendChild(btn);
+			el.hiddenList.appendChild(row);
+		});
+		hidden.forEach(function (id) {
+			const entry = entriesById[id] || { id: id, name: id };
+			const row = document.createElement('div');
+			row.className = 'hmk-hidden-row';
+			row.setAttribute('role', 'listitem');
+			const label = document.createElement('span');
+			label.className = 'hmk-hidden-row__name';
+			label.textContent = entry.name || id;
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'button-vue primary hmk-touch-btn';
+			btn.textContent = t.showApp;
+			btn.addEventListener('click', function () {
+				showAppAgain(id);
+			});
+			row.appendChild(label);
+			row.appendChild(btn);
+			el.hiddenList.appendChild(row);
+		});
+	}
+
+	function openHiddenDialog() {
+		paintHiddenDialog();
+		if (el.hiddenDialog && typeof el.hiddenDialog.showModal === 'function') {
+			el.hiddenDialog.showModal();
+		}
+	}
+
 	function renameFolder(folderId) {
 		const idx = findItemIndex(folderId);
 		if (idx < 0) {
@@ -970,17 +1173,23 @@
 				details.open = false;
 				removeFromFolder(opts.folderId, item.id);
 			}));
+			menu.appendChild(menuButton(t.hideApp, function () {
+				details.open = false;
+				hideApp(item.id, opts.folderId);
+			}));
 		} else {
 			if (item.type === 'app') {
 				menu.appendChild(menuButton(t.moveLeft, function () { details.open = false; moveItem(item.id, -1); }));
 				menu.appendChild(menuButton(t.moveRight, function () { details.open = false; moveItem(item.id, 1); }));
 				menu.appendChild(menuButton(t.newFolder, function () { details.open = false; createFolderWithApp(item.id); }));
 				menu.appendChild(menuButton(t.addToFolder, function () { details.open = false; addAppToFolderFlow(item.id); }));
+				menu.appendChild(menuButton(t.hideApp, function () { details.open = false; hideApp(item.id, null); }));
 			} else if (item.type === 'folder') {
 				menu.appendChild(menuButton(t.moveLeft, function () { details.open = false; moveItem(item.id, -1); }));
 				menu.appendChild(menuButton(t.moveRight, function () { details.open = false; moveItem(item.id, 1); }));
 				menu.appendChild(menuButton(t.openFolder, function () { details.open = false; openFolder(item, summary); }));
 				menu.appendChild(menuButton(t.rename, function () { details.open = false; renameFolder(item.id); }));
+				menu.appendChild(menuButton(t.hideApp, function () { details.open = false; hideFolder(item.id); }));
 				menu.appendChild(menuButton(t.deleteFolder, function () { details.open = false; deleteFolder(item.id); }));
 			}
 		}
@@ -991,6 +1200,16 @@
 				hostPane.classList.toggle('is-menu-open', details.open);
 			}
 			if (details.open) {
+				/* Accordion: only one ⋮ menu open at a time (home grid + folder dialog). */
+				document.querySelectorAll('#homecheck-app .hmk-pane__menu[open]').forEach(function (node) {
+					if (node !== details) {
+						node.open = false;
+						const otherPane = node.closest('.hmk-pane');
+						if (otherPane) {
+							otherPane.classList.remove('is-menu-open');
+						}
+					}
+				});
 				host.scrollIntoView({ block: 'nearest', behavior: 'instant' });
 			}
 		});
@@ -1024,7 +1243,8 @@
 			well.appendChild(img);
 			return well;
 		}
-		if (entry && entry.icon && typeof entry.icon === 'string' && entry.icon.indexOf('javascript:') !== 0) {
+		/* Same allowlist as launch hrefs — never trust entry.icon from nav/JSON alone. */
+		if (entry && entry.icon && typeof entry.icon === 'string' && isSafeHref(entry.icon)) {
 			img.src = entry.icon;
 			img.addEventListener('error', function () {
 				img.remove();
@@ -1226,6 +1446,9 @@
 		if (el.newFolder) {
 			el.newFolder.hidden = !editing;
 		}
+		if (el.hiddenAppsBtn) {
+			el.hiddenAppsBtn.hidden = !editing || !hasAnyHidden();
+		}
 		if (el.editHint) {
 			el.editHint.hidden = !editing;
 		}
@@ -1330,6 +1553,22 @@
 	if (el.newFolder) {
 		el.newFolder.addEventListener('click', function () {
 			createEmptyFolder();
+		});
+	}
+	if (el.hiddenAppsBtn) {
+		el.hiddenAppsBtn.addEventListener('click', function () {
+			openHiddenDialog();
+		});
+	}
+	if (el.hiddenClose) {
+		el.hiddenClose.addEventListener('click', function () { el.hiddenDialog.close(); });
+	}
+	if (el.hiddenCancel) {
+		el.hiddenCancel.addEventListener('click', function () { el.hiddenDialog.close(); });
+	}
+	if (el.hiddenDialog) {
+		el.hiddenDialog.addEventListener('close', function () {
+			restoreFocus();
 		});
 	}
 	if (el.folderClose) {

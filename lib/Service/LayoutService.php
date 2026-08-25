@@ -65,11 +65,7 @@ class LayoutService
 
 		// First visit or corrupt storage: persist so seed edits cannot stomp (US-009) / AC-G-08
 		if ($raw === null || $corrupt) {
-			$toStore = [
-				'version' => 1,
-				'revision' => 1,
-				'items' => $merged['items'],
-			];
+			$toStore = $this->layoutFromMerged($merged, 1);
 			$encoded = json_encode($toStore, JSON_THROW_ON_ERROR);
 			if (!$this->writeGuard->compareAndSwap($uid, $raw, $encoded)) {
 				// Lost first-write / regenerate race — return whatever won
@@ -80,11 +76,7 @@ class LayoutService
 		}
 
 		return [
-			'layout' => [
-				'version' => 1,
-				'revision' => (int)$merged['revision'],
-				'items' => $merged['items'],
-			],
+			'layout' => $this->layoutFromMerged($merged),
 			'entries' => $this->mapEntries($entries),
 			'ctaDismissed' => $this->config->getUserValue($uid, Application::APP_ID, self::USER_CTA_DISMISS_KEY, '0') === '1',
 			'isDefaultLanding' => $this->isDefaultLanding($uid),
@@ -120,11 +112,7 @@ class LayoutService
 
 		$entries = $this->liveEntries();
 		$merged = $this->merger->merge($validated, $entries);
-		$next = [
-			'version' => 1,
-			'revision' => $currentRev + 1,
-			'items' => $merged['items'],
-		];
+		$next = $this->layoutFromMerged($merged, $currentRev + 1);
 		$encoded = json_encode($next, JSON_THROW_ON_ERROR);
 
 		if (!$this->writeGuard->compareAndSwap($uid, $rawBefore, $encoded)) {
@@ -137,6 +125,7 @@ class LayoutService
 			'app' => Application::APP_ID,
 			'revision' => $next['revision'],
 			'items' => count($next['items']),
+			'hidden' => count($next['hidden']),
 			'apporderSynced' => $synced,
 		]);
 
@@ -158,11 +147,7 @@ class LayoutService
 		$stored = $this->readPersonalLayout($uid);
 		$entries = $this->liveEntries();
 		$merged = $this->merger->merge($stored, $entries);
-		$layout = [
-			'version' => 1,
-			'revision' => (int)$merged['revision'],
-			'items' => $merged['items'],
-		];
+		$layout = $this->layoutFromMerged($merged);
 		$synced = $this->syncAppOrder($uid, $layout, $entries);
 		if (!$synced) {
 			$this->logger->warning('AppHome apporder resync failed', [
@@ -265,11 +250,7 @@ class LayoutService
 			'Layout was updated elsewhere — reload and try again',
 			409,
 			[
-				'layout' => [
-					'version' => 1,
-					'revision' => (int)$merged['revision'],
-					'items' => $merged['items'],
-				],
+				'layout' => $this->layoutFromMerged($merged),
 				'entries' => $this->mapEntries($entries),
 			],
 		);
@@ -361,11 +342,7 @@ class LayoutService
 	{
 		$stored = $this->readPersonalLayout($uid);
 		$merged = $this->merger->merge($stored, $entries);
-		$layout = [
-			'version' => 1,
-			'revision' => (int)$merged['revision'],
-			'items' => $merged['items'],
-		];
+		$layout = $this->layoutFromMerged($merged);
 		// Winner persisted layout; loser must still push apporder (winner may have failed sync).
 		$apporderSynced = $this->syncAppOrder($uid, $layout, $entries);
 		return [
@@ -394,7 +371,30 @@ class LayoutService
 	}
 
 	/**
-	 * @return array{version:int,revision:int,items:list<array<string,mixed>>}|null
+	 * @param array{revision?:int,items?:list<array<string,mixed>>,hidden?:list<string>,hiddenFolders?:list<array<string,mixed>>} $merged
+	 * @return array{version:int,revision:int,items:list<array<string,mixed>>,hidden:list<string>,hiddenFolders:list<array<string,mixed>>}
+	 */
+	private function layoutFromMerged(array $merged, ?int $revisionOverride = null): array
+	{
+		$hidden = $merged['hidden'] ?? [];
+		if (!is_array($hidden)) {
+			$hidden = [];
+		}
+		$hiddenFolders = $merged['hiddenFolders'] ?? [];
+		if (!is_array($hiddenFolders)) {
+			$hiddenFolders = [];
+		}
+		return [
+			'version' => 1,
+			'revision' => $revisionOverride ?? (int)($merged['revision'] ?? 0),
+			'items' => is_array($merged['items'] ?? null) ? $merged['items'] : [],
+			'hidden' => array_values(array_filter($hidden, static fn ($id): bool => is_string($id) && $id !== '')),
+			'hiddenFolders' => array_values($hiddenFolders),
+		];
+	}
+
+	/**
+	 * @return array{version:int,revision:int,items:list<array<string,mixed>>,hidden?:list<string>}|null
 	 */
 	private function readPersonalLayout(string $uid): ?array
 	{
