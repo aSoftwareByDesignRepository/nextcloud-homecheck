@@ -11,7 +11,7 @@ async function scan(page, label) {
 	expect(results.violations, `${label} a11y violations: ${JSON.stringify(results.violations, null, 2)}`).toEqual([]);
 }
 
-test.describe('AppHome accessibility', () => {
+test.describe('HomeCheck accessibility', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 	});

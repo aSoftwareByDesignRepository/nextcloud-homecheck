@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 const { login, openHomeCheck } = require('./helpers');
 
-test.describe('AppHome first view — instant clarity', () => {
+test.describe('HomeCheck first view — instant clarity', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 		await openHomeCheck(page);

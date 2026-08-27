@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const { login, openHomeCheck, resetLayoutToFlatApps, clickCardMenuItem, folderCount, folderAt, openFolderCard, waitForLayoutSave } = require('./helpers');
 
-test.describe('AppHome launcher', () => {
+test.describe('HomeCheck launcher', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 		await resetLayoutToFlatApps(page);

@@ -15,7 +15,7 @@ use OCP\IURLGenerator;
 use RuntimeException;
 
 /**
- * Theme-safe AppHome icon URLs for header, dashboard, and notifications.
+ * Theme-safe HomeCheck icon URLs for header, dashboard, and notifications.
  *
  * - Header / app menu: white {@see app.svg}
  * - Dashboard / notifications: black {@see app-dashboard.svg} / {@see app-dark.svg}

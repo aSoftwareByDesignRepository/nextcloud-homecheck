@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Informal-register native quality gate for AppHome (personal app launcher).
+ * Informal-register native quality gate for HomeCheck (personal app launcher).
  *
  * Fails when user-facing prose is identical to English (outside allowlist),
  * when formal address appears (Sie/vous/…), or when banned English jargon leaks.
@@ -16,7 +16,7 @@ $en = json_decode((string) file_get_contents($base . '/en.json'), true, 512, JSO
 
 /** @var array<string, true> */
 $allowExact = [
-	'AppHome' => true,
+	'HomeCheck' => true,
 	'Apps' => true,
 	'JSON' => true,
 	'Nextcloud' => true,

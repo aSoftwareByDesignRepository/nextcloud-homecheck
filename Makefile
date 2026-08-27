@@ -1,4 +1,4 @@
-# Makefile for AppHome (homecheck) app release
+# Makefile for HomeCheck (homecheck) app release
 
 app_name = homecheck
 build_dir = build

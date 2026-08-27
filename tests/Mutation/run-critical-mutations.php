@@ -6,7 +6,7 @@ declare(strict_types=1);
  * SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Mutation-style checks for critical AppHome pure logic.
+ * Mutation-style checks for critical HomeCheck pure logic.
  * Prefer this over infection/infection (Nextcloud bootstrap conflicts).
  */
 
@@ -263,7 +263,19 @@ assertTrue(in_array('Unset as home', $enKeys, true), 'unset home msgid in catalo
 assertTrue(!in_array('Open', $enKeys, true), 'unused Open msgid removed');
 assertTrue(in_array('More Nextcloud apps from Software by Design', $enKeys, true), 'vendor credit msgid in catalog');
 assertTrue(count($enKeys) === 83, 'l10n catalog has 83 keys');
-assertTrue(in_array('Hide', $enKeys, true) && in_array('Hidden apps', $enKeys, true) && in_array('Show again', $enKeys, true) && in_array('Folder hidden from AppHome', $enKeys, true), 'hide-app msgids present');
+assertTrue(in_array('Hide', $enKeys, true) && in_array('Hidden apps', $enKeys, true) && in_array('Show again', $enKeys, true) && in_array('Folder hidden from HomeCheck', $enKeys, true), 'hide-app msgids present');
+assertTrue(in_array('HomeCheck', $enKeys, true), 'brand msgid HomeCheck present');
+assertTrue(!in_array('AppHome', $enKeys, true) && !in_array('AppCheck', $enKeys, true), 'retired brand msgids removed');
+$enJsonRaw = (string) file_get_contents($root . '/l10n/en.json');
+assertTrue(!str_contains($enJsonRaw, 'AppHome') && !str_contains($enJsonRaw, 'AppCheck'), 'en.json free of retired brand strings');
+$infoXml = (string) file_get_contents($root . '/appinfo/info.xml');
+assertTrue(substr_count($infoXml, '<name>HomeCheck</name>') >= 2, 'info.xml brand HomeCheck on name+nav');
+assertTrue(!str_contains($infoXml, 'AppHome') && !str_contains($infoXml, 'AppCheck'), 'info.xml free of retired brands');
+assertTrue(is_string($mainTpl) && !str_contains($mainTpl, 'AppHome') && str_contains($mainTpl, "\$l->t('HomeCheck')"), 'main template uses HomeCheck msgid');
+assertTrue(is_string($jsSrc2) && !str_contains($jsSrc2, 'AppHome'), 'app.js free of AppHome');
+assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'Hidden from HomeCheck'), 'app.js fallback strings use HomeCheck');
+assertTrue(!str_contains((string) file_get_contents($root . '/templates/admin.php'), 'AppHome'), 'admin template free of AppHome');
+assertTrue(!str_contains((string) file_get_contents($root . '/lib/Dashboard/LauncherWidget.php'), 'AppHome'), 'desklet free of AppHome');
 assertTrue(is_string($jsSrc2) && str_contains($jsSrc2, 'hmk-pane__launch'), 'app pane whole-surface launch');
 assertTrue(is_string($jsSrc2) && !str_contains($jsSrc2, 'hmk-pane__row-message'), 'no Open subtitle line');
 

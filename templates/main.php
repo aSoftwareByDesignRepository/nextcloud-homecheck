@@ -23,8 +23,8 @@ $i18n = [
 	'hiddenApps' => $l->t('Hidden apps'),
 	'showApp' => $l->t('Show again'),
 	'hiddenEmpty' => $l->t('No hidden apps.'),
-	'appHidden' => $l->t('Hidden from AppHome'),
-	'folderHidden' => $l->t('Folder hidden from AppHome'),
+	'appHidden' => $l->t('Hidden from HomeCheck'),
+	'folderHidden' => $l->t('Folder hidden from HomeCheck'),
 	'renameFolder' => $l->t('Rename folder'),
 	'deleteFolder' => $l->t('Delete folder'),
 	'confirmDeleteFolder' => $l->t('Delete this folder? Apps inside return to the home screen.'),
@@ -46,13 +46,13 @@ $i18n = [
 	'rename' => $l->t('Rename'),
 	'syncWarn' => $l->t('Saved (top-bar sync failed — try again)'),
 	'syncRetrying' => $l->t('Retrying top-bar sync…'),
-	'startOk' => $l->t('AppHome is your start page'),
-	'startCleared' => $l->t('AppHome is no longer your start page'),
+	'startOk' => $l->t('HomeCheck is your start page'),
+	'startCleared' => $l->t('HomeCheck is no longer your start page'),
 	'startFail' => $l->t('Could not update start page'),
 	'useAsHome' => $l->t('Use as home'),
 	'unsetAsHome' => $l->t('Unset as home'),
-	'useAsHomeHint' => $l->t('Open AppHome after you sign in'),
-	'unsetAsHomeHint' => $l->t('Stop opening AppHome after you sign in'),
+	'useAsHomeHint' => $l->t('Open HomeCheck after you sign in'),
+	'unsetAsHomeHint' => $l->t('Stop opening HomeCheck after you sign in'),
 	'unsafeLink' => $l->t('This app link is not safe to open'),
 	'emptyFolder' => $l->t('This folder is empty — add apps from Edit.'),
 	'limitItems' => $l->t('Too many items on the home screen (max 100)'),
@@ -96,8 +96,8 @@ if ($hour >= 22 || $hour < 5) {
 	<div id="app-content-wrapper" class="hmk-shell hmk-shell--wide hmk-shell--dashboard">
 		<div class="hmk-topbar">
 			<h2 class="hmk-greeting" id="hmk-greeting"><?php p($greeting); ?></h2>
-			<header class="hmk-chrome" role="toolbar" aria-label="<?php p($l->t('AppHome')); ?>">
-				<p class="hidden-visually" id="hmk-page-title"><?php p($l->t('AppHome')); ?></p>
+			<header class="hmk-chrome" role="toolbar" aria-label="<?php p($l->t('HomeCheck')); ?>">
+				<p class="hidden-visually" id="hmk-page-title"><?php p($l->t('HomeCheck')); ?></p>
 				<p class="hidden-visually" id="hmk-instructions"><?php p($l->t('Tap a pane to open an app.')); ?></p>
 				<div class="hmk-toolbar__actions">
 					<button type="button" class="button-vue secondary hmk-touch-btn hmk-chrome__btn" id="hmk-home-toggle" aria-pressed="false">
@@ -119,7 +119,7 @@ if ($hour >= 22 || $hour < 5) {
 		<p id="hmk-edit-hint" class="hmk-edit-hint" hidden><?php p($l->t('Drag panes to rearrange. Hide apps you do not need. Tap Done when finished.')); ?></p>
 
 		<div id="hmk-cta" class="notecard hmk-cta" hidden role="region" aria-label="<?php p($l->t('Start page')); ?>">
-			<p class="hmk-cta__text"><?php p($l->t('Make AppHome your start page after login?')); ?></p>
+			<p class="hmk-cta__text"><?php p($l->t('Make HomeCheck your start page after login?')); ?></p>
 			<div class="hmk-cta__actions">
 				<button type="button" class="button-vue primary hmk-touch-btn" id="hmk-cta-yes"><?php p($l->t('Use as start page')); ?></button>
 				<button type="button" class="button-vue secondary hmk-touch-btn" id="hmk-cta-no"><?php p($l->t('Not now')); ?></button>

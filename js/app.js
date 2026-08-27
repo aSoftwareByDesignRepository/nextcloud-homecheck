@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * AppHome launcher — accessible cards, folders, keyboard parity, CSRF saves.
+ * HomeCheck launcher — accessible cards, folders, keyboard parity, CSRF saves.
  */
 (function () {
 	'use strict';
@@ -64,8 +64,8 @@
 		hiddenApps: 'Hidden apps',
 		showApp: 'Show again',
 		hiddenEmpty: 'No hidden apps.',
-		appHidden: 'Hidden from AppHome',
-		folderHidden: 'Folder hidden from AppHome',
+		appHidden: 'Hidden from HomeCheck',
+		folderHidden: 'Folder hidden from HomeCheck',
 		renameFolder: 'Rename folder',
 		deleteFolder: 'Delete folder',
 		confirmDeleteFolder: 'Delete this folder? Apps inside return to the home screen.',
@@ -87,13 +87,13 @@
 		rename: 'Rename',
 		syncWarn: 'Saved (top-bar sync failed — try again)',
 		syncRetrying: 'Retrying top-bar sync…',
-		startOk: 'AppHome is your start page',
-		startCleared: 'AppHome is no longer your start page',
+		startOk: 'HomeCheck is your start page',
+		startCleared: 'HomeCheck is no longer your start page',
 		startFail: 'Could not update start page',
 		useAsHome: 'Use as home',
 		unsetAsHome: 'Unset as home',
-		useAsHomeHint: 'Open AppHome after you sign in',
-		unsetAsHomeHint: 'Stop opening AppHome after you sign in',
+		useAsHomeHint: 'Open HomeCheck after you sign in',
+		unsetAsHomeHint: 'Stop opening HomeCheck after you sign in',
 		unsafeLink: 'This app link is not safe to open',
 		emptyFolder: 'This folder is empty — add apps from Edit.',
 		limitItems: 'Too many items on the home screen (max 100)',

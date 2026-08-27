@@ -1,5 +1,5 @@
 // @ts-check
-/** Shared Playwright helpers for AppHome e2e journeys. */
+/** Shared Playwright helpers for HomeCheck e2e journeys. */
 
 /**
  * @param {import('@playwright/test').Page} page

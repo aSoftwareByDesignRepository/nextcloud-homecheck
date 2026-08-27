@@ -7,7 +7,7 @@ const {
 	waitForLayoutSave,
 } = require('./helpers');
 
-test.describe('AppHome drag-and-drop reorder', () => {
+test.describe('HomeCheck drag-and-drop reorder', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 		await resetLayoutToFlatApps(page);

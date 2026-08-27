@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Absolute No-Go architecture contracts for AppHome (Zeus NG-01..NG-04 + icon filter).
+ * Absolute No-Go architecture contracts for HomeCheck (Zeus NG-01..NG-04 + icon filter).
  *
  * Usage: php tests/Architecture/absolute-no-gos.php
  */
@@ -110,6 +110,41 @@ if (preg_match('/filter:\s*brightness\(0\)\s*;/', $css) !== 1) {
 	fail('Icons must use brightness(0) black silhouette on light well');
 } else {
 	ok('Icons use brightness(0) on light well');
+}
+
+/* Brand freeze: English marketing name HomeCheck everywhere in ship surfaces */
+$info = (string) file_get_contents($root . '/appinfo/info.xml');
+$en = json_decode((string) file_get_contents($root . '/l10n/en.json'), true, 512, JSON_THROW_ON_ERROR);
+$adminTpl = (string) file_get_contents($root . '/templates/admin.php');
+$mainTpl = (string) file_get_contents($root . '/templates/main.php');
+$brandFail = 0;
+if (!preg_match('/<name>HomeCheck<\/name>/', $info)
+	|| substr_count($info, '<name>HomeCheck</name>') < 2) {
+	fail('Brand: info.xml primary + navigation <name> must be HomeCheck');
+	$brandFail = 1;
+}
+if (str_contains($info, 'AppHome') || str_contains($info, 'AppCheck')) {
+	fail('Brand: info.xml must not contain retired marketing names AppHome/AppCheck');
+	$brandFail = 1;
+}
+$enBlob = json_encode($en, JSON_UNESCAPED_UNICODE);
+if (!is_string($enBlob) || str_contains($enBlob, 'AppHome') || str_contains($enBlob, 'AppCheck')) {
+	fail('Brand: l10n/en.json must not contain AppHome/AppCheck');
+	$brandFail = 1;
+}
+if (!isset($en['translations']['HomeCheck']) || $en['translations']['HomeCheck'] !== 'HomeCheck') {
+	fail('Brand: l10n must expose msgid HomeCheck');
+	$brandFail = 1;
+}
+foreach ([$adminTpl, $mainTpl, $js, $desklet] as $surface) {
+	if (str_contains($surface, 'AppHome') || str_contains($surface, 'AppCheck')) {
+		fail('Brand: templates/JS/desklet must not contain AppHome/AppCheck');
+		$brandFail = 1;
+		break;
+	}
+}
+if ($brandFail === 0) {
+	ok('Brand: HomeCheck frozen in info.xml + l10n + UI surfaces');
 }
 
 exit($fail > 0 ? 1 : 0);

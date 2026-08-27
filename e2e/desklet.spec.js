@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const { login, openHomeCheck } = require('./helpers');
 
-test.describe('AppHome responsive panes + desklet API', () => {
+test.describe('HomeCheck responsive panes + desklet API', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 	});
@@ -37,7 +37,7 @@ test.describe('AppHome responsive panes + desklet API', () => {
 		expect(metrics.count).toBeGreaterThan(1);
 	});
 
-	test('dashboard OCS returns AppHome launcher desklet items', async ({ page }) => {
+	test('dashboard OCS returns HomeCheck launcher desklet items', async ({ page }) => {
 		await openHomeCheck(page); // ensure session + layout warm
 		const result = await page.evaluate(async () => {
 			const token = window.OC?.requestToken

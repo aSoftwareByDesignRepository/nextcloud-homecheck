@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace OCA\HomeCheck\Service;
 
 /**
- * Flatten AppHome layout into Nextcloud core `apporder` keyed object.
+ * Flatten HomeCheck layout into Nextcloud core `apporder` keyed object.
  *
  * Shape (NavigationManager + theming preference listener):
  * { "<navId>": { "order": int, "app": "<appId>" }, ... }

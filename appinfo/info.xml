@@ -5,13 +5,13 @@
 -->
 <info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>homecheck</id>
-	<name>AppHome</name>
+	<name>HomeCheck</name>
 	<summary>Personal app home — panes, folders, and top-bar order</summary>
 	<summary lang="de">Persönliche App-Startseite — Kacheln, Ordner und Menüleisten-Reihenfolge</summary>
 	<description><![CDATA[
-# AppHome — personal app home
+# HomeCheck — personal app home
 
-Arrange the Nextcloud apps you can open as Dashboard-style panes with folders. Reordering saves to your personal layout and updates the top-bar app order (folders stay in AppHome only). Hide apps you do not need and restore them anytime.
+Arrange the Nextcloud apps you can open as Dashboard-style panes with folders. Reordering saves to your personal layout and updates the top-bar app order (folders stay in HomeCheck only). Hide apps you do not need and restore them anytime.
 
 **Free AGPL web app.** Optional admin seed template for first-time users; every user can fully customise afterwards.
 
@@ -28,9 +28,9 @@ Arrange the Nextcloud apps you can open as Dashboard-style panes with folders. R
 - Nextcloud 32–34 · PHP 8.2–8.5
 	]]></description>
 	<description lang="de"><![CDATA[
-# AppHome — persönliche App-Startseite
+# HomeCheck — persönliche App-Startseite
 
-Ordne die für dich freigeschalteten Nextcloud-Apps als Dashboard-Kacheln mit Ordnern. Die Reihenfolge speichert dein Layout und aktualisiert die Menüleiste (Ordner bleiben nur in AppHome). Blende Apps aus und hole sie jederzeit zurück.
+Ordne die für dich freigeschalteten Nextcloud-Apps als Dashboard-Kacheln mit Ordnern. Die Reihenfolge speichert dein Layout und aktualisiert die Menüleiste (Ordner bleiben nur in HomeCheck). Blende Apps aus und hole sie jederzeit zurück.
 
 **Kostenlose AGPL-Web-App.** Optionale Admin-Seed-Vorlage für Erstnutzer; danach personalisiert jede Person selbst.
 
@@ -46,7 +46,7 @@ Ordne die für dich freigeschalteten Nextcloud-Apps als Dashboard-Kacheln mit Or
 
 - Nextcloud 32–34 · PHP 8.2–8.5
 	]]></description>
-	<version>1.0.40</version>
+	<version>1.0.41</version>
 	<licence>agpl</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Alexander Mäule</author>
 	<namespace>HomeCheck</namespace>
@@ -70,7 +70,7 @@ Ordne die für dich freigeschalteten Nextcloud-Apps als Dashboard-Kacheln mit Or
 	</dependencies>
 	<navigations>
 		<navigation>
-			<name>AppHome</name>
+			<name>HomeCheck</name>
 			<route>homecheck.page.index</route>
 			<icon>app.svg</icon>
 			<order>2</order>

@@ -147,7 +147,7 @@ async function scanAxe(page, label) {
 	expect(results.violations, `${label}: ${JSON.stringify(results.violations, null, 2)}`).toEqual([]);
 }
 
-test.describe('AppHome responsive + theme matrix', () => {
+test.describe('HomeCheck responsive + theme matrix', () => {
 	test.beforeEach(async ({ page }) => {
 		await login(page);
 	});

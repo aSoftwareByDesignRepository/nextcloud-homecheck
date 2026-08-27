@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.41 — 2026-08-26
+
+- Rename: user-facing product name **HomeCheck** (technical app id remains `homecheck`).
+- Tests: brand-freeze architecture + mutation guards; Playwright brand e2e (launcher + admin).
+- App Store: screenshots regenerated with HomeCheck chrome.
+
 ## 1.0.40 — 2026-08-25
 
 - A11y/Theme: Chrome secondary buttons use opaque `main-background` + maxcontrast border so wallpaper/dark themes keep ≥4.5:1.

@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * App Store screenshot capture for AppHome (homecheck).
+ * App Store screenshot capture for HomeCheck (homecheck).
  * Seeds a curated German demo layout, then shoots key surfaces at
  * DutyCheck/MaintenanceCheck size (1920×1040).
  *
@@ -289,7 +289,7 @@ test.describe('App Store screenshots', () => {
 		await expect(page.locator('.hmk-credit__link')).toBeVisible();
 		await shot(page, 'homecheck-screenshot-08.png');
 
-		/* 09 — Admin seed settings (isolate AppHome section) */
+		/* 09 — Admin seed settings (isolate HomeCheck section) */
 		const base = process.env.HOMECHECK_BASE_URL || 'http://localhost:8081';
 		await page.goto(base + '/index.php/settings/admin');
 		await page.waitForLoadState('domcontentloaded');
@@ -313,7 +313,7 @@ test.describe('App Store screenshots', () => {
 					child.style.setProperty('display', 'none', 'important');
 				}
 			});
-			/* Hide sibling sections after AppHome inside the same settings column */
+			/* Hide sibling sections after HomeCheck inside the same settings column */
 			let sib = keep.nextElementSibling;
 			while (sib) {
 				if (sib instanceof HTMLElement) {

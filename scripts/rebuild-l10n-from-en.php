@@ -20,6 +20,18 @@ $retired = [
 	'Delete this folder? Apps inside return to the home grid.' => 'Delete this folder? Apps inside return to the home screen.',
 	'This folder is empty — add apps from the home grid.' => 'This folder is empty — add apps from Edit.',
 	'Too many items on the home grid (max 100)' => 'Too many items on the home screen (max 100)',
+	'AppHome' => 'HomeCheck',
+	'Make AppHome your start page after login?' => 'Make HomeCheck your start page after login?',
+	'AppHome is your start page' => 'HomeCheck is your start page',
+	'Optional seed layout for users who have never opened AppHome. Applied once; users can change everything afterwards. Folders never appear in the top bar.' => 'Optional seed layout for users who have never opened HomeCheck. Applied once; users can change everything afterwards. Folders never appear in the top bar.',
+	'AppHome opens after you sign in' => 'HomeCheck opens after you sign in',
+	'Not set — open AppHome to choose' => 'Not set — open HomeCheck to choose',
+	'Could not load AppHome status.' => 'Could not load HomeCheck status.',
+	'AppHome is no longer your start page' => 'HomeCheck is no longer your start page',
+	'Open AppHome after you sign in' => 'Open HomeCheck after you sign in',
+	'Stop opening AppHome after you sign in' => 'Stop opening HomeCheck after you sign in',
+	'Hidden from AppHome' => 'Hidden from HomeCheck',
+	'Folder hidden from AppHome' => 'Folder hidden from HomeCheck',
 ];
 
 $locales = ['de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR'];

@@ -51,7 +51,7 @@ class LayoutService
 			} catch (\Throwable) {
 				$corrupt = true;
 				$stored = null;
-				$this->logger->warning('AppHome corrupt personal layout; regenerating', [
+				$this->logger->warning('HomeCheck corrupt personal layout; regenerating', [
 					'app' => Application::APP_ID,
 				]);
 			}
@@ -121,7 +121,7 @@ class LayoutService
 		}
 
 		$synced = $this->syncAppOrder($uid, $next, $entries);
-		$this->logger->info('AppHome layout saved', [
+		$this->logger->info('HomeCheck layout saved', [
 			'app' => Application::APP_ID,
 			'revision' => $next['revision'],
 			'items' => count($next['items']),
@@ -150,7 +150,7 @@ class LayoutService
 		$layout = $this->layoutFromMerged($merged);
 		$synced = $this->syncAppOrder($uid, $layout, $entries);
 		if (!$synced) {
-			$this->logger->warning('AppHome apporder resync failed', [
+			$this->logger->warning('HomeCheck apporder resync failed', [
 				'app' => Application::APP_ID,
 			]);
 		}
@@ -326,7 +326,7 @@ class LayoutService
 			$this->config->setUserValue($uid, 'core', 'apporder', json_encode($flat, JSON_THROW_ON_ERROR));
 			return true;
 		} catch (\Throwable $e) {
-			$this->logger->error('AppHome apporder sync failed', [
+			$this->logger->error('HomeCheck apporder sync failed', [
 				'app' => Application::APP_ID,
 				'exception' => $e,
 			]);
@@ -428,7 +428,7 @@ class LayoutService
 			$decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
 			return $this->validator->validate($decoded, false);
 		} catch (\Throwable) {
-			$this->logger->warning('AppHome corrupt seed template ignored', [
+			$this->logger->warning('HomeCheck corrupt seed template ignored', [
 				'app' => Application::APP_ID,
 			]);
 			return null;

@@ -2,8 +2,8 @@
  * SPDX-FileCopyrightText: 2026 Alexander Mäule
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Nextcloud home dashboard desklet for AppHome. Scoped to `.panel`
- * elements whose header icon is the AppHome mark.
+ * Nextcloud home dashboard desklet for HomeCheck. Scoped to `.panel`
+ * elements whose header icon is the HomeCheck mark.
  *
  * Compact status list + primary “Open launcher” — WCAG 2.1 AA touch/focus.
  */
