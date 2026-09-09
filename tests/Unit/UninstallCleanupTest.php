@@ -20,6 +20,15 @@ use PHPUnit\Framework\TestCase;
 
 final class UninstallCleanupTest extends TestCase
 {
+	public function testGetNameReturnsStableLabel(): void
+	{
+		$step = new UninstallCleanup(
+			$this->createMock(IDBConnection::class),
+			$this->createMock(IConfig::class),
+		);
+		$this->assertSame('Remove HomeCheck preferences and app config', $step->getName());
+	}
+
 	public function testRunDeletesPrefsAndStripsDefaultApp(): void
 	{
 		$config = $this->createMock(IConfig::class);

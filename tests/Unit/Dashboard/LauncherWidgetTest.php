@@ -65,6 +65,46 @@ final class LauncherWidgetTest extends TestCase
 		$this->assertSame('homecheck-launcher', $this->widget->getId());
 	}
 
+	public function testChromeMetadata(): void
+	{
+		$this->assertSame('Your apps', $this->widget->getTitle());
+		$this->assertSame(5, $this->widget->getOrder());
+		$this->assertSame('icon-home', $this->widget->getIconClass());
+		$this->assertSame('https://nc.test/apps/homecheck/', $this->widget->getUrl());
+		$this->assertSame(300, $this->widget->getReloadInterval());
+	}
+
+	/**
+	 * Invokes IWidget::load() → RegistersDeskletStylesTrait::registerDeskletStylesForWidget().
+	 * Host unit: stub OC_Util so OCP\Util::addStyle does not need a full NC boot.
+	 */
+	public function testLoadRegistersDeskletStylesOnce(): void
+	{
+		if (!class_exists(\OC_Util::class, false)) {
+			eval(<<<'PHP'
+class OC_Util {
+	public static array $styles = [];
+	public static function addStyle($app, $file = null, $prepend = false): void {
+		self::$styles[] = [$app, $file, $prepend];
+	}
+}
+PHP);
+		}
+		\OC_Util::$styles = [];
+
+		$prop = new \ReflectionProperty(LauncherWidget::class, 'deskletStylesRegistered');
+		$prop->setAccessible(true);
+		$prop->setValue(null, false);
+
+		$this->widget->load();
+		$this->assertCount(1, \OC_Util::$styles);
+		$this->assertSame(['homecheck', 'desklet-nextcloud', false], \OC_Util::$styles[0]);
+
+		$this->widget->load();
+		$this->assertCount(1, \OC_Util::$styles, 'second load() must not re-register styles');
+		$this->assertTrue($prop->getValue());
+	}
+
 	public function testIconUrlUsesDarkSurfaceAsset(): void
 	{
 		$this->assertStringContainsString('app-dashboard.svg', $this->widget->getIconUrl());
