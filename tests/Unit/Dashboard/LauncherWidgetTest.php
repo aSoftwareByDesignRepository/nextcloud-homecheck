@@ -47,6 +47,14 @@ final class LauncherWidgetTest extends TestCase
 			}
 			return $s;
 		});
+		$l10n->method('n')->willReturnCallback(static function (string $singular, string $plural, int $count, array $a = []) {
+			$s = $count === 1 ? $singular : $plural;
+			$s = str_replace('%n', (string)$count, $s);
+			foreach ($a as $i => $v) {
+				$s = str_replace('%' . ($i + 1) . '$s', (string)$v, $s);
+			}
+			return $s;
+		});
 		$apps = $this->createMock(IAppManager::class);
 		$apps->method('getAppVersion')->willReturn('1.0.15');
 		$icons = new AppIconService($url, $apps);
@@ -126,6 +134,33 @@ PHP);
 		$items = $this->widget->getItemsV2('alice');
 		$this->assertCount(2, $items->getItems());
 		$this->assertSame('', $items->getEmptyContentMessage());
+		$subtitle = $items->getItems()[0]->getSubtitle();
+		$this->assertStringContainsString('1 folder', $subtitle);
+		$this->assertStringNotContainsString('1 folders', $subtitle);
+	}
+
+	public function testSummaryPluralizesFolders(): void
+	{
+		$this->layout->method('summarizeForUser')->willReturnOnConsecutiveCalls(
+			[
+				'appCount' => 25,
+				'folderCount' => 2,
+				'tileCount' => 27,
+				'isDefaultLanding' => false,
+				'hasPersonalLayout' => true,
+			],
+			[
+				'appCount' => 25,
+				'folderCount' => 0,
+				'tileCount' => 25,
+				'isDefaultLanding' => false,
+				'hasPersonalLayout' => true,
+			],
+		);
+		$two = $this->widget->getItemsV2('alice')->getItems()[0]->getSubtitle();
+		$this->assertStringContainsString('2 folders', $two);
+		$zero = $this->widget->getItemsV2('alice')->getItems()[0]->getSubtitle();
+		$this->assertStringContainsString('0 folders', $zero);
 	}
 
 	public function testEmptyWhenNoApps(): void

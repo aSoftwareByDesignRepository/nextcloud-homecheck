@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 /**
- * Ensures every $l->t('…') string in PHP templates is present in l10n/en.json.
+ * Ensures every $l->t('…') / ->l10n->n('…','…',…) string in PHP templates
+ * is present in l10n/en.json (plural keys use _singular_::_plural_ form).
  *
  * Usage: php scripts/check-l10n-code-keys.php
  */
@@ -21,13 +22,27 @@ $files = [
 $missing = [];
 foreach ($files as $file) {
 	$src = (string) file_get_contents($file);
-	if (!preg_match_all("/(?:\\\$l|->l10n)->t\\('((?:\\\\'|[^'])*)'\\)/", $src, $m)) {
-		continue;
+	if (preg_match_all("/(?:\\\$l|->l10n)->t\\('((?:\\\\'|[^'])*)'\\)/", $src, $m)) {
+		foreach ($m[1] as $raw) {
+			$key = str_replace("\\'", "'", $raw);
+			if (!array_key_exists($key, $catalog)) {
+				$missing[] = basename($file) . ': ' . $key;
+			}
+		}
 	}
-	foreach ($m[1] as $raw) {
-		$key = str_replace("\\'", "'", $raw);
-		if (!array_key_exists($key, $catalog)) {
-			$missing[] = basename($file) . ': ' . $key;
+	if (preg_match_all(
+		"/(?:\\\$l|->l10n)->n\\(\\s*'((?:\\\\'|[^'])*)'\\s*,\\s*'((?:\\\\'|[^'])*)'\\s*,/",
+		$src,
+		$mn,
+		PREG_SET_ORDER
+	)) {
+		foreach ($mn as $hit) {
+			$singular = str_replace("\\'", "'", $hit[1]);
+			$plural = str_replace("\\'", "'", $hit[2]);
+			$key = '_' . $singular . '_::_' . $plural . '_';
+			if (!array_key_exists($key, $catalog)) {
+				$missing[] = basename($file) . ': ' . $key;
+			}
 		}
 	}
 }

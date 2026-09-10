@@ -12,8 +12,8 @@ $json = json_encode($template, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSO
 $adminI18n = [
 	'saving' => $l->t('Saving…'),
 	'saved' => $l->t('Saved'),
-	'saveFailed' => $l->t('Save failed'),
-	'invalidJson' => $l->t('Invalid JSON'),
+	'saveFailed' => $l->t('Could not save the seed — fix any errors and try again'),
+	'invalidJson' => $l->t('Invalid JSON — fix the syntax, then save again'),
 ];
 $adminI18nJson = json_encode($adminI18n, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
 ?>

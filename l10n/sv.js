@@ -48,10 +48,10 @@ OC.L10N.register(
 	"Save seed template" : "Spara seed-mall",
 	"Clear seed" : "Rensa seed",
 	"Too many apps in this folder (max 40)" : "För många appar i den här mappen (max 40)",
-	"Invalid JSON" : "Ogiltig JSON",
-	"Save failed" : "Sparning misslyckades",
+	"Invalid JSON — fix the syntax, then save again" : "Ogiltig JSON — rätta syntaxen och spara igen",
+	"Could not save the seed — fix any errors and try again" : "Kunde inte spara seed — åtgärda fel och försök igen",
 	"Open launcher" : "Öppna launcher",
-	"%1$s apps · %2$s folders on your home" : "%1$s appar · %2$s mappar på din startsida",
+	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s appar · %n mapp på din startsida", "%1$s appar · %n mappar på din startsida"],
 	"No apps available for you yet." : "Det finns inga appar för dig ännu.",
 	"Start page after login" : "Startsida efter inloggning",
 	"HomeCheck opens after you sign in" : "HomeCheck öppnas efter inloggning",
@@ -84,6 +84,6 @@ OC.L10N.register(
 	"Hidden from HomeCheck" : "Dold i HomeCheck",
 	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Dra paneler för att sortera. Dölj appar du inte behöver. Tryck på Klar när du är klar.",
 	"Folder hidden from HomeCheck" : "Mapp dold i HomeCheck"
-	},
+},
 	"nplurals=2; plural=(n != 1);"
 );

@@ -181,6 +181,20 @@ final class LayoutServiceTest extends TestCase
 		$this->assertSame(2, $apporder['calendar']['order']);
 	}
 
+	public function testGetForUserSurfacesCtaWhenNotDismissed(): void
+	{
+		$svc = $this->service([
+			['id' => 'files', 'name' => 'Files', 'href' => '/apps/files', 'order' => 1, 'app' => 'files'],
+		]);
+		$out = $svc->getForUser('cta_user');
+		$this->assertFalse($out['ctaDismissed']);
+		$this->assertFalse($out['isDefaultLanding']);
+
+		$svc->dismissCta('cta_user');
+		$after = $svc->getForUser('cta_user');
+		$this->assertTrue($after['ctaDismissed']);
+	}
+
 	public function testDefaultLandingOptIn(): void
 	{
 		$svc = $this->service([]);

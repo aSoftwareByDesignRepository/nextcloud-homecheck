@@ -1439,8 +1439,9 @@
 		if (el.editToggle) {
 			el.editToggle.setAttribute('aria-pressed', editing ? 'true' : 'false');
 			el.editToggle.textContent = editing ? t.done : t.edit;
-			el.editToggle.classList.toggle('primary', !editing);
-			el.editToggle.classList.toggle('secondary', editing);
+			/* Done keeps primary CTA ownership while editing (DS §5 / POLICY). */
+			el.editToggle.classList.add('primary');
+			el.editToggle.classList.remove('secondary');
 			el.editToggle.setAttribute('aria-label', editing ? t.editSubtitle : t.viewSubtitle);
 		}
 		if (el.newFolder) {
@@ -1455,6 +1456,16 @@
 		if (el.instructions) {
 			el.instructions.textContent = editing ? t.editSubtitle : t.viewSubtitle;
 		}
+		paintCta();
+	}
+
+	function paintCta() {
+		if (!el.cta) {
+			return;
+		}
+		/* One Bachus teacher: hide CTA while editing (edit hint owns that mode). */
+		const show = !editing && !state.ctaDismissed && !state.isDefaultLanding;
+		el.cta.hidden = !show;
 		paintHomeToggle();
 	}
 
@@ -1470,6 +1481,12 @@
 		el.homeToggle.classList.toggle('primary', on);
 		el.homeToggle.classList.toggle('secondary', !on);
 		el.homeToggle.classList.toggle('hmk-chrome__btn--home-on', on);
+		/*
+		 * Bachus: when the start-page CTA is the teacher, hide the duplicate
+		 * Use-as-home chrome so first paint has one primary start-page CTA.
+		 */
+		const ctaTeaching = !!(el.cta && !el.cta.hidden);
+		el.homeToggle.hidden = ctaTeaching;
 	}
 
 	async function toggleDefaultLanding() {
@@ -1484,11 +1501,8 @@
 		state.isDefaultLanding = !!(data.data && data.data.isDefaultLanding);
 		if (enable) {
 			state.ctaDismissed = true;
-			if (el.cta) {
-				el.cta.hidden = true;
-			}
 		}
-		paintHomeToggle();
+		paintCta();
 		setStatus(state.isDefaultLanding ? t.startOk : t.startCleared, false);
 	}
 
@@ -1496,18 +1510,13 @@
 		if (!el.cta) {
 			return;
 		}
-		if (state.ctaDismissed || state.isDefaultLanding) {
-			el.cta.hidden = true;
-			return;
-		}
-		el.cta.hidden = false;
+		paintCta();
 		el.ctaYes.addEventListener('click', async function () {
 			const { data } = await api('POST', defaultLandingUrl(), { enable: true, dismiss: true });
 			if (data.ok) {
 				state.isDefaultLanding = true;
 				state.ctaDismissed = true;
-				el.cta.hidden = true;
-				paintHomeToggle();
+				paintCta();
 				setStatus(t.startOk, false);
 			} else {
 				setStatus(t.startFail, true);
@@ -1517,7 +1526,7 @@
 			const { data } = await api('POST', defaultLandingUrl(), { enable: false, dismiss: true });
 			if (data.ok) {
 				state.ctaDismissed = true;
-				el.cta.hidden = true;
+				paintCta();
 			} else {
 				setStatus(t.startFail, true);
 			}

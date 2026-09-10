@@ -48,10 +48,13 @@
 		"Save seed template": "Gem seed-skabelon",
 		"Clear seed": "Ryd seed",
 		"Too many apps in this folder (max 40)": "For mange apps i denne mappe (maks. 40)",
-		"Invalid JSON": "Ugyldig JSON",
-		"Save failed": "Gemning mislykkedes",
+		"Invalid JSON — fix the syntax, then save again": "Ugyldig JSON — ret syntaksen, og gem igen",
+		"Could not save the seed — fix any errors and try again": "Seed kunne ikke gemmes — ret fejlene og prøv igen",
 		"Open launcher": "Åbn launcher",
-		"%1$s apps · %2$s folders on your home": "%1$s apps · %2$s mapper på din startside",
+		"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_": [
+			"%1$s apps · %n mappe på din startside",
+			"%1$s apps · %n mapper på din startside"
+		],
 		"No apps available for you yet.": "Der er endnu ingen apps til dig.",
 		"Start page after login": "Startside efter login",
 		"HomeCheck opens after you sign in": "HomeCheck åbner, når du logger ind",

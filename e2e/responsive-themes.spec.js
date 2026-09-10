@@ -55,11 +55,15 @@ const THEME_PRESETS = [
 		name: 'light-accent-pale',
 		vars: {
 			'--color-primary-element': '#d9e3e8',
+			'--color-primary-element-hover': '#c8d5dc',
 			'--color-primary-element-text': '#1d1d1d',
 			'--color-primary-element-light': '#eef3f5',
 			'--color-primary-element-light-text': '#1d1d1d',
 			'--color-main-background': '#ffffff',
 			'--color-main-text': '#1d1d1d',
+			/* Explicit fill — must track pale primary (not darkened toward main-text). */
+			'--hmk-primary-fill': '#d9e3e8',
+			'--hmk-primary-text': '#1d1d1d',
 		},
 	},
 ];
@@ -97,9 +101,20 @@ async function applyThemePreset(page, preset) {
 		if (!merged['--color-background-dark']) {
 			merged['--color-background-dark'] = merged['--color-main-background'] || '#eeeeee';
 		}
+		if (!merged['--color-main-text']) {
+			merged['--color-main-text'] = bodyClass && bodyClass.indexOf('dark') !== -1 ? '#ededed' : '#102a43';
+		}
+		if (!merged['--color-main-background']) {
+			merged['--color-main-background'] = bodyClass && bodyClass.indexOf('dark') !== -1 ? '#0b1622' : '#ffffff';
+		}
 		if (bodyClass && bodyClass.indexOf('dark') !== -1) {
 			merged['--hmk-secondary-fill'] = merged['--color-background-dark'];
 			merged['--hmk-secondary-ink'] = merged['--color-main-text'] || '#ededed';
+			merged['--hmk-check-canvas'] = '#0b1622';
+			merged['--hmk-check-surface'] = '#152536';
+		} else {
+			merged['--hmk-check-canvas'] = '#f5f7fb';
+			merged['--hmk-check-surface'] = '#ffffff';
 		}
 		const targets = [
 			document.body,
@@ -110,7 +125,18 @@ async function applyThemePreset(page, preset) {
 			document.querySelector('#content[class*="app-homecheck"]'),
 			document.querySelector('.hmk-app'),
 		].filter(Boolean);
+		/* Drop prior inline theme vars so accents do not inherit dark ink on light canvas */
+		const known = [
+			'--color-main-background', '--color-main-text', '--color-text-maxcontrast',
+			'--color-background-dark', '--color-background-hover', '--color-primary-element',
+			'--color-primary-element-hover',
+			'--color-primary-element-text', '--color-primary-element-light', '--color-primary-element-light-text',
+			'--color-border', '--color-border-maxcontrast', '--color-element-error', '--color-error-text',
+			'--hmk-primary-fill', '--hmk-primary-text',
+			'--hmk-secondary-fill', '--hmk-secondary-ink', '--hmk-check-canvas', '--hmk-check-surface',
+		];
 		targets.forEach((el) => {
+			known.forEach((key) => el.style.removeProperty(key));
 			Object.entries(merged).forEach(([key, value]) => {
 				el.style.setProperty(key, value);
 			});
@@ -140,6 +166,8 @@ async function assertNoHorizontalOverflow(page, label) {
  * @param {string} label
  */
 async function scanAxe(page, label) {
+	/* Leave primary CTA so :hover does not pull host --color-primary-element-hover. */
+	await page.mouse.move(0, 0);
 	const results = await new AxeBuilder({ page })
 		.include('#homecheck-app')
 		.withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -232,7 +260,7 @@ test.describe('HomeCheck responsive + theme matrix', () => {
 		await assertNoHorizontalOverflow(page, 'confirm dialog');
 	});
 
-	test('chrome secondary buttons stay opaque AA on wallpaper (dark + custom accent)', async ({ page }) => {
+	test('chrome secondary buttons stay opaque AA on Check flat canvas (dark + custom accent)', async ({ page }) => {
 		await page.setViewportSize({ width: 1440, height: 900 });
 		await openHomeCheck(page);
 		for (const theme of [THEME_PRESETS[1], THEME_PRESETS[3]]) {

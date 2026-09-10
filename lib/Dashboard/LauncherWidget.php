@@ -121,10 +121,12 @@ class LauncherWidget implements IAPIWidgetV2, IButtonWidget, IIconWidget, IReloa
 
 		$items[] = new WidgetItem(
 			$this->l10n->t('HomeCheck'),
-			$this->l10n->t('%1$s apps · %2$s folders on your home', [
-				(string)$appCount,
-				(string)$folderCount,
-			]),
+			$this->l10n->n(
+				'%1$s apps · %n folder on your home',
+				'%1$s apps · %n folders on your home',
+				$folderCount,
+				[(string)$appCount],
+			),
 			$url,
 			$icon,
 			'hmk-summary',

@@ -48,10 +48,10 @@ OC.L10N.register(
 	"Save seed template" : "Save seed template",
 	"Clear seed" : "Clear seed",
 	"Too many apps in this folder (max 40)" : "Too many apps in this folder (max 40)",
-	"Invalid JSON" : "Invalid JSON",
-	"Save failed" : "Save failed",
+	"Invalid JSON — fix the syntax, then save again" : "Invalid JSON — fix the syntax, then save again",
+	"Could not save the seed — fix any errors and try again" : "Could not save the seed — fix any errors and try again",
 	"Open launcher" : "Open launcher",
-	"%1$s apps · %2$s folders on your home" : "%1$s apps · %2$s folders on your home",
+	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s apps · %n folder on your home", "%1$s apps · %n folders on your home"],
 	"No apps available for you yet." : "No apps available for you yet.",
 	"Start page after login" : "Start page after login",
 	"HomeCheck opens after you sign in" : "HomeCheck opens after you sign in",
@@ -84,6 +84,6 @@ OC.L10N.register(
 	"Hidden from HomeCheck" : "Hidden from HomeCheck",
 	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Drag panes to rearrange. Hide apps you do not need. Tap Done when finished.",
 	"Folder hidden from HomeCheck" : "Folder hidden from HomeCheck"
-	},
+},
 	"nplurals=2; plural=(n != 1);"
 );

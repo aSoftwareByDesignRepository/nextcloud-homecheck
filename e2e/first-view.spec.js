@@ -126,6 +126,31 @@ test.describe('HomeCheck first view — instant clarity', () => {
 		expect(metrics.primary.length).toBeGreaterThan(0);
 	});
 
+	test('Done stays primary CTA while editing', async ({ page }) => {
+		await page.locator('#hmk-edit-toggle').click();
+		await expect(page.locator('#homecheck-app')).toHaveClass(/is-editing/);
+		const metrics = await page.evaluate(() => {
+			const edit = document.querySelector('#hmk-edit-toggle');
+			if (!edit) {
+				return null;
+			}
+			const bg = getComputedStyle(edit).backgroundColor;
+			return {
+				text: (edit.textContent || '').trim(),
+				className: edit.className,
+				bg,
+				pressed: edit.getAttribute('aria-pressed'),
+			};
+		});
+		expect(metrics).not.toBeNull();
+		expect(metrics.pressed).toBe('true');
+		expect(metrics.className).toContain('primary');
+		expect(metrics.className).not.toMatch(/\bsecondary\b/);
+		expect(metrics.bg).not.toBe('rgba(0, 0, 0, 0)');
+		expect(metrics.bg).not.toBe('rgb(239, 239, 239)');
+		expect(metrics.bg).toMatch(/^(rgb\(|color\()/);
+	});
+
 	test('pane icon wells use light primary surface with black glyphs', async ({ page }) => {
 		const metrics = await page.evaluate(() => {
 			function parseRgb(s) {

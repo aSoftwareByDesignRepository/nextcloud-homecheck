@@ -24,8 +24,8 @@
 	const t = Object.assign({
 		saving: 'Saving…',
 		saved: 'Saved',
-		saveFailed: 'Save failed',
-		invalidJson: 'Invalid JSON',
+		saveFailed: 'Could not save the seed — fix any errors and try again',
+		invalidJson: 'Invalid JSON — fix the syntax, then save again',
 	}, readJsonScript('hmk-admin-i18n', {}));
 
 	let initial = null;

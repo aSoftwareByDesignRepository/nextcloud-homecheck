@@ -48,10 +48,10 @@ OC.L10N.register(
 	"Save seed template" : "Seed-sjabloon opslaan",
 	"Clear seed" : "Seed wissen",
 	"Too many apps in this folder (max 40)" : "Te veel apps in deze map (max. 40)",
-	"Invalid JSON" : "Ongeldige JSON",
-	"Save failed" : "Opslaan mislukt",
+	"Invalid JSON — fix the syntax, then save again" : "Ongeldige JSON — herstel de syntaxis en sla opnieuw op",
+	"Could not save the seed — fix any errors and try again" : "Seed kon niet worden opgeslagen — herstel fouten en probeer opnieuw",
 	"Open launcher" : "Launcher openen",
-	"%1$s apps · %2$s folders on your home" : "%1$s apps · %2$s mappen op je start",
+	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s apps · %n map op je start", "%1$s apps · %n mappen op je start"],
 	"No apps available for you yet." : "Er zijn nog geen apps voor jou beschikbaar.",
 	"Start page after login" : "Startpagina na inloggen",
 	"HomeCheck opens after you sign in" : "HomeCheck opent na het inloggen",
@@ -84,6 +84,6 @@ OC.L10N.register(
 	"Hidden from HomeCheck" : "Verborgen in HomeCheck",
 	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Sleep panelen om te herschikken. Verberg apps die je niet nodig hebt. Tik op Klaar als je klaar bent.",
 	"Folder hidden from HomeCheck" : "Map verborgen in HomeCheck"
-	},
+},
 	"nplurals=2; plural=(n != 1);"
 );

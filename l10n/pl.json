@@ -48,10 +48,14 @@
 		"Save seed template": "Zapisz szablon seed",
 		"Clear seed": "Wyczyść seed",
 		"Too many apps in this folder (max 40)": "Za dużo aplikacji w tym folderze (maks. 40)",
-		"Invalid JSON": "Nieprawidłowy JSON",
-		"Save failed": "Zapis nie powiódł się",
+		"Invalid JSON — fix the syntax, then save again": "Nieprawidłowy JSON — popraw składnię, potem zapisz ponownie",
+		"Could not save the seed — fix any errors and try again": "Nie udało się zapisać szablonu — popraw błędy i spróbuj ponownie",
 		"Open launcher": "Otwórz launcher",
-		"%1$s apps · %2$s folders on your home": "%1$s aplikacji · %2$s folderów na stronie głównej",
+		"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_": [
+			"%1$s aplikacji · %n folder na stronie głównej",
+			"%1$s aplikacji · %n foldery na stronie głównej",
+			"%1$s aplikacji · %n folderów na stronie głównej"
+		],
 		"No apps available for you yet.": "Nie masz jeszcze dostępnych aplikacji.",
 		"Start page after login": "Strona startowa po zalogowaniu",
 		"HomeCheck opens after you sign in": "HomeCheck otwiera się po zalogowaniu",

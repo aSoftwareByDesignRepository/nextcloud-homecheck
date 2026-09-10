@@ -22,9 +22,13 @@ function ok(cond, msg) {
 	}
 }
 
-/** Feature rules must not use raw #hex outside var(..., fallback) */
-const hexOutsideVar = css.replace(/var\([^)]+\)/g, '').match(/#[0-9a-fA-F]{3,8}\b/g);
-ok(!hexOutsideVar || hexOutsideVar.length === 0, 'no raw hex in feature CSS');
+/** Feature rules: no raw #hex outside var(..., fallback) except Check family canvas */
+const CHECK_CANVAS_HEX = new Set(['#f5f7fb', '#0b1622', '#152536', '#ffffff', '#000000', '#d9e2ec']);
+const hexOutsideVar = css.replace(/var\([^)]+\)/g, '').match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+const bannedHex = hexOutsideVar.filter((h) => !CHECK_CANVAS_HEX.has(h.toLowerCase()));
+ok(bannedHex.length === 0, 'no raw hex in feature CSS except Check canvas tokens (' + bannedHex.join(',') + ')');
+ok(css.includes('#f5f7fb'), 'Check light canvas #f5f7fb');
+ok(css.includes('#0b1622'), 'Check dark canvas #0b1622');
 
 ok(css.includes('#app-content .hmk-app'), 'legacy NC app-content tokens retained');
 ok(css.includes('#content[class*="app-homecheck"].hmk-app'), 'NC34 content root scoped');
@@ -42,12 +46,16 @@ ok(/#homecheck-app\s*\{[^}]*overflow-y:\s*auto/s.test(css), 'app root is vertica
 ok(/\.hmk-credit\s*\{[^}]*margin-top:\s*auto/s.test(css), 'vendor credit pinned to page end via margin-top auto');
 ok(/\.hmk-credit\s*\{[^}]*flex-shrink:\s*0/s.test(css), 'vendor credit never collapses');
 ok(
-	/button\.button-vue\.secondary\.hmk-chrome__btn[\s\S]*?background-color:\s*var\(--color-main-background\)/.test(css),
-	'chrome secondary uses opaque main-background for wallpaper AA',
+	/button\.button-vue\.secondary\.hmk-chrome__btn[\s\S]*?background-color:\s*var\(--hmk-check-surface/.test(css),
+	'chrome secondary uses opaque Check surface for canvas AA',
 );
 ok(
 	/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
 	'dark theme icon glyphs invert for AA on dark wells',
+);
+ok(
+	/body\.theme--highcontrast[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
+	'high-contrast theme icon glyphs invert for AA on dark wells',
 );
 ok(css.includes('hmk-shell--wide'), 'wide shell modifier present');
 ok(css.includes('color-background-hover'), 'native NC hover on tiles');
@@ -56,10 +64,11 @@ ok(css.includes('--hmk-overlay-height'), 'viewport height under header for scrol
 ok(css.includes('calc(100dvh - var(--header-height'), 'content height accounts for NC header');
 ok(css.includes('hmk-panels'), 'pane host flex wrap');
 ok(css.includes('hmk-greeting'), 'dashboard greeting');
-ok(css.includes('--color-main-background-blur'), 'pane uses NC blur background');
-ok(css.includes('--filter-background-blur'), 'pane uses NC blur filter');
-ok(css.includes('--image-background'), 'themed background image');
-ok(css.includes('--color-background-plain-text'), 'greeting uses plain-text token');
+ok(css.includes('--hmk-check-canvas'), 'Check flat canvas token');
+ok(css.includes('background-image: none'), 'no wallpaper stage as chrome');
+ok(!/background-image:\s*var\(--image-background\)/.test(css), 'bans --image-background as page chrome');
+ok(css.includes('line-clamp: 2') || css.includes('-webkit-line-clamp: 2'), 'pane titles two-line clamp');
+ok(css.includes('#hmk-cta:not([hidden])') || css.includes('hmk-cta:not([hidden])'), 'Bachus hides home when CTA teaches');
 ok(css.includes('prefers-reduced-transparency'), 'reduced transparency fallback');
 ok(css.includes('is-drop-target'), 'drop target visual feedback');
 ok(css.includes('is-dragging'), 'dragging visual feedback');
@@ -85,6 +94,10 @@ ok(
 );
 ok(css.includes('button.button-vue.primary'), 'vanilla primary buttons styled to NC primary');
 ok(css.includes('background-color: var(--hmk-primary-fill'), 'primary button fill uses AA-safe hmk-primary-fill');
+ok(
+	/--hmk-primary-fill:\s*var\(--color-primary-element\)/.test(css),
+	'primary fill tracks NC primary (no main-text darken that breaks pale accents)',
+);
 ok(css.includes('--hmk-secondary-fill'), 'secondary fill token defined');
 ok(css.includes('button.button-vue.secondary'), 'vanilla secondary buttons styled');
 ok(
@@ -92,6 +105,14 @@ ok(
 	'secondary fill uses background-dark (not pale primary-light)',
 );
 ok(css.includes('--hmk-danger-fill-solid'), 'danger uses AA-safe solid fill token');
+ok(
+	/body\.theme--dark[\s\S]*?\.hmk-admin[\s\S]*?--hmk-danger-ink:\s*color-mix/.test(css),
+	'dark admin danger-ink lightened (AA on near-black settings)',
+);
+ok(
+	/#hmk-admin p#hmk-admin-error[\s\S]*?background:\s*color-mix/.test(css),
+	'admin error uses soft danger well',
+);
 ok(css.includes('--hmk-pane-width'), 'pane width token defined');
 ok(!css.includes('#homecheck-app .hmk-btn--danger {\n\t--color-primary-element:'), 'danger no longer remaps primary token');
 
