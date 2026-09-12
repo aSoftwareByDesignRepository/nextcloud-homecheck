@@ -99,22 +99,14 @@ body[data-theme-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	--hmk-danger-ink: color-mix(in srgb, var(--color-error-text, var(--color-element-error)) 38%, var(--color-main-text));
 }
 
-/* Kill NC Dashboard wallpaper bleed around Check flat canvas */
-body:has(#content[class*="app-homecheck"]),
-body:has(#app-content.hmk-app) {
-	background-image: none !important;
-	background-color: var(--hmk-check-canvas, #f5f7fb) !important;
-}
-body.theme--dark:has(#content[class*="app-homecheck"]),
-body.theme--dark:has(#app-content.hmk-app),
-body.theme-dark:has(#content[class*="app-homecheck"]),
-body.theme-dark:has(#app-content.hmk-app),
-body[data-theme-dark]:has(#content[class*="app-homecheck"]),
-body[data-theme-dark]:has(#app-content.hmk-app) {
-	background-color: #0b1622 !important;
-}
-
-/* Design-system shell — Check-family flat canvas (never Dashboard wallpaper stage) */
+/*
+ * Check flat canvas lives ONLY on the app content root — never on body.
+ * NC #header is transparent and paints white/primary-text ink over
+ * body --color-background-plain + --image-background. Painting body with
+ * the light Check canvas washed out the top bar (logo, app menu, search).
+ * Content still bans wallpaper; the header strip keeps theming parity
+ * with Files / Dashboard.
+ */
 #app-content.hmk-app,
 #content[class*="app-homecheck"].hmk-app {
 	/* Atlas COMPANION-DESIGN-SYSTEM §2 / §3 — allowed Check canvas hexes */
@@ -137,7 +129,7 @@ body[data-theme-dark]:has(#app-content.hmk-app) {
 	height: var(--hmk-overlay-height, calc(100dvh - var(--header-height, 50px)));
 	max-height: var(--hmk-overlay-height, calc(100dvh - var(--header-height, 50px)));
 	overflow: hidden;
-	/* Flat slate — ban --image-background as page chrome */
+	/* Flat slate — ban --image-background as app chrome (not body) */
 	background-color: var(--hmk-check-canvas);
 	background-image: none;
 	box-sizing: border-box;

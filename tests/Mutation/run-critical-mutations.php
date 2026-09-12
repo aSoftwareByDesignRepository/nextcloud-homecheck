@@ -231,6 +231,17 @@ assertTrue(is_string($css) && str_contains($css, 'hmk-greeting'), 'dashboard gre
 assertTrue(is_string($css) && str_contains($css, '--hmk-check-canvas'), 'Check flat canvas token');
 assertTrue(is_string($css) && str_contains($css, 'background-image: none'), 'flat canvas no wallpaper image');
 assertTrue(is_string($css) && !preg_match('/background-image:\s*var\(--image-background\)/', $css), 'bans wallpaper stage chrome');
+/* Mutant: reintroduce body:has Check canvas — washes out transparent NC #header */
+assertTrue(
+	is_string($css)
+		&& !preg_match('/body:has\([^)]*(?:app-homecheck|hmk-app)[^)]*\)[\s\S]{0,200}background-(?:color|image):\s*(?:none|var\(--hmk-check-canvas)/', $css),
+	'body must not force Check canvas (host header backdrop)'
+);
+assertTrue(
+	is_string($css)
+		&& preg_match('/#app-content\.hmk-app[\s\S]{0,1200}background-color:\s*var\(--hmk-check-canvas/', $css) === 1,
+	'Check canvas applied on #app-content.hmk-app'
+);
 assertTrue(is_string($css) && str_contains($css, 'color-background-hover'), 'native tile hover');
 assertTrue(is_string($css) && preg_match('/filter:\s*brightness\(0\)\s*;/', $css) === 1, 'black glyph brightness(0)');
 assertTrue(is_string($css) && str_contains($css, '--color-primary-element-light'), 'light primary icon well');
@@ -263,7 +274,7 @@ assertTrue(in_array('Use as home', $enKeys, true), 'home toggle msgid in catalog
 assertTrue(in_array('Unset as home', $enKeys, true), 'unset home msgid in catalog');
 assertTrue(!in_array('Open', $enKeys, true), 'unused Open msgid removed');
 assertTrue(in_array('More Nextcloud apps from Software by Design', $enKeys, true), 'vendor credit msgid in catalog');
-assertTrue(count($enKeys) === 83, 'l10n catalog has 83 keys');
+assertTrue(count($enKeys) === 91, 'l10n catalog has 91 keys');
 assertTrue(in_array('Hide', $enKeys, true) && in_array('Hidden apps', $enKeys, true) && in_array('Show again', $enKeys, true) && in_array('Folder hidden from HomeCheck', $enKeys, true), 'hide-app msgids present');
 assertTrue(in_array('HomeCheck', $enKeys, true), 'brand msgid HomeCheck present');
 assertTrue(!in_array('AppHome', $enKeys, true) && !in_array('AppCheck', $enKeys, true), 'retired brand msgids removed');

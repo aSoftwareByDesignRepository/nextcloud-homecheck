@@ -67,6 +67,18 @@ ok(css.includes('hmk-greeting'), 'dashboard greeting');
 ok(css.includes('--hmk-check-canvas'), 'Check flat canvas token');
 ok(css.includes('background-image: none'), 'no wallpaper stage as chrome');
 ok(!/background-image:\s*var\(--image-background\)/.test(css), 'bans --image-background as page chrome');
+/* Host header AA: never steal body theming (transparent #header sits on body) */
+ok(
+	!/body:has\(#content\[class\*=["']app-homecheck/.test(css)
+		&& !/body:has\(#app-content\.hmk-app\)[\s\S]{0,120}background-color:\s*var\(--hmk-check-canvas/.test(css)
+		&& !/body:has\([\s\S]*?hmk-app[\s\S]*?background-image:\s*none\s*!important/.test(css),
+	'does not force Check canvas / kill wallpaper on body (preserves NC header backdrop)',
+);
+ok(
+	/#app-content\.hmk-app[\s\S]*?background-image:\s*none/.test(css)
+		&& /#content\[class\*="app-homecheck"\]\.hmk-app[\s\S]*?background-color:\s*var\(--hmk-check-canvas/.test(css),
+	'flat Check canvas scoped to content root only',
+);
 ok(css.includes('line-clamp: 2') || css.includes('-webkit-line-clamp: 2'), 'pane titles two-line clamp');
 ok(css.includes('#hmk-cta:not([hidden])') || css.includes('hmk-cta:not([hidden])'), 'Bachus hides home when CTA teaches');
 ok(css.includes('prefers-reduced-transparency'), 'reduced transparency fallback');

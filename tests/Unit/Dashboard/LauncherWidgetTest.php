@@ -85,6 +85,7 @@ final class LauncherWidgetTest extends TestCase
 	/**
 	 * Invokes IWidget::load() → RegistersDeskletStylesTrait::registerDeskletStylesForWidget().
 	 * Host unit: stub OC_Util so OCP\Util::addStyle does not need a full NC boot.
+	 * Docker/integration-adjacent: real OC_Util stores path strings in $styles.
 	 */
 	public function testLoadRegistersDeskletStylesOnce(): void
 	{
@@ -106,7 +107,12 @@ PHP);
 
 		$this->widget->load();
 		$this->assertCount(1, \OC_Util::$styles);
-		$this->assertSame(['homecheck', 'desklet-nextcloud', false], \OC_Util::$styles[0]);
+		$entry = \OC_Util::$styles[0];
+		if (is_array($entry)) {
+			$this->assertSame(['homecheck', 'desklet-nextcloud', false], $entry);
+		} else {
+			$this->assertSame('homecheck/css/desklet-nextcloud', $entry);
+		}
 
 		$this->widget->load();
 		$this->assertCount(1, \OC_Util::$styles, 'second load() must not re-register styles');

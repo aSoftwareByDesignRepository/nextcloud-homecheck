@@ -1,18 +1,18 @@
 {
-  "name": "homecheck",
-  "private": true,
-  "scripts": {
-	"test:js": "node tests/js/layout-client.test.js && node tests/js/desklet-chrome.test.js && node tests/js/icon-contrast.test.js",
-	"test:css": "node tests/css/theme-contract.test.js",
-	"test:arch": "php tests/Architecture/absolute-no-gos.php",
-	"test:unit": "npm run test:js && npm run test:css && npm run test:arch",
-    "e2e:a11y": "playwright test e2e/a11y.spec.js",
-    "e2e:flows": "playwright test e2e/flows.spec.js",
-    "e2e:store-screenshots": "playwright test e2e/capture-store-screenshots.spec.js --project=chromium-store",
-    "e2e:install": "playwright install chromium"
-  },
-  "devDependencies": {
-    "@axe-core/playwright": "^4.13.0",
-    "@playwright/test": "^1.49.0"
-  }
+    "name": "homecheck",
+    "private": true,
+    "scripts": {
+        "test:js": "node tests/js/layout-client.test.js && node tests/js/desklet-chrome.test.js && node tests/js/icon-contrast.test.js",
+        "test:css": "node tests/css/theme-contract.test.js",
+        "test:arch": "php tests/Architecture/absolute-no-gos.php",
+        "test:unit": "npm run test:js && npm run test:css && npm run test:arch",
+        "e2e:a11y": "playwright test e2e/a11y.spec.js",
+        "e2e:flows": "playwright test e2e/flows.spec.js",
+        "e2e:store-screenshots": "playwright test e2e/capture-store-screenshots.spec.js --project=chromium-store",
+        "e2e:install": "playwright install chromium"
+    },
+    "devDependencies": {
+        "@axe-core/playwright": "^4.13.0",
+        "@playwright/test": "^1.49.0"
+    }
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.42 — 2026-09-13
+
+- Fix: stop painting Check flat canvas on `body` — NC `#header` is transparent and was washing out (logo, app menu, search). Canvas stays on the content root only.
+- Tests: theme-contract + mutation guards forbid body Check-canvas washout; a11y e2e asserts host header ink stays readable over themed body.
+- Tests: LauncherWidget desklet `Util::addStyle` unit accepts host OC_Util path strings (Docker) and stub arrays (host).
+
 ## 1.0.41 — 2026-08-26
 
 - Rename: user-facing product name **HomeCheck** (technical app id remains `homecheck`).
