@@ -25,6 +25,7 @@ class AdminSettings implements ISettings
 	public function getForm(): TemplateResponse
 	{
 		Util::addScript(Application::APP_ID, 'admin');
+		Util::addScript(Application::APP_ID, 'common/app-feedback');
 		Util::addStyle(Application::APP_ID, 'app');
 		return new TemplateResponse(Application::APP_ID, 'admin', [
 			'template' => $this->layouts->getAdminTemplate(),

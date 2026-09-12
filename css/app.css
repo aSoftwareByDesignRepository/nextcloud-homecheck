@@ -1004,9 +1004,14 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 /*
  * NC settings `.section p` uses muted maxcontrast — keep admin alerts on danger ink.
  * Soft danger well + high-contrast ink so errors stay AA-readable on near-black.
+ * Hide when empty so happy-path seed UI does not paint dishonest danger chrome.
  */
-#hmk-admin.section p.hmk-error,
-#hmk-admin p#hmk-admin-error {
+#hmk-admin.section p.hmk-error:empty,
+#hmk-admin p#hmk-admin-error:empty {
+	display: none;
+}
+#hmk-admin.section p.hmk-error:not(:empty),
+#hmk-admin p#hmk-admin-error:not(:empty) {
 	color: var(--hmk-danger-ink);
 	background: color-mix(in srgb, var(--hmk-danger-ink) 12%, var(--color-main-background));
 	border: 1px solid color-mix(in srgb, var(--hmk-danger-ink) 38%, transparent);
@@ -1282,4 +1287,240 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 .hmk-empty-inline {
 	margin: 0;
 	color: var(--color-text-maxcontrast, var(--color-main-text));
+}
+
+/* === app-feedback:hmk start === */
+#app-navigation .hmk-nav-footer,
+.hmk-nav .hmk-nav-footer,
+.hmk-app-nav .hmk-nav-footer {
+	margin-top: auto;
+	flex-shrink: 0;
+	min-width: 0;
+	width: 100%;
+	box-sizing: border-box;
+	padding: var(--hmk-space-2, 0.5rem) var(--hmk-space-3, 0.75rem)
+		max(var(--hmk-space-3, 0.75rem), env(safe-area-inset-bottom, 0px));
+	border-top: 1px solid var(--hmk-border, color-mix(in srgb, var(--color-main-text) 12%, var(--color-main-background)));
+	background: transparent;
+	z-index: 1;
+}
+
+.hmk-nav-footer__popover {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--hmk-space-2, 0.5rem);
+}
+
+.hmk-nav-footer__trigger {
+	display: inline-flex;
+	gap: var(--hmk-space-3, 0.75rem);
+	min-height: 44px;
+	min-width: 44px;
+	padding: var(--hmk-space-2, 0.5rem) var(--hmk-space-3, 0.75rem);
+	border-radius: var(--hmk-radius-sm, 6px);
+	box-sizing: border-box;
+	border: none;
+	background: none;
+	color: var(--color-main-text);
+	font: inherit;
+	cursor: pointer;
+	align-items: center;
+	justify-content: center;
+	white-space: nowrap;
+}
+
+.hmk-nav-footer__trigger:hover {
+	background: color-mix(in srgb, var(--color-primary-element) 8%, var(--color-main-background));
+}
+
+.hmk-nav-footer__trigger:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 60%, transparent);
+	outline-offset: 2px;
+}
+
+.hmk-nav-footer__trigger:focus:not(:focus-visible) {
+	outline: none;
+}
+
+.hmk-nav-footer__trigger-icon .hmk-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.hmk-nav-footer__menu {
+	position: absolute;
+	bottom: calc(100% + var(--hmk-space-2, 0.5rem));
+	left: 50%;
+	transform: translateX(-50%);
+	min-width: max-content;
+	max-width: calc(100vw - 2rem);
+	list-style: none;
+	margin: 0;
+	padding: var(--hmk-space-2, 0.5rem);
+	background: var(--color-main-background);
+	border: 1px solid var(--hmk-border, var(--color-border));
+	border-radius: var(--hmk-radius-md, 12px);
+	box-shadow:
+		0 2px 6px color-mix(in srgb, var(--color-main-text) 6%, transparent),
+		0 8px 24px color-mix(in srgb, var(--color-main-text) 10%, transparent);
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	z-index: 100;
+}
+
+.hmk-nav-footer__menu[hidden] {
+	display: none;
+}
+
+.hmk-nav-footer__menu-item {
+	display: flex;
+	align-items: center;
+	gap: var(--hmk-space-3, 0.75rem);
+	min-height: 44px;
+	min-width: 44px;
+	padding: var(--hmk-space-2, 0.5rem) var(--hmk-space-3, 0.75rem);
+	border-radius: var(--hmk-radius-sm, 6px);
+	color: var(--color-main-text);
+	text-decoration: none;
+	font-size: var(--hmk-fs-sm, 0.875rem);
+	line-height: var(--hmk-line-base, 1.45);
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.hmk-nav-footer__menu-item:hover {
+	background: color-mix(in srgb, var(--color-primary-element) 8%, var(--color-main-background));
+}
+
+.hmk-nav-footer__menu-item:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 60%, transparent);
+	outline-offset: -2px;
+}
+
+.hmk-nav-footer__menu-item:focus:not(:focus-visible) {
+	outline: none;
+}
+
+.hmk-nav-footer__menu-icon .hmk-icon {
+	width: 18px;
+	height: 18px;
+}
+
+.hmk-nav-footer__note {
+	margin: 0;
+	font-size: var(--hmk-fs-xs, 0.75rem);
+	line-height: 1.45;
+	color: var(--color-text-maxcontrast);
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+@media (width < 480px) {
+	.hmk-nav-footer__menu {
+		left: var(--hmk-space-2, 0.5rem);
+		right: var(--hmk-space-2, 0.5rem);
+		transform: none;
+		min-width: 0;
+	}
+}
+
+.hmk-nav-footer__new-tab {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+.hmk-nav-footer__toast-link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	min-width: 44px;
+	margin-top: var(--hmk-space-2, 0.5rem);
+	padding: 0;
+	font-size: var(--hmk-fs-sm, 0.875rem);
+	line-height: 1.45;
+	color: var(--color-error-text, var(--color-main-text));
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+	overflow-wrap: anywhere;
+}
+
+.hmk-nav-footer__toast-link:focus-visible {
+	outline: 2px solid var(--color-primary-element);
+	outline-offset: 2px;
+}
+
+.hmk-nav-footer__toast-link:focus:not(:focus-visible) {
+	outline: none;
+}
+
+@media (prefers-contrast: more) {
+	#app-navigation .hmk-nav-footer,
+	.hmk-nav .hmk-nav-footer,
+	.hmk-app-nav .hmk-nav-footer {
+		border-top-width: 2px;
+		border-top-color: var(--color-main-text);
+	}
+
+	.hmk-nav-footer__menu {
+		border-width: 2px;
+	}
+
+	.hmk-nav-footer__trigger:focus-visible,
+	.hmk-nav-footer__menu-item:focus-visible,
+	.hmk-nav-footer__toast-link:focus-visible {
+		outline-width: 3px;
+	}
+}
+
+@media (forced-colors: active) {
+	.hmk-nav-footer__menu-item,
+	.hmk-nav-footer__toast-link {
+		forced-color-adjust: none;
+		color: LinkText;
+	}
+
+	.hmk-nav-footer__trigger:focus-visible,
+	.hmk-nav-footer__menu-item:focus-visible,
+	.hmk-nav-footer__toast-link:focus-visible {
+		outline: 3px solid Highlight;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hmk-nav-footer__trigger,
+	.hmk-nav-footer__menu-item,
+	.hmk-nav-footer__toast-link {
+		transition: none;
+	}
+}
+/* === app-feedback:hmk end === */
+
+
+/* HomeCheck has no sidebar nav — place Help in the credit footer. */
+.hmk-credit {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem 1.25rem;
+}
+.hmk-credit .hmk-nav-footer {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	width: auto;
+}
+.hmk-credit .hmk-nav-footer__trigger {
+	min-height: 44px;
 }

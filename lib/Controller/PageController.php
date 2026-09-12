@@ -57,6 +57,7 @@ class PageController extends Controller
 
 		Util::addInitScript('homecheck', 'shell-init');
 		Util::addScript('homecheck', 'app');
+		Util::addScript('homecheck', 'common/app-feedback');
 		Util::addStyle('homecheck', 'app');
 
 		return new TemplateResponse('homecheck', 'main', [

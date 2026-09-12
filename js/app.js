@@ -370,7 +370,10 @@
 				if (data.data && data.data.layout) {
 					state.layout = data.data.layout;
 				}
-				window.location.reload();
+				/* E2E may set __HMK_E2E_HOLD_RELOAD to assert status before navigation. */
+				if (!window.__HMK_E2E_HOLD_RELOAD) {
+					window.location.reload();
+				}
 				return;
 			}
 			setStatus((data.error && data.error.message) || t.saveFailed, true);

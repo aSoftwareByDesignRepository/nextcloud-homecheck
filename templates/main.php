@@ -137,6 +137,11 @@ if ($hour >= 22 || $hour < 5) {
 		</main>
 
 		<footer class="hmk-credit" role="contentinfo">
+			<?php
+			$appFeedbackCssPrefix = 'hmk';
+			$appFeedbackVersion = '';
+			require __DIR__ . '/parts/feedback-nav-footer.php';
+			?>
 			<p class="hmk-credit__text">
 				<a
 					class="hmk-credit__link"

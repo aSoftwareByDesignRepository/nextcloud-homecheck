@@ -35,6 +35,11 @@ $adminI18nJson = json_encode($adminI18n, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_
 		<button type="button" class="button-vue hmk-btn hmk-btn--ghost" id="hmk-admin-clear"><?php p($l->t('Clear seed')); ?></button>
 	</div>
 	<footer class="hmk-credit hmk-credit--admin" role="contentinfo">
+		<?php
+		$appFeedbackCssPrefix = 'hmk';
+		$appFeedbackVersion = '';
+		require __DIR__ . '/parts/feedback-nav-footer.php';
+		?>
 		<p class="hmk-credit__text">
 			<a
 				class="hmk-credit__link"

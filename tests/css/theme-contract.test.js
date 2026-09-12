@@ -110,8 +110,12 @@ ok(
 	'dark admin danger-ink lightened (AA on near-black settings)',
 );
 ok(
-	/#hmk-admin p#hmk-admin-error[\s\S]*?background:\s*color-mix/.test(css),
-	'admin error uses soft danger well',
+	/#hmk-admin p#hmk-admin-error:not\(:empty\)[\s\S]*?background:\s*color-mix/.test(css),
+	'admin error uses soft danger well only when not empty',
+);
+ok(
+	/#hmk-admin p#hmk-admin-error:empty[\s\S]*?display:\s*none/.test(css),
+	'empty admin error hides danger well chrome',
 );
 ok(css.includes('--hmk-pane-width'), 'pane width token defined');
 ok(!css.includes('#homecheck-app .hmk-btn--danger {\n\t--color-primary-element:'), 'danger no longer remaps primary token');

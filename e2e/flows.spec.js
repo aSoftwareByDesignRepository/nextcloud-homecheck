@@ -157,8 +157,9 @@ test.describe('HomeCheck user journeys', () => {
 
 		await seedBox.fill('{ not-json');
 		await page.locator('#hmk-admin-save').click();
-		await expect(err).toContainText(/Invalid JSON/i);
-		await expect(err).toContainText(/fix the syntax|try again|syntax/i);
+		/* EN "Invalid JSON" / DE "Ungültiges JSON" (and sibling locales). */
+		await expect(err).toContainText(/Invalid JSON|Ungültiges JSON|JSON/i);
+		await expect(err).toContainText(/fix the syntax|try again|syntax|korrigieren|erneut/i);
 
 		await seedBox.fill(JSON.stringify({ version: 1, revision: 0, items: [{ type: 'app', id: 'files' }] }, null, 2));
 		await page.route('**/apps/homecheck/api/admin/template**', async (route) => {
@@ -175,6 +176,139 @@ test.describe('HomeCheck user journeys', () => {
 		await page.locator('#hmk-admin-save').click();
 		await expect(err).toContainText(/Could not save the seed|Save failed|try again/i);
 		await page.unroute('**/apps/homecheck/api/admin/template**');
+	});
+
+	test('status-bar save failed: PUT layout 500 → Could not save — try again', async ({ page }) => {
+		await page.route('**/homecheck/api/layout**', async (route) => {
+			if (route.request().method() === 'PUT') {
+				await route.fulfill({
+					status: 500,
+					contentType: 'application/json',
+					body: JSON.stringify({ ok: false, error: { message: 'Could not save — try again' } }),
+				});
+				return;
+			}
+			await route.continue();
+		});
+		await page.locator('#hmk-edit-toggle').click();
+		await page.locator('#hmk-new-folder').click();
+		const status = page.locator('#hmk-status');
+		await expect(status).toContainText(/Could not save — try again|Speichern fehlgeschlagen/i, { timeout: 15_000 });
+		await expect(status).toHaveClass(/is-error/);
+		await page.unroute('**/homecheck/api/layout**');
+	});
+
+	test('status-bar CAS conflict: PUT layout 409 → Someone changed the layout — reloading', async ({ page }) => {
+		await page.evaluate(() => {
+			window.__HMK_E2E_HOLD_RELOAD = true;
+		});
+		await page.route('**/homecheck/api/layout**', async (route) => {
+			if (route.request().method() === 'PUT') {
+				await route.fulfill({
+					status: 409,
+					contentType: 'application/json',
+					body: JSON.stringify({
+						ok: false,
+						error: { message: 'Someone changed the layout — reloading' },
+						data: { layout: { version: 1, revision: 99, items: [] } },
+					}),
+				});
+				return;
+			}
+			await route.continue();
+		});
+		await page.locator('#hmk-edit-toggle').click();
+		await page.locator('#hmk-new-folder').click();
+		const status = page.locator('#hmk-status');
+		await expect(status).toContainText(/Someone changed the layout — reloading|woanders geändert|neu laden/i, {
+			timeout: 15_000,
+		});
+		await expect(status).toHaveClass(/is-error/);
+		await page.unroute('**/homecheck/api/layout**');
+	});
+
+	test('status-bar folder children limit: Add to folder at max 40 → Too many apps', async ({ page }) => {
+		/* Merger drops non-live nav ids, so lower MAX_CHILDREN via app.js route to exercise the same guard. */
+		await page.route('**/homecheck/js/app.js**', async (route) => {
+			const resp = await route.fetch();
+			let body = await resp.text();
+			if (!body.includes('const MAX_CHILDREN = 40;')) {
+				throw new Error('MAX_CHILDREN const not found in app.js for e2e patch');
+			}
+			body = body.replace(/const MAX_CHILDREN = 40;/, 'const MAX_CHILDREN = 1;');
+			await route.fulfill({
+				status: resp.status(),
+				headers: { ...resp.headers(), 'content-type': 'application/javascript' },
+				body,
+			});
+		});
+		await page.reload({ waitUntil: 'domcontentloaded' });
+		await page.locator('#hmk-panels .hmk-pane').first().waitFor({ state: 'visible', timeout: 20_000 });
+		await page.locator('#hmk-edit-toggle').click();
+		/* New folder from app menu → folder already has 1 child (= MAX when patched). */
+		const firstApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').last();
+		await clickCardMenuItem(firstApp, /New folder|Neuer Ordner/i);
+		await waitForLayoutSave(page);
+		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(1);
+		const secondApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').first();
+		await clickCardMenuItem(secondApp, /Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i);
+		const status = page.locator('#hmk-status');
+		await expect(status).toContainText(/Too many apps in this folder \(max 40\)|Zu viele Apps|máx\.?\s*40|max\.?\s*40/i, {
+			timeout: 10_000,
+		});
+		await expect(status).toHaveClass(/is-error/);
+		await page.unroute('**/homecheck/js/app.js**');
+	});
+
+	test('status-bar start-page fail: default-landing !ok → Could not update start page', async ({ page }) => {
+		await page.route('**/homecheck/api/default-landing**', async (route) => {
+			if (route.request().method() === 'POST') {
+				await route.fulfill({
+					status: 500,
+					contentType: 'application/json',
+					body: JSON.stringify({ ok: false, error: { message: 'Could not update start page' } }),
+				});
+				return;
+			}
+			await route.continue();
+		});
+		/* Prefer chrome toggle; if CTA is teaching, use CTA Yes instead. */
+		const homeToggle = page.locator('#hmk-home-toggle');
+		const ctaYes = page.locator('#hmk-cta-yes');
+		if (await homeToggle.isVisible().catch(() => false)) {
+			await homeToggle.click();
+		} else if (await ctaYes.isVisible().catch(() => false)) {
+			await ctaYes.click();
+		} else {
+			await page.evaluate(() => {
+				const btn = document.getElementById('hmk-home-toggle');
+				if (btn) {
+					btn.hidden = false;
+					btn.click();
+				}
+			});
+		}
+		const status = page.locator('#hmk-status');
+		await expect(status).toContainText(/Could not update start page|Startseite konnte nicht|página inicial|start page/i, {
+			timeout: 15_000,
+		});
+		await expect(status).toHaveClass(/is-error/);
+		await page.unroute('**/homecheck/api/default-landing**');
+	});
+
+	test('Help feedback footer: open menu, mailto/GitHub links, Escape dismiss', async ({ page }) => {
+		const help = page.locator('#hmk-nav-footer .hmk-nav-footer__trigger');
+		await help.scrollIntoViewIfNeeded();
+		await expect(help).toBeVisible();
+		await help.click();
+		const menu = page.locator('#hmk-feedback-menu');
+		await expect(menu).toBeVisible();
+		await expect(page.locator('#hmk-feedback-problem')).toHaveAttribute('href', /mailto:/);
+		await expect(page.locator('#hmk-feedback-idea')).toHaveAttribute('href', /mailto:/);
+		await expect(page.locator('#hmk-feedback-github')).toHaveAttribute('href', /github\.com/);
+		await page.keyboard.press('Escape');
+		await expect(menu).toBeHidden();
+		await expect(help).toHaveAttribute('aria-expanded', 'false');
 	});
 
 	test('mobile viewport: panes and edit controls usable', async ({ page }) => {

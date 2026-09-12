@@ -460,6 +460,16 @@ test.describe('Atlas web craft screenshots', () => {
 		/* Dark + HC theme crafts (view mode) — HC must keep pane label text visible */
 		await page.locator('#hmk-edit-toggle').click();
 		await expect(page.locator('#homecheck-app')).not.toHaveClass(/is-editing/);
+
+		/* Help / app-feedback footer popover (main + Escape dismiss) */
+		const helpTrigger = page.locator('#hmk-nav-footer .hmk-nav-footer__trigger');
+		await helpTrigger.scrollIntoViewIfNeeded();
+		await helpTrigger.click();
+		await expect(page.locator('#hmk-feedback-menu')).toBeVisible();
+		await shot(page, 'feedback-help', meta);
+		await page.keyboard.press('Escape');
+		await expect(page.locator('#hmk-feedback-menu')).toBeHidden();
+
 		await applyThemePreset(page, THEME_DARK);
 		await shot(page, 'view-dark', meta);
 		await applyThemePreset(page, THEME_HC);
@@ -540,7 +550,8 @@ test.describe('Atlas web craft screenshots', () => {
 				/* Admin Invalid JSON error craft */
 				await seedBox.fill('{ not-json');
 				await page.locator('#hmk-admin-save').click();
-				await expect(page.locator('#hmk-admin-error')).toContainText(/Invalid JSON/i);
+				/* EN "Invalid JSON" / DE "Ungültiges JSON" (and sibling locales). */
+				await expect(page.locator('#hmk-admin-error')).toContainText(/Invalid JSON|Ungültiges JSON|JSON/i);
 				const adminErrContrast = await page.evaluate(() => {
 					const el = document.getElementById('hmk-admin-error');
 					if (!el) {
