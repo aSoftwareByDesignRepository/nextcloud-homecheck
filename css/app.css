@@ -32,6 +32,7 @@
 
 /* Theme-bound tokens — scoped to app content (DESIGN-SYSTEM §1.5, §7) */
 #app-content .hmk-app,
+#app-content.hmk-app,
 #content[class*="app-homecheck"].hmk-app,
 .hmk-admin {
 	--hmk-bg: var(--color-main-background);
@@ -69,12 +70,15 @@
 }
 
 body.theme--dark #app-content .hmk-app,
+body.theme--dark #app-content.hmk-app,
 body.theme--dark #content[class*="app-homecheck"].hmk-app,
 body.theme--dark .hmk-admin,
 body.theme-dark #app-content .hmk-app,
+body.theme-dark #app-content.hmk-app,
 body.theme-dark #content[class*="app-homecheck"].hmk-app,
 body.theme-dark .hmk-admin,
 body[data-theme-dark] #app-content .hmk-app,
+body[data-theme-dark] #app-content.hmk-app,
 body[data-theme-dark] #content[class*="app-homecheck"].hmk-app,
 body[data-theme-dark] .hmk-admin {
 	--hmk-primary-fill: color-mix(in srgb, var(--hmk-primary) 62%, var(--color-main-background));
@@ -109,9 +113,17 @@ body[data-theme-highcontrast] #content[class*="app-homecheck"].hmk-app {
  */
 #app-content.hmk-app,
 #content[class*="app-homecheck"].hmk-app {
-	/* Atlas COMPANION-DESIGN-SYSTEM §2 / §3 — allowed Check canvas hexes */
+	/* Atlas §2.3 — Check canvas hexes + canvas-local ink (never inherit body wallpaper ink). */
 	--hmk-check-canvas: #f5f7fb;
 	--hmk-check-surface: #ffffff;
+	--hmk-text: #000000;
+	--hmk-muted: color-mix(in srgb, #000000 58%, #f5f7fb);
+	--color-main-text: #000000;
+	--color-text-maxcontrast: color-mix(in srgb, #000000 68%, #f5f7fb);
+	/* Flat slate on content only — ban --image-background as app chrome (not body). */
+	background-color: var(--hmk-check-canvas);
+	background-image: none;
+	color: var(--hmk-text);
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
@@ -129,11 +141,7 @@ body[data-theme-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	height: var(--hmk-overlay-height, calc(100dvh - var(--header-height, 50px)));
 	max-height: var(--hmk-overlay-height, calc(100dvh - var(--header-height, 50px)));
 	overflow: hidden;
-	/* Flat slate — ban --image-background as app chrome (not body) */
-	background-color: var(--hmk-check-canvas);
-	background-image: none;
 	box-sizing: border-box;
-	color: var(--hmk-text);
 	line-height: var(--hmk-line-base);
 }
 
@@ -145,6 +153,10 @@ body[data-theme-dark] #app-content.hmk-app,
 body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	--hmk-check-canvas: #0b1622;
 	--hmk-check-surface: #152536;
+	--hmk-text: #ffffff;
+	--hmk-muted: color-mix(in srgb, #ffffff 62%, #0b1622);
+	--color-main-text: #ffffff;
+	--color-text-maxcontrast: color-mix(in srgb, #ffffff 72%, #0b1622);
 }
 
 @media (prefers-contrast: more) {
@@ -152,6 +164,10 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	#content[class*="app-homecheck"].hmk-app {
 		--hmk-check-canvas: #000000;
 		--hmk-check-surface: #000000;
+		--hmk-text: #ffffff;
+		--hmk-muted: #d9e2ec;
+		--color-main-text: #ffffff;
+		--color-text-maxcontrast: #d9e2ec;
 	}
 }
 
@@ -525,7 +541,7 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	background: transparent;
 	/* Valid filters only — never NC `no` sentinel */
 	filter: brightness(0);
-	opacity: 0.92;
+	opacity: 1;
 }
 /* Dark + high-contrast themes: black silhouette is invisible on dark wells — invert to light */
 body.theme--dark #homecheck-app .hmk-pane__icon,

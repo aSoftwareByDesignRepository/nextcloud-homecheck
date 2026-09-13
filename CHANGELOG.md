@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.43 — 2026-09-13
+
+- Fix: after 1.0.42, wallpaper-derived light `--color-main-text` on the flat light Check canvas washed out titles/icons. Pin canvas-local ink (`#000` / `#fff`) on the content root; keep body theming for the NC header.
+- Fix: bind theme tokens when `hmk-app` is on `#app-content` itself (legacy NC shell), not only on a descendant.
+- A11y: pane icon glyphs use full opacity (no 0.92 wash).
+- Tests: theme-contract + mutation guards for canvas-local ink.
+
 ## 1.0.42 — 2026-09-13
 
 - Fix: stop painting Check flat canvas on `body` — NC `#header` is transparent and was washing out (logo, app menu, search). Canvas stays on the content root only.

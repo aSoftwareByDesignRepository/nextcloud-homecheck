@@ -237,11 +237,33 @@ assertTrue(
 		&& !preg_match('/body:has\([^)]*(?:app-homecheck|hmk-app)[^)]*\)[\s\S]{0,200}background-(?:color|image):\s*(?:none|var\(--hmk-check-canvas)/', $css),
 	'body must not force Check canvas (host header backdrop)'
 );
+	/* Bound to the light-canvas rule group (not earlier #app-content.hmk-app selectors). */
 assertTrue(
 	is_string($css)
-		&& preg_match('/#app-content\.hmk-app[\s\S]{0,1200}background-color:\s*var\(--hmk-check-canvas/', $css) === 1,
+		&& preg_match(
+			'/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-color:\s*var\(--hmk-check-canvas/',
+			$css
+		) === 1,
 	'Check canvas applied on #app-content.hmk-app'
 );
+assertTrue(
+	is_string($css)
+		&& preg_match(
+			'/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--hmk-text:\s*#000000/',
+			$css
+		) === 1
+		&& preg_match(
+			'/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--color-main-text:\s*#000000/',
+			$css
+		) === 1,
+	'Check canvas pins dark ink on light slate'
+);
+assertTrue(
+	is_string($css)
+		&& preg_match('/body\.theme--dark[\s\S]{0,800}#app-content\.hmk-app[\s\S]{0,600}--hmk-text:\s*#ffffff/', $css) === 1,
+	'dark theme Check canvas pins light ink'
+);
+assertTrue(is_string($css) && str_contains($css, '#app-content.hmk-app'), 'token selector includes #app-content.hmk-app');
 assertTrue(is_string($css) && str_contains($css, 'color-background-hover'), 'native tile hover');
 assertTrue(is_string($css) && preg_match('/filter:\s*brightness\(0\)\s*;/', $css) === 1, 'black glyph brightness(0)');
 assertTrue(is_string($css) && str_contains($css, '--color-primary-element-light'), 'light primary icon well');

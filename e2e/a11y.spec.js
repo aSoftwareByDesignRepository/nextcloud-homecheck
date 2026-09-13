@@ -131,4 +131,100 @@ test.describe('HomeCheck accessibility', () => {
 		/* Header ink vs themed body: WCAG AA for UI text (≥4.5:1); allow ≥3 if large chrome */
 		expect(metrics.inkOnBody).toBeGreaterThanOrEqual(3);
 	});
+
+	/**
+	 * Regression 1.0.43 / DESIGN-SYSTEM §2.3: dark wallpaper theming can set light
+	 * --color-main-text on body for the transparent header. Content must keep
+	 * canvas-local dark ink on the light Check slate (not inherit washed-out text).
+	 */
+	test('content titles/icons stay readable on Check canvas when body has wallpaper light ink', async ({ page }) => {
+		await openHomeCheck(page);
+		await page.evaluate(() => {
+			/* Simulate dark wallpaper / light ink without enabling theme--dark
+			 * (content must stay on light #f5f7fb Check canvas). */
+			document.documentElement.style.setProperty('--color-main-text', '#f0f4f8');
+			document.documentElement.style.setProperty('--color-text-maxcontrast', '#bcccdc');
+			document.body.style.setProperty('--color-main-text', '#f0f4f8');
+			document.body.style.setProperty('--color-background-plain', '#0b1622');
+			document.body.style.backgroundColor = '#0b1622';
+			document.body.style.backgroundImage = 'none';
+			document.body.classList.remove('theme--dark', 'theme-dark');
+			document.body.removeAttribute('data-theme-dark');
+		});
+		const metrics = await page.evaluate(() => {
+			function parseRgb(s) {
+				const m = String(s).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+				if (!m) {
+					return null;
+				}
+				const a = m[4] === undefined ? 1 : Number(m[4]);
+				if (a < 0.2) {
+					return null;
+				}
+				return [Number(m[1]), Number(m[2]), Number(m[3])];
+			}
+			function relLum(rgb) {
+				const f = (c) => {
+					c /= 255;
+					return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+				};
+				return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]);
+			}
+			function contrast(a, b) {
+				const L1 = relLum(a);
+				const L2 = relLum(b);
+				const hi = Math.max(L1, L2);
+				const lo = Math.min(L1, L2);
+				return (hi + 0.05) / (lo + 0.05);
+			}
+			const content = document.querySelector('#content.app-homecheck, #app-content.hmk-app');
+			const greeting = document.querySelector('.hmk-greeting');
+			const icon = document.querySelector('#hmk-panels .hmk-pane__icon');
+			const well = document.querySelector('#hmk-panels .hmk-pane__icon-well');
+			if (!content || !greeting) {
+				return { ok: false, reason: 'missing content/greeting' };
+			}
+			const cs = getComputedStyle(content);
+			const contentBg = parseRgb(cs.backgroundColor);
+			const greetingColor = parseRgb(getComputedStyle(greeting).color);
+			const hmkText = String(cs.getPropertyValue('--hmk-text') || '').trim();
+			const localMain = String(cs.getPropertyValue('--color-main-text') || '').trim();
+			const checkLight = [245, 247, 251];
+			const nearCheck = contentBg
+				? Math.hypot(contentBg[0] - checkLight[0], contentBg[1] - checkLight[1], contentBg[2] - checkLight[2])
+				: 999;
+			let iconOk = true;
+			let iconFilter = '';
+			if (icon) {
+				iconFilter = getComputedStyle(icon).filter || '';
+				/* Light canvas: black silhouette, not inverted white-on-light */
+				iconOk = /brightness\(\s*0\s*\)/.test(iconFilter) && !/invert\(\s*1\s*\)/.test(iconFilter);
+			}
+			return {
+				ok: true,
+				contentBg,
+				greetingColor,
+				hmkText,
+				localMain,
+				nearCheck,
+				greetingOnCanvas: contentBg && greetingColor ? contrast(greetingColor, contentBg) : null,
+				iconOk,
+				iconFilter,
+				wellBg: well ? parseRgb(getComputedStyle(well).backgroundColor) : null,
+				bodyThemeDark: document.body.classList.contains('theme--dark')
+					|| document.body.classList.contains('theme-dark'),
+			};
+		});
+		expect(metrics.ok, metrics.reason || 'metrics').toBe(true);
+		expect(metrics.bodyThemeDark).toBe(false);
+		expect(metrics.nearCheck).toBeLessThan(30);
+		expect(metrics.hmkText.toLowerCase()).toMatch(/#000|#000000|rgb\(\s*0,\s*0,\s*0\s*\)|black/);
+		expect(metrics.localMain.toLowerCase()).toMatch(/#000|#000000|rgb\(\s*0,\s*0,\s*0\s*\)|black/);
+		expect(metrics.greetingOnCanvas).toBeGreaterThanOrEqual(4.5);
+		expect(metrics.iconOk).toBe(true);
+		await page.screenshot({
+			path: 'test-results/homecheck-canvas-local-ink-wallpaper.png',
+			fullPage: false,
+		});
+	});
 });

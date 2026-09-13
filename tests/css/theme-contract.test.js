@@ -31,6 +31,7 @@ ok(css.includes('#f5f7fb'), 'Check light canvas #f5f7fb');
 ok(css.includes('#0b1622'), 'Check dark canvas #0b1622');
 
 ok(css.includes('#app-content .hmk-app'), 'legacy NC app-content tokens retained');
+ok(css.includes('#app-content.hmk-app'), 'tokens also bind when hmk-app is on #app-content');
 ok(css.includes('#content[class*="app-homecheck"].hmk-app'), 'NC34 content root scoped');
 ok(css.includes('--color-primary-element'), 'maps to NC primary');
 ok(css.includes('--color-main-background'), 'maps to NC background');
@@ -74,10 +75,20 @@ ok(
 		&& !/body:has\([\s\S]*?hmk-app[\s\S]*?background-image:\s*none\s*!important/.test(css),
 	'does not force Check canvas / kill wallpaper on body (preserves NC header backdrop)',
 );
-ok(
-	/#app-content\.hmk-app[\s\S]*?background-image:\s*none/.test(css)
-		&& /#content\[class\*="app-homecheck"\]\.hmk-app[\s\S]*?background-color:\s*var\(--hmk-check-canvas/.test(css),
+	ok(
+	/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-color:\s*var\(--hmk-check-canvas/.test(css)
+		&& /#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-image:\s*none/.test(css),
 	'flat Check canvas scoped to content root only',
+);
+ok(
+	/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--hmk-text:\s*#000000/.test(css)
+		&& /#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--color-main-text:\s*#000000/.test(css),
+	'light Check canvas pins dark ink (not wallpaper-derived light text)',
+);
+ok(
+	/body\.theme--dark[\s\S]*?#app-content\.hmk-app[\s\S]*?--hmk-text:\s*#ffffff/.test(css)
+		&& /body\.theme--dark[\s\S]*?#app-content\.hmk-app[\s\S]*?--color-main-text:\s*#ffffff/.test(css),
+	'dark Check canvas pins light ink',
 );
 ok(css.includes('line-clamp: 2') || css.includes('-webkit-line-clamp: 2'), 'pane titles two-line clamp');
 ok(css.includes('#hmk-cta:not([hidden])') || css.includes('hmk-cta:not([hidden])'), 'Bachus hides home when CTA teaches');
