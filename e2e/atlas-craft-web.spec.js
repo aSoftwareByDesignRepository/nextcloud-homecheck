@@ -477,13 +477,21 @@ test.describe('Atlas web craft screenshots', () => {
 		await expect(page.locator('#hmk-panels .hmk-pane__title-text').first()).toBeVisible();
 		const hcLabel = await page.locator('#hmk-panels .hmk-pane__title-text').first().innerText();
 		expect(hcLabel.trim().length, 'HC craft must show pane label text').toBeGreaterThan(2);
-		/* Icons must be light silhouettes on black HC — not empty yellow wells */
+		/* Icons must paint theme ink via mask — not empty wells */
 		const iconVis = await page.locator('#hmk-panels .hmk-pane__icon').first().evaluate((el) => {
 			const cs = getComputedStyle(el);
-			return { filter: cs.filter, opacity: cs.opacity, w: el.getBoundingClientRect().width };
+			return {
+				filter: cs.filter,
+				opacity: cs.opacity,
+				w: el.getBoundingClientRect().width,
+				mask: cs.maskImage || cs.webkitMaskImage || '',
+				ink: cs.backgroundColor,
+			};
 		});
 		expect(iconVis.w, 'HC icon glyph sized').toBeGreaterThan(8);
-		expect(String(iconVis.filter), 'HC icons invert on dark well').toMatch(/invert/i);
+		expect(iconVis.mask, 'HC icons use CSS mask').toMatch(/url\(/i);
+		expect(iconVis.ink, 'HC icons paint theme ink').toMatch(/^(rgb\(|color\()/);
+		expect(iconVis.filter === 'none' || iconVis.filter === '', 'HC icons do not use invert filter').toBe(true);
 		await shot(page, 'view-hc', meta);
 		await page.evaluate(() => {
 			document.body.classList.remove('theme--dark', 'theme-dark', 'theme--highcontrast', 'theme-highcontrast');

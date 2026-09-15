@@ -1156,7 +1156,10 @@
 		const details = document.createElement('details');
 		details.className = 'hmk-pane__menu';
 		const summary = document.createElement('summary');
-		summary.textContent = '⋮';
+		const dots = document.createElement('span');
+		dots.className = 'hmk-pane__menu-dots';
+		dots.setAttribute('aria-hidden', 'true');
+		summary.appendChild(dots);
 		summary.setAttribute('aria-label', t.moreActions);
 		details.appendChild(summary);
 		const menu = document.createElement('div');
@@ -1227,42 +1230,54 @@
 		window.location.href = entry.href;
 	}
 
+	function cssMaskUrl(href) {
+		/* CSS url("…") — escape backslash and quotes only; href already isSafeHref. */
+		return 'url("' + String(href).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '")';
+	}
+
 	function buildPaneIcon(entry, isFolder) {
 		const well = document.createElement('span');
 		well.className = 'hmk-pane__icon-well';
 		well.setAttribute('aria-hidden', 'true');
 
-		const img = document.createElement('img');
-		img.className = 'hmk-pane__icon';
-		img.alt = '';
-		img.width = 24;
-		img.height = 24;
-		img.decoding = 'async';
-		img.draggable = false;
+		function appendFallback() {
+			const span = document.createElement('span');
+			span.className = 'hmk-pane__icon hmk-pane__icon--fallback';
+			span.textContent = iconLetter(entry ? entry.name : '?');
+			well.appendChild(span);
+		}
+
+		function appendMaskedGlyph(src) {
+			/* <img> keeps naturalWidth for load/e2e; CSS mask + primary paints theme ink. */
+			const img = document.createElement('img');
+			img.className = 'hmk-pane__icon';
+			img.alt = '';
+			img.width = 24;
+			img.height = 24;
+			img.decoding = 'async';
+			img.draggable = false;
+			img.style.setProperty('--hmk-icon-url', cssMaskUrl(src));
+			img.src = src;
+			img.addEventListener('error', function () {
+				img.remove();
+				appendFallback();
+			});
+			well.appendChild(img);
+		}
+
 		if (isFolder) {
-			img.src = (window.OC && window.OC.imagePath)
+			const src = (window.OC && window.OC.imagePath)
 				? window.OC.imagePath('homecheck', 'app-dashboard.svg')
 				: '/apps/homecheck/img/app-dashboard.svg';
-			well.appendChild(img);
+			appendMaskedGlyph(src);
 			return well;
 		}
 		/* Same allowlist as launch hrefs — never trust entry.icon from nav/JSON alone. */
 		if (entry && entry.icon && typeof entry.icon === 'string' && isSafeHref(entry.icon)) {
-			img.src = entry.icon;
-			img.addEventListener('error', function () {
-				img.remove();
-				const span = document.createElement('span');
-				span.className = 'hmk-pane__icon hmk-pane__icon--fallback';
-				span.textContent = iconLetter(entry ? entry.name : '?');
-				well.appendChild(span);
-			});
-			well.appendChild(img);
+			appendMaskedGlyph(entry.icon);
 			return well;
 		}
-		const span = document.createElement('span');
-		span.className = 'hmk-pane__icon hmk-pane__icon--fallback';
-		span.textContent = iconLetter(entry ? entry.name : '?');
-		well.appendChild(span);
+		appendFallback();
 		return well;
 	}
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * Icon well visibility + WCAG non-text contrast (≥3:1).
- * Glyphs: brightness(0) on primary-element-light — never NC invert sentinels.
+ * Glyphs: CSS mask + --color-primary-element on --hmk-tint-info — never NC invert sentinels.
  */
 'use strict';
 
@@ -33,6 +33,14 @@ function parseHex(hex) {
 	];
 }
 
+function mix(fg, bg, p) {
+	return [
+		Math.round(fg[0] * p + bg[0] * (1 - p)),
+		Math.round(fg[1] * p + bg[1] * (1 - p)),
+		Math.round(fg[2] * p + bg[2] * (1 - p)),
+	];
+}
+
 function relLum(rgb) {
 	const f = (c) => {
 		c /= 255;
@@ -51,28 +59,41 @@ function contrast(a, b) {
 
 ok(css.includes('.hmk-pane__icon-well'), 'icon well class');
 ok(appJs.includes('hmk-pane__icon-well'), 'JS builds wells');
-ok(/filter:\s*brightness\(0\)\s*;/.test(css), 'black glyph via brightness(0)');
+ok(appJs.includes('hmk-pane__menu-dots'), 'JS builds kebab three-dot glyph');
+ok(appJs.includes('--hmk-icon-url'), 'JS sets CSS mask URL for theme-aware glyphs');
+ok(appJs.includes('cssMaskUrl'), 'JS escapes icon URLs for CSS mask');
+ok(/mask-image:\s*var\(--hmk-icon-url\)/.test(css), 'icons use CSS mask (theme-aware)');
 ok(
-	/\.hmk-pane__icon \{[^}]*filter:\s*brightness\(0\)\s*;/s.test(css),
-	'default icons are black silhouette (not inverted)',
+	/\.hmk-pane__icon \{[\s\S]*?background-color:\s*var\(--color-primary-element\)/s.test(css),
+	'icon ink is NC primary (tracks accent + theme)',
 );
 ok(
-	/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
-	'dark theme scopes invert(1) so glyphs stay visible on dark wells',
+	/\.hmk-pane__icon-well \{[\s\S]*?background:\s*var\(--hmk-tint-info/s.test(css),
+	'well uses tint-info (design-system)',
 );
 ok(!/filter:\s*var\(--primary-invert-if-/.test(css), 'does not pipe NC invert sentinels into filter');
-ok(/background:\s*var\(--color-primary-element-light/.test(css), 'well uses primary-element-light');
+ok(
+	!/\.hmk-pane__icon \{[^}]*filter:\s*brightness\(0\)\s*;/s.test(css),
+	'does not force black brightness(0) silhouette (not theme-aware)',
+);
+ok(
+	!/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
+	'does not rely on dark-body invert(1) for icon AA',
+);
+ok(css.includes('.hmk-pane__menu-dots'), 'edit kebab is a three-dot glyph not a filled disc');
 ok(/border:\s*2px solid var\(--color-primary-element\)/.test(css), 'well bordered with primary');
 
+const white = parseHex('#ffffff');
+const darkBg = parseHex('#171717');
 const pairs = [
-	['#000000', '#e5eff5', 'black on default primary-light'],
-	['#000000', '#ffffff', 'black on white'],
-	['#000000', '#d9e3e8', 'black on soft primary-light'],
-	['#ffffff', '#243a48', 'white glyph on dark well (dark theme)'],
-	['#00679e', '#ffffff', 'primary border vs white pane'],
+	[parseHex('#00679e'), mix(parseHex('#00679e'), white, 0.16), 'primary on light tint-info'],
+	[parseHex('#0082c9'), mix(parseHex('#0082c9'), white, 0.16), 'NC default primary on tint-info'],
+	[parseHex('#7ac4ef'), mix(parseHex('#7ac4ef'), darkBg, 0.16), 'light primary on dark tint-info'],
+	[parseHex('#ffffff'), parseHex('#000000'), 'HC main-text on black'],
+	[parseHex('#00679e'), white, 'primary border vs white pane'],
 ];
 for (const [fg, bg, label] of pairs) {
-	const ratio = contrast(parseHex(fg), parseHex(bg));
+	const ratio = contrast(fg, bg);
 	ok(ratio >= 3, `WCAG UI contrast ≥3:1 for ${label} (${ratio.toFixed(2)})`);
 }
 

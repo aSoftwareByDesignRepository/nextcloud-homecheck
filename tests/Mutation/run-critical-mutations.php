@@ -228,46 +228,63 @@ $mainTpl = file_get_contents($root . '/templates/main.php');
 assertTrue(is_string($css) && str_contains($css, 'hmk-shell--wide'), 'wide shell modifier');
 assertTrue(is_string($css) && str_contains($css, 'hmk-pane'), 'dashboard frosted panes');
 assertTrue(is_string($css) && str_contains($css, 'hmk-greeting'), 'dashboard greeting');
-assertTrue(is_string($css) && str_contains($css, '--hmk-check-canvas'), 'Check flat canvas token');
-assertTrue(is_string($css) && str_contains($css, 'background-image: none'), 'flat canvas no wallpaper image');
-assertTrue(is_string($css) && !preg_match('/background-image:\s*var\(--image-background\)/', $css), 'bans wallpaper stage chrome');
+assertTrue(is_string($css) && str_contains($css, '--hmk-check-surface'), 'check-surface token (NC alias)');
+assertTrue(
+	is_string($css)
+		&& preg_match('/--hmk-check-surface:\s*var\(--color-main-background\)/', $css) === 1,
+	'check-surface aliases NC main-background'
+);
+assertTrue(
+	is_string($css)
+		&& !preg_match('/background-image:\s*var\(--image-background\)/', $css),
+	'does not re-apply --image-background as app chrome'
+);
 /* Mutant: reintroduce body:has Check canvas — washes out transparent NC #header */
 assertTrue(
 	is_string($css)
 		&& !preg_match('/body:has\([^)]*(?:app-homecheck|hmk-app)[^)]*\)[\s\S]{0,200}background-(?:color|image):\s*(?:none|var\(--hmk-check-canvas)/', $css),
 	'body must not force Check canvas (host header backdrop)'
 );
-	/* Bound to the light-canvas rule group (not earlier #app-content.hmk-app selectors). */
 assertTrue(
 	is_string($css)
 		&& preg_match(
-			'/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-color:\s*var\(--hmk-check-canvas/',
+			'/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-color:\s*transparent/',
 			$css
 		) === 1,
-	'Check canvas applied on #app-content.hmk-app'
+	'content root transparent (NC wallpaper / Appearance shows through)'
 );
 assertTrue(
 	is_string($css)
-		&& preg_match(
-			'/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--hmk-text:\s*#000000/',
-			$css
-		) === 1
-		&& preg_match(
-			'/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--color-main-text:\s*#000000/',
-			$css
-		) === 1,
-	'Check canvas pins dark ink on light slate'
+		&& !preg_match('/#app-content\.hmk-app[\s\S]{0,500}?background-color:\s*var\(--hmk-check-canvas/', $css),
+	'does not paint flat Check canvas on content'
 );
+assertTrue(is_string($css) && str_contains($css, '.hmk-pane__menu-dots'), 'kebab three-dot glyph class');
 assertTrue(
 	is_string($css)
-		&& preg_match('/body\.theme--dark[\s\S]{0,800}#app-content\.hmk-app[\s\S]{0,600}--hmk-text:\s*#ffffff/', $css) === 1,
-	'dark theme Check canvas pins light ink'
+		&& preg_match('/\.hmk-menu \{[\s\S]{0,800}?background:\s*var\(--color-main-background/', $css) === 1,
+	'overflow menu uses NC main-background'
+);
+assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'hmk-pane__menu-dots'), 'JS builds kebab three-dot glyph');
+assertTrue(
+	is_string($css)
+		&& preg_match('/\.hmk-menu \{[\s\S]{0,500}?max-width:\s*calc\(100vw - 2rem\)/', $css) === 1,
+	'overflow menu max-width is viewport-safe'
 );
 assertTrue(is_string($css) && str_contains($css, '#app-content.hmk-app'), 'token selector includes #app-content.hmk-app');
 assertTrue(is_string($css) && str_contains($css, 'color-background-hover'), 'native tile hover');
-assertTrue(is_string($css) && preg_match('/filter:\s*brightness\(0\)\s*;/', $css) === 1, 'black glyph brightness(0)');
-assertTrue(is_string($css) && str_contains($css, '--color-primary-element-light'), 'light primary icon well');
+assertTrue(is_string($css) && preg_match('/mask-image:\s*var\(--hmk-icon-url\)/', $css) === 1, 'theme-aware icon CSS mask');
+assertTrue(
+	is_string($css)
+		&& preg_match('/\.hmk-pane__icon \{[\s\S]*?background-color:\s*var\(--color-primary-element\)/s', $css) === 1,
+	'icon ink is NC primary'
+);
+assertTrue(
+	is_string($css)
+		&& preg_match('/\.hmk-pane__icon-well \{[\s\S]*?background:\s*var\(--hmk-tint-info/s', $css) === 1,
+	'tint-info icon well'
+);
 assertTrue(is_string($css) && preg_match('/filter:\s*var\(--primary-invert-if-/', $css) !== 1, 'no NC invert sentinel in icon filter');
+assertTrue(is_string($jsSrc) && str_contains($jsSrc, '--hmk-icon-url'), 'JS sets icon mask URL');
 assertTrue(is_string($css) && str_contains($css, '--hmk-icon-well'), 'icon well size token');
 assertTrue(is_string($css) && str_contains($css, '.hmk-pane__icon-well'), 'icon well wrapper class');
 assertTrue(is_string($jsSrc) && str_contains($jsSrc, 'hmk-pane__icon-well'), 'JS builds icon wells');

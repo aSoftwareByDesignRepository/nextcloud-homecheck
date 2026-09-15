@@ -14,26 +14,41 @@ async function login(page) {
 		return;
 	}
 
-	for (let attempt = 0; attempt < 3; attempt++) {
+	for (let attempt = 0; attempt < 5; attempt++) {
 		await page.goto(base + '/login', { waitUntil: 'domcontentloaded' });
 		/* NC 34 login is a Vue app — wait for hydrated fields, not the shell HTML. */
 		const userInput = page.locator('#user, input[name="user"]').first();
 		try {
 			await userInput.waitFor({ state: 'visible', timeout: 45000 });
 		} catch (err) {
-			if (attempt === 2) {
+			if (attempt === 4) {
 				throw err;
 			}
 			continue;
 		}
-		await userInput.fill(user);
-		await page.locator('#password, input[name="password"]').first().fill(pass);
-		await page.locator('button[type="submit"], input[type="submit"], button.login-button').first().click();
+		/*
+		 * Under Atlas multi-app Playwright load, Vue login can thrash (visible but not
+		 * "stable") so Playwright actionability waits blow the 90s test timeout.
+		 * Prefer force fill + native DOM click; fall back to force locator click.
+		 */
+		await userInput.fill(user, { force: true });
+		await page.locator('#password, input[name="password"]').first().fill(pass, { force: true });
+		const submitted = await page.evaluate(() => {
+			const btn = document.querySelector('[data-login-form-submit], button[type="submit"], input[type="submit"], button.login-button');
+			if (!btn) {
+				return false;
+			}
+			/** @type {HTMLElement} */ (btn).click();
+			return true;
+		});
+		if (!submitted) {
+			await page.locator('button[type="submit"], input[type="submit"], button.login-button').first().click({ force: true });
+		}
 		try {
-			await page.waitForURL(/apps\/|index\.php\/apps/, { timeout: 45000 });
+			await page.waitForURL(/apps\/|index\.php\/apps/, { timeout: 60000 });
 			return;
 		} catch (err) {
-			if (attempt === 2) {
+			if (attempt === 4) {
 				throw err;
 			}
 		}

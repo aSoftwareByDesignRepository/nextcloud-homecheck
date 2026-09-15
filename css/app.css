@@ -38,6 +38,9 @@
 	--hmk-bg: var(--color-main-background);
 	--hmk-bg-soft: color-mix(in srgb, var(--color-main-background) 96%, var(--color-main-text) 4%);
 	--hmk-bg-card: var(--color-main-background);
+	/* Alias: panes/chrome that still say check-surface track NC main background */
+	--hmk-check-surface: var(--color-main-background);
+	--hmk-check-canvas: transparent;
 	--hmk-text: var(--color-main-text);
 	--hmk-muted: var(--color-text-maxcontrast);
 	--hmk-border: var(--color-border, color-mix(in srgb, var(--color-main-text) 12%, transparent));
@@ -95,35 +98,27 @@ body.theme--highcontrast .hmk-admin,
 body.theme-highcontrast .hmk-admin,
 body[data-theme-highcontrast] .hmk-admin,
 body.theme--highcontrast #app-content .hmk-app,
+body.theme--highcontrast #app-content.hmk-app,
 body.theme--highcontrast #content[class*="app-homecheck"].hmk-app,
 body.theme-highcontrast #app-content .hmk-app,
+body.theme-highcontrast #app-content.hmk-app,
 body.theme-highcontrast #content[class*="app-homecheck"].hmk-app,
 body[data-theme-highcontrast] #app-content .hmk-app,
+body[data-theme-highcontrast] #app-content.hmk-app,
 body[data-theme-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	--hmk-danger-ink: color-mix(in srgb, var(--color-error-text, var(--color-element-error)) 38%, var(--color-main-text));
 }
 
 /*
- * Check flat canvas lives ONLY on the app content root — never on body.
- * NC #header is transparent and paints white/primary-text ink over
- * body --color-background-plain + --image-background. Painting body with
- * the light Check canvas washed out the top bar (logo, app menu, search).
- * Content still bans wallpaper; the header strip keeps theming parity
- * with Files / Dashboard.
+ * Content root: layout + scroll only. Background inherits Nextcloud Appearance
+ * (body --color-background-plain / --image-background). Never paint a Check
+ * slate here — that overwrote the host wallpaper and fought NC theming.
  */
 #app-content.hmk-app,
 #content[class*="app-homecheck"].hmk-app {
-	/* Atlas §2.3 — Check canvas hexes + canvas-local ink (never inherit body wallpaper ink). */
-	--hmk-check-canvas: #f5f7fb;
-	--hmk-check-surface: #ffffff;
-	--hmk-text: #000000;
-	--hmk-muted: color-mix(in srgb, #000000 58%, #f5f7fb);
-	--color-main-text: #000000;
-	--color-text-maxcontrast: color-mix(in srgb, #000000 68%, #f5f7fb);
-	/* Flat slate on content only — ban --image-background as app chrome (not body). */
-	background-color: var(--hmk-check-canvas);
-	background-image: none;
-	color: var(--hmk-text);
+	background-color: transparent;
+	background-image: none; /* do not paint our own stage; body wallpaper shows through */
+	color: var(--hmk-text, var(--color-main-text));
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
@@ -143,32 +138,6 @@ body[data-theme-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	overflow: hidden;
 	box-sizing: border-box;
 	line-height: var(--hmk-line-base);
-}
-
-body.theme--dark #app-content.hmk-app,
-body.theme--dark #content[class*="app-homecheck"].hmk-app,
-body.theme-dark #app-content.hmk-app,
-body.theme-dark #content[class*="app-homecheck"].hmk-app,
-body[data-theme-dark] #app-content.hmk-app,
-body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
-	--hmk-check-canvas: #0b1622;
-	--hmk-check-surface: #152536;
-	--hmk-text: #ffffff;
-	--hmk-muted: color-mix(in srgb, #ffffff 62%, #0b1622);
-	--color-main-text: #ffffff;
-	--color-text-maxcontrast: color-mix(in srgb, #ffffff 72%, #0b1622);
-}
-
-@media (prefers-contrast: more) {
-	#app-content.hmk-app,
-	#content[class*="app-homecheck"].hmk-app {
-		--hmk-check-canvas: #000000;
-		--hmk-check-surface: #000000;
-		--hmk-text: #ffffff;
-		--hmk-muted: #d9e2ec;
-		--color-main-text: #ffffff;
-		--color-text-maxcontrast: #d9e2ec;
-	}
 }
 
 #content[class*="app-homecheck"] > #app-content.hmk-app {
@@ -432,7 +401,7 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	/* Solid Check surface cards on flat canvas — no frosted wallpaper dialect */
 	background-color: var(--hmk-check-surface, var(--color-main-background));
 	border-radius: var(--border-radius-container-large, var(--hmk-radius-lg));
-	border: 1px solid var(--color-border, #d9e2ec);
+	border: 1px solid var(--color-border, var(--hmk-border));
 	box-shadow: var(--hmk-shadow);
 	box-sizing: border-box;
 	min-width: 0;
@@ -510,13 +479,12 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 }
 
 /*
- * Icon well: light primary surface + black glyph silhouette.
+ * Icon well (DESIGN-SYSTEM page-header): tint-info fill + primary ink.
  *
- * Why not dark primary + invert tokens?
- * - `--primary-invert-if-*` uses sentinel `no` (invalid filter → icons can vanish)
- * - Forced `brightness(0) invert(1)` (white) fails AA when primary-element is bright
- * - Nav SVGs are mixed white/black/colour; brightness(0) normalises to black
- * Black on --color-primary-element-light is high-contrast; primary border defines the well.
+ * Nav icons arrive as mixed SVG/PNG <img> URLs. Theme-aware mono ink:
+ * mask the asset via --hmk-icon-url (set in JS) and paint with
+ * --color-primary-element. Tracks Light / Dark / HC / custom accent without
+ * brightness(0) or body.theme--* invert hacks. Never use NC invert sentinels.
  */
 .hmk-pane__icon-well {
 	display: grid;
@@ -526,51 +494,67 @@ body[data-theme-dark] #content[class*="app-homecheck"].hmk-app {
 	height: var(--hmk-touch);
 	flex-shrink: 0;
 	border-radius: var(--border-radius, 8px);
-	background: var(--color-primary-element-light, var(--color-background-dark, var(--color-main-background)));
+	background: var(--hmk-tint-info, color-mix(in srgb, var(--color-primary-element) 16%, var(--color-main-background)));
 	border: 2px solid var(--color-primary-element);
 	box-shadow: none;
 	box-sizing: border-box;
 	overflow: hidden;
 }
 .hmk-pane__icon {
+	display: block;
 	width: 1.375rem;
 	height: 1.375rem;
-	object-fit: contain;
 	padding: 0;
 	border: 0;
-	background: transparent;
-	/* Valid filters only — never NC `no` sentinel */
-	filter: brightness(0);
+	/* Theme ink — mask from --hmk-icon-url; fallback letters opt out below */
+	background-color: var(--color-primary-element);
+	-webkit-mask-image: var(--hmk-icon-url);
+	mask-image: var(--hmk-icon-url);
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	/* Hide raw bitmap; mask paints primary through the glyph silhouette */
+	object-fit: none;
+	object-position: -9999px 0;
+	filter: none;
 	opacity: 1;
-}
-/* Dark + high-contrast themes: black silhouette is invisible on dark wells — invert to light */
-body.theme--dark #homecheck-app .hmk-pane__icon,
-body.theme-dark #homecheck-app .hmk-pane__icon,
-body[data-theme-dark] #homecheck-app .hmk-pane__icon,
-body.theme--highcontrast #homecheck-app .hmk-pane__icon,
-body.theme-highcontrast #homecheck-app .hmk-pane__icon,
-body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon {
-	filter: brightness(0) invert(1);
-}
-body.theme--dark #homecheck-app .hmk-pane__icon-well,
-body.theme-dark #homecheck-app .hmk-pane__icon-well,
-body[data-theme-dark] #homecheck-app .hmk-pane__icon-well,
-body.theme--highcontrast #homecheck-app .hmk-pane__icon-well,
-body.theme-highcontrast #homecheck-app .hmk-pane__icon-well,
-body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
-	background: color-mix(in srgb, var(--color-primary-element) 32%, var(--color-main-background));
 }
 .hmk-pane__icon--fallback {
 	display: grid;
 	place-items: center;
 	width: 100%;
 	height: 100%;
-	color: var(--color-primary-element-light-text, var(--color-primary-element));
+	background-color: transparent;
+	-webkit-mask-image: none;
+	mask-image: none;
+	color: var(--color-primary-element);
 	font-weight: 700;
 	font-size: 0.95rem;
 	line-height: 1;
+	object-fit: unset;
+	object-position: unset;
 	filter: none;
 	opacity: 1;
+}
+
+body.theme--highcontrast #homecheck-app .hmk-pane__icon-well,
+body.theme-highcontrast #homecheck-app .hmk-pane__icon-well,
+body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
+	background: var(--color-main-background);
+	border-color: var(--color-main-text);
+}
+body.theme--highcontrast #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback),
+body.theme-highcontrast #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback),
+body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback) {
+	background-color: var(--color-main-text);
+}
+body.theme--highcontrast #homecheck-app .hmk-pane__icon--fallback,
+body.theme-highcontrast #homecheck-app .hmk-pane__icon--fallback,
+body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
+	color: var(--color-main-text);
 }
 
 .hmk-pane__title-text {
@@ -675,7 +659,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 .hmk-pane__row-title {
 	flex: 1 1 0;
 	min-width: 0;
-	font-size: 15px;
+	font-size: 0.9375rem;
 	font-weight: 600;
 	line-height: 1.3;
 	color: var(--color-main-text);
@@ -720,9 +704,20 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 	border-radius: 50%;
 	font-weight: 700;
 	font-size: var(--hmk-fs-lg);
-	color: var(--color-main-text);
-	background: var(--color-background-hover, var(--hmk-bg-soft));
+	/* Opaque NC surface — readable over wallpaper; never invent a Check slate fill. */
+	color: var(--hmk-text);
+	background: var(--color-main-background);
+	border: 1px solid var(--hmk-border-strong);
+	box-sizing: border-box;
 	touch-action: manipulation;
+}
+.hmk-pane__menu-dots {
+	display: block;
+	width: 4px;
+	height: 4px;
+	border-radius: 50%;
+	background: currentColor;
+	box-shadow: 0 -7px 0 currentColor, 0 7px 0 currentColor;
 }
 #homecheck-app:not(.is-editing) .hmk-pane__menu {
 	display: none;
@@ -738,18 +733,18 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 .hmk-pane__row .hmk-pane__menu {
 	position: absolute;
 	top: 0;
-	right: 0;
+	inset-inline-end: 0;
 }
 
 /* CTA — solid surface card (one Bachus teacher when visible) */
 #homecheck-app .hmk-cta.notecard {
 	max-width: 1800px;
 	margin: 0 auto var(--hmk-space-3);
-	width: calc(100% - 32px);
+	width: calc(100% - 2 * var(--hmk-space-4));
 	box-sizing: border-box;
 	padding: var(--hmk-space-3) var(--hmk-space-4);
 	background-color: var(--hmk-check-surface, var(--color-main-background));
-	border: 1px solid var(--color-border, #d9e2ec);
+	border: 1px solid var(--color-border, var(--hmk-border));
 	border-radius: var(--border-radius-container-large, var(--hmk-radius-lg));
 	color: var(--color-main-text);
 	box-shadow: var(--hmk-shadow);
@@ -767,7 +762,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 .hmk-folder-list {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: var(--hmk-space-1);
 	margin: 0;
 	padding: 0;
 	max-height: min(50vh, 24rem);
@@ -866,20 +861,28 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 	flex-direction: column;
 	gap: var(--hmk-space-1);
 	position: absolute;
-	right: 0;
+	inset-inline-end: 0;
 	top: 100%;
 	z-index: 50;
-	min-width: 11rem;
+	min-width: min(11rem, calc(100vw - 2rem));
+	max-width: calc(100vw - 2rem);
 	max-height: min(16rem, 50vh);
 	overflow-y: auto;
 	padding: var(--hmk-space-2);
-	background: var(--color-main-background, var(--hmk-bg-card));
+	background: var(--color-main-background);
+	color: var(--hmk-text);
 	border: 1px solid var(--hmk-border-strong);
 	border-radius: var(--hmk-radius-md);
 	box-shadow: var(--hmk-shadow-md);
 }
-.hmk-menu button {
+#homecheck-app .hmk-menu button,
+#homecheck-app .hmk-menu button.button-vue {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	max-width: none;
 	min-height: var(--hmk-touch);
+	height: auto;
 	text-align: left;
 	padding: var(--hmk-space-2) var(--hmk-space-3);
 	border: 0;
@@ -887,6 +890,15 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 	border-radius: var(--hmk-radius-sm);
 	cursor: pointer;
 	color: var(--hmk-text);
+	font-size: var(--hmk-fs-sm);
+	line-height: var(--hmk-line-base);
+	overflow: visible;
+	opacity: 1;
+	white-space: normal;
+}
+#homecheck-app .hmk-menu button:hover,
+#homecheck-app .hmk-menu button.button-vue:hover {
+	background: var(--color-background-hover, var(--hmk-bg-soft));
 }
 .hmk-menu button:focus-visible {
 	background: var(--hmk-tint);
@@ -1046,9 +1058,12 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 
 /* Vendor credit — always last in the scrollable page (after all panes) */
 .hmk-credit {
-	display: flex;
-	justify-content: center;
+	display: flex !important;
+	flex-direction: column !important;
+	flex-wrap: nowrap !important;
 	align-items: center;
+	justify-content: center;
+	gap: var(--hmk-space-3);
 	flex-shrink: 0;
 	width: 100%;
 	box-sizing: border-box;
@@ -1057,8 +1072,13 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 	padding: var(--hmk-space-5) var(--hmk-space-3) var(--hmk-space-3);
 	text-align: center;
 }
+.hmk-credit > * {
+	width: 100%;
+	max-width: 36rem;
+	box-sizing: border-box;
+}
 .hmk-credit--admin {
-	justify-content: flex-start;
+	align-items: flex-start;
 	text-align: left;
 	margin-top: var(--hmk-space-5);
 	padding: var(--hmk-space-4) 0 0;
@@ -1070,12 +1090,12 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 .hmk-credit__link {
 	display: inline-block;
 	max-width: 100%;
-	padding: 0.55rem 1rem;
-	border-radius: var(--border-radius-pill, 999px);
-	border: 1px solid color-mix(in srgb, var(--color-main-text) 12%, transparent);
-	background: color-mix(in srgb, var(--color-main-background) 86%, transparent);
-	-webkit-backdrop-filter: var(--filter-background-blur, blur(10px));
-	backdrop-filter: var(--filter-background-blur, blur(10px));
+	padding: 0.55rem 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
 	font-size: var(--hmk-fs-sm);
 	font-weight: 500;
 	line-height: 1.4;
@@ -1083,11 +1103,10 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 	color: var(--color-main-text);
 	text-decoration: none;
 	text-shadow: none;
-	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-main-text) 8%, transparent);
+	box-shadow: none;
 }
 .hmk-credit__link:hover {
-	background: color-mix(in srgb, var(--color-main-background) 94%, transparent);
-	border-color: color-mix(in srgb, var(--color-primary-element) 45%, transparent);
+	background: transparent;
 	color: var(--color-primary-element);
 	text-decoration: underline;
 	text-underline-offset: 0.18em;
@@ -1096,28 +1115,14 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 	outline: var(--hmk-focus);
 	outline-offset: 3px;
 }
-.hmk-credit--admin .hmk-credit__link {
-	background: var(--color-main-background);
-	backdrop-filter: none;
-	-webkit-backdrop-filter: none;
-}
-@media (prefers-reduced-transparency: reduce) {
-	.hmk-credit__link {
-		background: var(--color-main-background);
-		backdrop-filter: none;
-		-webkit-backdrop-filter: none;
-	}
-}
 @media (prefers-contrast: more) {
 	.hmk-credit__link {
 		font-weight: 700;
-		border-width: 2px;
-		border-color: var(--color-main-text);
-		background: var(--color-main-background);
 	}
 }
 
 @media (max-width: 768px) {
+	/* Phone/tablet: one-column panes; greeting + Edit stack; NC nav is already the platform hamburger below 1024. */
 	.hmk-topbar {
 		flex-wrap: wrap;
 		justify-content: center;
@@ -1163,6 +1168,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 }
 
 @media (max-width: 480px) {
+	/* Compact phone: tighter shell padding, keep safe-area insets. */
 	#app-content.hmk-app #app-content-wrapper.hmk-shell,
 	#content[class*="app-homecheck"].hmk-app #app-content-wrapper.hmk-shell {
 		padding:
@@ -1183,6 +1189,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 
 @media (prefers-contrast: more) {
 	#app-content .hmk-app,
+	#app-content.hmk-app,
 	#content[class*="app-homecheck"].hmk-app {
 		--hmk-border: var(--color-border-maxcontrast, var(--color-main-text));
 		--hmk-border-strong: var(--color-main-text);
@@ -1209,18 +1216,9 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 		background: var(--color-main-background);
 		border: 2px solid var(--color-main-text);
 	}
-	.hmk-pane__icon {
-		/* Light canvas → black glyph; dark/HC bodies keep invert(1) from theme selectors above */
-		filter: brightness(0);
-		opacity: 1;
-	}
-	body.theme--dark .hmk-pane__icon,
-	body.theme-dark .hmk-pane__icon,
-	body[data-theme-dark] .hmk-pane__icon,
-	body.theme--highcontrast .hmk-pane__icon,
-	body.theme-highcontrast .hmk-pane__icon,
-	body[data-theme-highcontrast] .hmk-pane__icon {
-		filter: brightness(0) invert(1);
+	.hmk-pane__icon:not(.hmk-pane__icon--fallback) {
+		/* Prefer max-contrast ink on HC surfaces; still theme token, not hex */
+		background-color: var(--color-main-text);
 	}
 	.hmk-dialog {
 		border-width: 2px;
@@ -1249,13 +1247,12 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 		background: Canvas;
 		border: 2px solid CanvasText;
 	}
-	.hmk-pane__icon {
-		/* Forced-colors: keep silhouette so white SVGs stay visible on Canvas */
-		filter: brightness(0);
-		opacity: 1;
+	.hmk-pane__icon:not(.hmk-pane__icon--fallback) {
+		background-color: CanvasText;
+		forced-color-adjust: none;
 	}
 	.hmk-pane__icon--fallback {
-		background: transparent;
+		background-color: transparent;
 		color: CanvasText;
 	}
 	.hmk-pane__launch:focus-visible,
@@ -1427,6 +1424,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 }
 
 @media (width < 480px) {
+	/* Compact phone: help popover spans the viewport instead of overflowing the credit. */
 	.hmk-nav-footer__menu {
 		left: var(--hmk-space-2, 0.5rem);
 		right: var(--hmk-space-2, 0.5rem);
@@ -1515,19 +1513,23 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
 /* === app-feedback:hmk end === */
 
 
-/* HomeCheck has no sidebar nav — place Help in the credit footer. */
+/* HomeCheck has no sidebar nav — Help above vendor credit (column stack). */
 .hmk-credit {
-	display: flex;
-	flex-wrap: wrap;
+	display: flex !important;
+	flex-direction: column !important;
+	flex-wrap: nowrap !important;
 	align-items: center;
 	justify-content: center;
-	gap: 0.75rem 1.25rem;
+	gap: var(--hmk-space-3);
+}
+.hmk-credit--admin {
+	align-items: flex-start;
 }
 .hmk-credit .hmk-nav-footer {
 	margin: 0;
 	padding: 0;
 	border: 0;
-	width: auto;
+	width: 100%;
 }
 .hmk-credit .hmk-nav-footer__trigger {
 	min-height: 44px;

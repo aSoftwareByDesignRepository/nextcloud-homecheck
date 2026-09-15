@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.44 — 2026-09-15
+
+- Fix: 1.0.43 pinned canvas ink but still inherited wallpaper `--color-main-background` / `--color-primary-element-light`. That turned app icons into black squares, the edit ⋮ into a filled disc, and left the overflow menu looking empty (black labels on a dark popover). Pin Check surfaces on the content root; kebab and menu use those tokens only.
+- UX: stop painting the flat Check slate on `/apps/homecheck/` — content root is transparent so Nextcloud Appearance / wallpaper shows through; panes and chrome use NC `--color-main-background`.
+- Theme: pane icons are theme-aware — CSS mask + `--color-primary-element` ink on `--hmk-tint-info` wells (no `brightness(0)` / body-class invert). High-contrast uses `--color-main-text`.
+- A11y: NC Appearance high-contrast pins a black Check canvas (same as `prefers-contrast: more`); overflow menu clamps to the viewport; folder/type sizes use design tokens.
+- Tests: theme-contract + mutation for high-contrast canvas and viewport-safe menus; Playwright protocol viewports 375 / 414 / 1024 / 1280.
+
 ## 1.0.43 — 2026-09-13
 
 - Fix: after 1.0.42, wallpaper-derived light `--color-main-text` on the flat light Check canvas washed out titles/icons. Pin canvas-local ink (`#000` / `#fff`) on the content root; keep body theming for the NC header.

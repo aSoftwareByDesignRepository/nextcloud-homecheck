@@ -100,16 +100,22 @@ if (!str_contains($desklet, 'getUID() !== $userId') || !str_contains($desklet, '
 	ok('NG-06: desklet getItemsV2 binds session UID');
 }
 
-/* Icon filter must not use NC sentinel */
+/* Icon ink must be theme tokens — never NC invert sentinel or fixed black silhouette */
 if (preg_match('/filter:\s*var\(--primary-invert-if-/', $css) === 1) {
 	fail('Icons must not use NC invert sentinel in filter');
 } else {
 	ok('Icons avoid NC invert sentinel');
 }
-if (preg_match('/filter:\s*brightness\(0\)\s*;/', $css) !== 1) {
-	fail('Icons must use brightness(0) black silhouette on light well');
+if (preg_match('/mask-image:\s*var\(--hmk-icon-url\)/', $css) !== 1
+	|| preg_match('/\.hmk-pane__icon \{[\s\S]*?background-color:\s*var\(--color-primary-element\)/s', $css) !== 1) {
+	fail('Icons must paint NC primary via CSS mask (theme-aware)');
 } else {
-	ok('Icons use brightness(0) on light well');
+	ok('Icons use primary mask ink (theme-aware)');
+}
+if (preg_match('/\.hmk-pane__icon \{[^}]*filter:\s*brightness\(0\)\s*;/s', $css) === 1) {
+	fail('Icons must not force brightness(0) black silhouette');
+} else {
+	ok('Icons do not force black brightness(0)');
 }
 
 /* Brand freeze: English marketing name HomeCheck everywhere in ship surfaces */

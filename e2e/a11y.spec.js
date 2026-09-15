@@ -123,34 +123,20 @@ test.describe('HomeCheck accessibility', () => {
 		expect(metrics.ok, metrics.reason || 'metrics').toBe(true);
 		expect(metrics.headerVisible).toBe(true);
 		expect(metrics.headerHit).toBe(true);
-		/* Body must not be the flat Check light canvas (#f5f7fb) */
+		/* Body must not be forced to the old Check light canvas (#f5f7fb) */
 		expect(metrics.bodyVsCheck).toBeGreaterThan(20);
-		/* Content keeps flat canvas (no wallpaper stage) */
+		/* Content does not paint its own wallpaper stage */
 		expect(metrics.contentImage).toBe('none');
-		expect(metrics.contentBg).not.toBeNull();
 		/* Header ink vs themed body: WCAG AA for UI text (≥4.5:1); allow ≥3 if large chrome */
 		expect(metrics.inkOnBody).toBeGreaterThanOrEqual(3);
 	});
 
 	/**
-	 * Regression 1.0.43 / DESIGN-SYSTEM §2.3: dark wallpaper theming can set light
-	 * --color-main-text on body for the transparent header. Content must keep
-	 * canvas-local dark ink on the light Check slate (not inherit washed-out text).
+	 * Product choice: inherit NC Appearance. Content root must stay transparent
+	 * (no #f5f7fb Check slate) so body wallpaper / theming shows through.
 	 */
-	test('content titles/icons stay readable on Check canvas when body has wallpaper light ink', async ({ page }) => {
+	test('content root does not paint Check slate over NC wallpaper', async ({ page }) => {
 		await openHomeCheck(page);
-		await page.evaluate(() => {
-			/* Simulate dark wallpaper / light ink without enabling theme--dark
-			 * (content must stay on light #f5f7fb Check canvas). */
-			document.documentElement.style.setProperty('--color-main-text', '#f0f4f8');
-			document.documentElement.style.setProperty('--color-text-maxcontrast', '#bcccdc');
-			document.body.style.setProperty('--color-main-text', '#f0f4f8');
-			document.body.style.setProperty('--color-background-plain', '#0b1622');
-			document.body.style.backgroundColor = '#0b1622';
-			document.body.style.backgroundImage = 'none';
-			document.body.classList.remove('theme--dark', 'theme-dark');
-			document.body.removeAttribute('data-theme-dark');
-		});
 		const metrics = await page.evaluate(() => {
 			function parseRgb(s) {
 				const m = String(s).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
@@ -162,6 +148,82 @@ test.describe('HomeCheck accessibility', () => {
 					return null;
 				}
 				return [Number(m[1]), Number(m[2]), Number(m[3])];
+			}
+			const content = document.querySelector('#content.app-homecheck, #app-content.hmk-app');
+			if (!content) {
+				return { ok: false, reason: 'missing content' };
+			}
+			const cs = getComputedStyle(content);
+			const bg = parseRgb(cs.backgroundColor);
+			const checkLight = [245, 247, 251];
+			const dist = bg
+				? Math.hypot(bg[0] - checkLight[0], bg[1] - checkLight[1], bg[2] - checkLight[2])
+				: 999;
+			return {
+				ok: true,
+				bg,
+				dist,
+				image: cs.backgroundImage,
+				canvasToken: String(cs.getPropertyValue('--hmk-check-canvas') || '').trim(),
+			};
+		});
+		expect(metrics.ok, metrics.reason || 'metrics').toBe(true);
+		expect(metrics.image).toBe('none');
+		/* Transparent or not the forced Check light slate */
+		expect(metrics.dist).toBeGreaterThan(20);
+		expect(metrics.canvasToken.toLowerCase()).not.toMatch(/#f5f7fb/);
+	});
+
+	/**
+	 * Edit chrome still readable when NC tokens are dark (menu/kebab use main-background).
+	 */
+	test('edit chrome stays readable with NC card tokens over dark wallpaper body', async ({ page }) => {
+		await openHomeCheck(page);
+		await page.evaluate(() => {
+			/* Dark body wallpaper; card/chrome tokens stay NC light (typical Appearance). */
+			document.body.style.setProperty('--color-background-plain', '#0b1622');
+			document.body.style.backgroundColor = '#0b1622';
+			document.body.style.backgroundImage = 'none';
+			function paintCards(el) {
+				el.style.setProperty('--color-main-text', '#102a43');
+				el.style.setProperty('--color-text-maxcontrast', '#4a5568');
+				el.style.setProperty('--color-main-background', '#ffffff');
+				el.style.setProperty('--color-background-hover', '#f5f5f5');
+				el.style.setProperty('--color-primary-element-light', '#e5eff5');
+			}
+			paintCards(document.documentElement);
+			paintCards(document.body);
+			document.body.classList.remove('theme--dark', 'theme-dark');
+			document.body.removeAttribute('data-theme-dark');
+		});
+		await page.locator('#hmk-edit-toggle').click();
+		await expect(page.locator('#homecheck-app')).toHaveClass(/is-editing/);
+		const kebab = page.locator('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__menu summary').first();
+		await expect(kebab).toBeVisible();
+		await kebab.click();
+		const menuItem = page.locator('#hmk-panels .hmk-pane[data-type="app"] .hmk-menu button').first();
+		await expect(menuItem).toBeVisible();
+		await expect(menuItem).not.toHaveText(/^$/);
+		const metrics = await page.evaluate(() => {
+			function parseRgb(s) {
+				const str = String(s).trim();
+				let m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+				if (m) {
+					const a = m[4] === undefined ? 1 : Number(m[4]);
+					if (a < 0.2) {
+						return null;
+					}
+					return [Number(m[1]), Number(m[2]), Number(m[3])];
+				}
+				m = str.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
+				if (m) {
+					return [
+						Math.round(Number(m[1]) * 255),
+						Math.round(Number(m[2]) * 255),
+						Math.round(Number(m[3]) * 255),
+					];
+				}
+				return null;
 			}
 			function relLum(rgb) {
 				const f = (c) => {
@@ -178,52 +240,46 @@ test.describe('HomeCheck accessibility', () => {
 				return (hi + 0.05) / (lo + 0.05);
 			}
 			const content = document.querySelector('#content.app-homecheck, #app-content.hmk-app');
-			const greeting = document.querySelector('.hmk-greeting');
-			const icon = document.querySelector('#hmk-panels .hmk-pane__icon');
-			const well = document.querySelector('#hmk-panels .hmk-pane__icon-well');
-			if (!content || !greeting) {
-				return { ok: false, reason: 'missing content/greeting' };
-			}
-			const cs = getComputedStyle(content);
-			const contentBg = parseRgb(cs.backgroundColor);
-			const greetingColor = parseRgb(getComputedStyle(greeting).color);
-			const hmkText = String(cs.getPropertyValue('--hmk-text') || '').trim();
-			const localMain = String(cs.getPropertyValue('--color-main-text') || '').trim();
+			const well = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__icon-well');
+			const img = well && well.querySelector('.hmk-pane__icon');
+			const summary = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__menu summary');
+			const dots = summary && summary.querySelector('.hmk-pane__menu-dots');
+			const menu = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-menu');
+			const item = menu && menu.querySelector('button');
+			const wellBg = well ? parseRgb(getComputedStyle(well).backgroundColor) : null;
+			const inkBg = img ? parseRgb(getComputedStyle(img).backgroundColor) : null;
+			const summaryBg = summary ? parseRgb(getComputedStyle(summary).backgroundColor) : null;
+			const summaryFg = summary ? parseRgb(getComputedStyle(summary).color) : null;
+			const menuBg = menu ? parseRgb(getComputedStyle(menu).backgroundColor) : null;
+			const itemFg = item ? parseRgb(getComputedStyle(item).color) : null;
+			const contentBg = content ? parseRgb(getComputedStyle(content).backgroundColor) : null;
 			const checkLight = [245, 247, 251];
-			const nearCheck = contentBg
-				? Math.hypot(contentBg[0] - checkLight[0], contentBg[1] - checkLight[1], contentBg[2] - checkLight[2])
-				: 999;
-			let iconOk = true;
-			let iconFilter = '';
-			if (icon) {
-				iconFilter = getComputedStyle(icon).filter || '';
-				/* Light canvas: black silhouette, not inverted white-on-light */
-				iconOk = /brightness\(\s*0\s*\)/.test(iconFilter) && !/invert\(\s*1\s*\)/.test(iconFilter);
-			}
+			const imgStyle = img ? getComputedStyle(img) : null;
 			return {
-				ok: true,
-				contentBg,
-				greetingColor,
-				hmkText,
-				localMain,
-				nearCheck,
-				greetingOnCanvas: contentBg && greetingColor ? contrast(greetingColor, contentBg) : null,
-				iconOk,
-				iconFilter,
-				wellBg: well ? parseRgb(getComputedStyle(well).backgroundColor) : null,
-				bodyThemeDark: document.body.classList.contains('theme--dark')
-					|| document.body.classList.contains('theme-dark'),
+				itemText: item ? String(item.textContent || '').trim() : '',
+				itemCount: menu ? menu.querySelectorAll('button').length : 0,
+				dotsPresent: !!(dots && getComputedStyle(dots).display !== 'none'),
+				iconFilter: imgStyle ? imgStyle.filter : '',
+				iconMask: imgStyle ? (imgStyle.maskImage || imgStyle.webkitMaskImage || '') : '',
+				iconInk: imgStyle ? imgStyle.backgroundColor : '',
+				inkOnWell: wellBg && inkBg ? contrast(inkBg, wellBg) : 0,
+				kebabContrast: summaryBg && summaryFg ? contrast(summaryFg, summaryBg) : 0,
+				menuContrast: menuBg && itemFg ? contrast(itemFg, menuBg) : 0,
+				contentNotCheckSlate: !contentBg
+					|| Math.hypot(contentBg[0] - checkLight[0], contentBg[1] - checkLight[1], contentBg[2] - checkLight[2]) > 20,
 			};
 		});
-		expect(metrics.ok, metrics.reason || 'metrics').toBe(true);
-		expect(metrics.bodyThemeDark).toBe(false);
-		expect(metrics.nearCheck).toBeLessThan(30);
-		expect(metrics.hmkText.toLowerCase()).toMatch(/#000|#000000|rgb\(\s*0,\s*0,\s*0\s*\)|black/);
-		expect(metrics.localMain.toLowerCase()).toMatch(/#000|#000000|rgb\(\s*0,\s*0,\s*0\s*\)|black/);
-		expect(metrics.greetingOnCanvas).toBeGreaterThanOrEqual(4.5);
-		expect(metrics.iconOk).toBe(true);
+		expect(metrics.contentNotCheckSlate).toBe(true);
+		expect(metrics.itemCount).toBeGreaterThan(0);
+		expect(metrics.itemText.length).toBeGreaterThan(2);
+		expect(metrics.dotsPresent).toBe(true);
+		expect(metrics.iconFilter === 'none' || metrics.iconFilter === '').toBe(true);
+		expect(metrics.iconMask).toMatch(/url\(/i);
+		expect(metrics.inkOnWell).toBeGreaterThanOrEqual(3);
+		expect(metrics.kebabContrast).toBeGreaterThanOrEqual(3);
+		expect(metrics.menuContrast).toBeGreaterThanOrEqual(4.5);
 		await page.screenshot({
-			path: 'test-results/homecheck-canvas-local-ink-wallpaper.png',
+			path: 'test-results/homecheck-wallpaper-edit-menu.png',
 			fullPage: false,
 		});
 	});

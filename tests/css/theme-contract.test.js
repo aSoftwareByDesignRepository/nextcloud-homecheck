@@ -22,13 +22,9 @@ function ok(cond, msg) {
 	}
 }
 
-/** Feature rules: no raw #hex outside var(..., fallback) except Check family canvas */
-const CHECK_CANVAS_HEX = new Set(['#f5f7fb', '#0b1622', '#152536', '#ffffff', '#000000', '#d9e2ec']);
+/** Feature rules: no raw #hex outside var(..., fallback) — HomeCheck inherits NC theming */
 const hexOutsideVar = css.replace(/var\([^)]+\)/g, '').match(/#[0-9a-fA-F]{3,8}\b/g) || [];
-const bannedHex = hexOutsideVar.filter((h) => !CHECK_CANVAS_HEX.has(h.toLowerCase()));
-ok(bannedHex.length === 0, 'no raw hex in feature CSS except Check canvas tokens (' + bannedHex.join(',') + ')');
-ok(css.includes('#f5f7fb'), 'Check light canvas #f5f7fb');
-ok(css.includes('#0b1622'), 'Check dark canvas #0b1622');
+ok(hexOutsideVar.length === 0, 'no raw hex in feature CSS (' + hexOutsideVar.join(',') + ')');
 
 ok(css.includes('#app-content .hmk-app'), 'legacy NC app-content tokens retained');
 ok(css.includes('#app-content.hmk-app'), 'tokens also bind when hmk-app is on #app-content');
@@ -47,16 +43,18 @@ ok(/#homecheck-app\s*\{[^}]*overflow-y:\s*auto/s.test(css), 'app root is vertica
 ok(/\.hmk-credit\s*\{[^}]*margin-top:\s*auto/s.test(css), 'vendor credit pinned to page end via margin-top auto');
 ok(/\.hmk-credit\s*\{[^}]*flex-shrink:\s*0/s.test(css), 'vendor credit never collapses');
 ok(
-	/button\.button-vue\.secondary\.hmk-chrome__btn[\s\S]*?background-color:\s*var\(--hmk-check-surface/.test(css),
-	'chrome secondary uses opaque Check surface for canvas AA',
+	/button\.button-vue\.secondary\.hmk-chrome__btn[\s\S]*?background-color:\s*var\(--hmk-check-surface/.test(css)
+		|| /button\.button-vue\.secondary\.hmk-chrome__btn[\s\S]*?background-color:\s*var\(--color-main-background/.test(css),
+	'chrome secondary uses opaque NC surface for wallpaper AA',
 );
 ok(
-	/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
-	'dark theme icon glyphs invert for AA on dark wells',
+	/\.hmk-pane__icon \{[\s\S]*?background-color:\s*var\(--color-primary-element\)/s.test(css)
+		&& /mask-image:\s*var\(--hmk-icon-url\)/.test(css),
+	'icon glyphs paint NC primary via CSS mask (theme + accent aware)',
 );
 ok(
-	/body\.theme--highcontrast[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
-	'high-contrast theme icon glyphs invert for AA on dark wells',
+	/body\.theme--highcontrast[\s\S]*?\.hmk-pane__icon:not\(\.hmk-pane__icon--fallback\)[\s\S]*?background-color:\s*var\(--color-main-text\)/.test(css),
+	'high-contrast theme icon glyphs use main-text ink',
 );
 ok(css.includes('hmk-shell--wide'), 'wide shell modifier present');
 ok(css.includes('color-background-hover'), 'native NC hover on tiles');
@@ -65,9 +63,19 @@ ok(css.includes('--hmk-overlay-height'), 'viewport height under header for scrol
 ok(css.includes('calc(100dvh - var(--header-height'), 'content height accounts for NC header');
 ok(css.includes('hmk-panels'), 'pane host flex wrap');
 ok(css.includes('hmk-greeting'), 'dashboard greeting');
-ok(css.includes('--hmk-check-canvas'), 'Check flat canvas token');
-ok(css.includes('background-image: none'), 'no wallpaper stage as chrome');
-ok(!/background-image:\s*var\(--image-background\)/.test(css), 'bans --image-background as page chrome');
+ok(
+	/--hmk-check-surface:\s*var\(--color-main-background\)/.test(css),
+	'check-surface aliases NC main-background (no forced Check slate)',
+);
+ok(
+	/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-color:\s*transparent/.test(css),
+	'content root is transparent so NC wallpaper / Appearance shows through',
+);
+ok(
+	!/#app-content\.hmk-app[\s\S]{0,400}?--hmk-check-canvas:\s*#f5f7fb/.test(css)
+		&& !/#app-content\.hmk-app[\s\S]{0,500}?background-color:\s*var\(--hmk-check-canvas/.test(css),
+	'does not paint flat Check canvas on content root',
+);
 /* Host header AA: never steal body theming (transparent #header sits on body) */
 ok(
 	!/body:has\(#content\[class\*=["']app-homecheck/.test(css)
@@ -75,20 +83,26 @@ ok(
 		&& !/body:has\([\s\S]*?hmk-app[\s\S]*?background-image:\s*none\s*!important/.test(css),
 	'does not force Check canvas / kill wallpaper on body (preserves NC header backdrop)',
 );
-	ok(
-	/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-color:\s*var\(--hmk-check-canvas/.test(css)
-		&& /#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?background-image:\s*none/.test(css),
-	'flat Check canvas scoped to content root only',
+ok(css.includes('.hmk-pane__menu-dots'), 'kebab uses three-dot glyph');
+ok(
+	/\.hmk-pane__menu summary \{[\s\S]{0,400}?background:\s*var\(--color-main-background/.test(css)
+		&& /\.hmk-pane__menu summary \{[\s\S]{0,400}?color:\s*var\(--hmk-text/.test(css),
+	'kebab trigger uses NC main-background + app ink',
 );
 ok(
-	/#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--hmk-text:\s*#000000/.test(css)
-		&& /#app-content\.hmk-app,\s*#content\[class\*="app-homecheck"\]\.hmk-app\s*\{[\s\S]{0,900}?--color-main-text:\s*#000000/.test(css),
-	'light Check canvas pins dark ink (not wallpaper-derived light text)',
+	/\.hmk-menu \{[\s\S]{0,800}?background:\s*var\(--color-main-background/.test(css)
+		&& /#homecheck-app \.hmk-menu button[\s\S]{0,500}?color:\s*var\(--hmk-text/.test(css),
+	'overflow menu items use NC main-background + app ink',
 );
 ok(
-	/body\.theme--dark[\s\S]*?#app-content\.hmk-app[\s\S]*?--hmk-text:\s*#ffffff/.test(css)
-		&& /body\.theme--dark[\s\S]*?#app-content\.hmk-app[\s\S]*?--color-main-text:\s*#ffffff/.test(css),
-	'dark Check canvas pins light ink',
+	/\.hmk-menu \{[\s\S]{0,500}?max-width:\s*calc\(100vw - 2rem\)/.test(css)
+		&& /\.hmk-menu \{[\s\S]{0,500}?min-width:\s*min\(11rem/.test(css),
+	'overflow menu clamps to viewport (no 320px horizontal clip)',
+);
+ok(!/font-size:\s*15px/.test(css), 'launcher type uses rem (not 15px literals)');
+ok(
+	/\.hmk-folder-list \{[\s\S]{0,120}?gap:\s*var\(--hmk-space-1\)/.test(css),
+	'folder list gap uses spacing token',
 );
 ok(css.includes('line-clamp: 2') || css.includes('-webkit-line-clamp: 2'), 'pane titles two-line clamp');
 ok(css.includes('#hmk-cta:not([hidden])') || css.includes('hmk-cta:not([hidden])'), 'Bachus hides home when CTA teaches');
@@ -103,17 +117,17 @@ ok(!css.includes('.hmk-card'), 'legacy card tiles removed');
 ok(css.includes('--hmk-icon-well'), 'icon well token defined');
 ok(css.includes('--hmk-icon-inner'), 'icon glyph size token defined');
 ok(css.includes('.hmk-pane__icon-well'), 'icon well wrapper present');
-ok(/filter:\s*brightness\(0\)\s*;/.test(css), 'black glyph on light well');
-ok(/--color-primary-element-light/.test(css), 'icon well uses primary-element-light');
+ok(/mask-image:\s*var\(--hmk-icon-url\)/.test(css), 'theme-aware icon mask present');
+ok(/--hmk-tint-info/.test(css) && /\.hmk-pane__icon-well \{[\s\S]*?--hmk-tint-info/s.test(css), 'icon well uses tint-info');
 ok(/border:\s*2px\s+solid\s+var\(--color-primary-element\)/.test(css), 'icon well bordered with primary');
 ok(!/filter:\s*var\(--primary-invert-if-/.test(css), 'no NC invert sentinel in icon filter');
 ok(
-	/\.hmk-pane__icon \{[^}]*filter:\s*brightness\(0\)\s*;/s.test(css),
-	'default icon filter is black silhouette (not inverted)',
+	/\.hmk-pane__icon \{[\s\S]*?background-color:\s*var\(--color-primary-element\)/s.test(css),
+	'default icon ink is NC primary (not black silhouette)',
 );
 ok(
-	/body\.theme--dark[\s\S]*?\.hmk-pane__icon[\s\S]*?invert\(1\)/.test(css),
-	'dark theme scopes invert(1) for icon AA',
+	!/\.hmk-pane__icon \{[^}]*filter:\s*brightness\(0\)\s*;/s.test(css),
+	'does not force brightness(0) black icons',
 );
 ok(css.includes('button.button-vue.primary'), 'vanilla primary buttons styled to NC primary');
 ok(css.includes('background-color: var(--hmk-primary-fill'), 'primary button fill uses AA-safe hmk-primary-fill');

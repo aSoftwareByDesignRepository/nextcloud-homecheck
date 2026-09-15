@@ -151,11 +151,24 @@ test.describe('HomeCheck first view — instant clarity', () => {
 		expect(metrics.bg).toMatch(/^(rgb\(|color\()/);
 	});
 
-	test('pane icon wells use light primary surface with black glyphs', async ({ page }) => {
+	test('pane icon wells use tint-info surface with primary glyphs', async ({ page }) => {
 		const metrics = await page.evaluate(() => {
 			function parseRgb(s) {
-				const m = String(s).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-				return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+				const str = String(s).trim();
+				let m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+				if (m) {
+					return [Number(m[1]), Number(m[2]), Number(m[3])];
+				}
+				/* Chrome may serialize color-mix as color(srgb r g b) with 0–1 channels */
+				m = str.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
+				if (m) {
+					return [
+						Math.round(Number(m[1]) * 255),
+						Math.round(Number(m[2]) * 255),
+						Math.round(Number(m[3]) * 255),
+					];
+				}
+				return null;
 			}
 			function relLum(rgb) {
 				const f = (c) => {
@@ -179,33 +192,40 @@ test.describe('HomeCheck first view — instant clarity', () => {
 			const wellStyle = getComputedStyle(well);
 			const imgStyle = getComputedStyle(img);
 			const html = getComputedStyle(document.documentElement);
-			const light = html.getPropertyValue('--color-primary-element-light').trim();
 			const primary = html.getPropertyValue('--color-primary-element').trim();
 			const wellRgb = parseRgb(wellStyle.backgroundColor);
 			const borderRgb = parseRgb(wellStyle.borderTopColor);
+			const inkRgb = parseRgb(imgStyle.backgroundColor);
 			return {
 				wellBg: wellStyle.backgroundColor,
 				border: wellStyle.borderTopColor,
+				inkBg: imgStyle.backgroundColor,
+				mask: imgStyle.maskImage || imgStyle.webkitMaskImage || '',
 				filter: imgStyle.filter,
 				opacity: imgStyle.opacity,
 				visibility: imgStyle.visibility,
 				naturalW: img.naturalWidth,
-				light,
 				primary,
-				blackOnWell: wellRgb ? contrast([0, 0, 0], wellRgb) : 0,
+				inkOnWell: wellRgb && inkRgb ? contrast(inkRgb, wellRgb) : 0,
+				wellParsed: !!wellRgb,
+				inkParsed: !!inkRgb,
 				borderVsWell: wellRgb && borderRgb ? contrast(borderRgb, wellRgb) : 0,
 				wellW: well.getBoundingClientRect().width,
 				usesInvertSentinel: /var\(--primary-invert/.test(imgStyle.filter),
+				maskUrlSet: !!(img.style.getPropertyValue('--hmk-icon-url') || '').includes('url('),
 			};
 		});
 		expect(metrics).not.toBeNull();
 		expect(metrics.naturalW).toBeGreaterThan(0);
 		expect(metrics.visibility).toBe('visible');
 		expect(metrics.opacity).not.toBe('0');
-		expect(metrics.filter).toMatch(/brightness/i);
-		expect(metrics.filter).not.toMatch(/invert/i);
+		expect(metrics.maskUrlSet).toBe(true);
+		expect(metrics.mask).toMatch(/url\(/i);
+		expect(metrics.filter === 'none' || metrics.filter === '').toBe(true);
 		expect(metrics.usesInvertSentinel).toBe(false);
-		expect(metrics.blackOnWell).toBeGreaterThanOrEqual(3);
+		expect(metrics.wellParsed).toBe(true);
+		expect(metrics.inkParsed).toBe(true);
+		expect(metrics.inkOnWell).toBeGreaterThanOrEqual(3);
 		expect(metrics.wellW).toBeGreaterThanOrEqual(34);
 		/* Well should not be the solid dark primary (that was the muddy/orange path) */
 		const hex = metrics.primary.replace('#', '');
@@ -217,22 +237,27 @@ test.describe('HomeCheck first view — instant clarity', () => {
 		}
 	});
 
-	test('icon filter never depends on NC invert sentinel values', async ({ page }) => {
+	test('icon paint never depends on NC invert sentinel values', async ({ page }) => {
 		await page.evaluate(() => {
 			document.documentElement.style.setProperty('--primary-invert-if-bright', 'no');
 			document.documentElement.style.setProperty('--primary-invert-if-dark', 'no');
 		});
 		const metrics = await page.evaluate(() => {
 			const img = document.querySelector('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__launch .hmk-pane__icon');
+			const st = getComputedStyle(img);
 			return {
-				filter: getComputedStyle(img).filter,
-				opacity: getComputedStyle(img).opacity,
+				filter: st.filter,
+				opacity: st.opacity,
 				naturalW: img.naturalWidth,
+				mask: st.maskImage || st.webkitMaskImage || '',
+				ink: st.backgroundColor,
 			};
 		});
-		expect(metrics.filter).toMatch(/brightness/i);
+		expect(metrics.filter === 'none' || metrics.filter === '').toBe(true);
 		expect(metrics.opacity).not.toBe('0');
 		expect(metrics.naturalW).toBeGreaterThan(0);
+		expect(metrics.mask).toMatch(/url\(/i);
+		expect(metrics.ink).toMatch(/^(rgb\(|color\()/);
 	});
 
 	test('view mode passes axe on first paint region', async ({ page }) => {

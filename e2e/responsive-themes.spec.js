@@ -77,6 +77,14 @@ const VIEWPORTS = [
 	{ name: 'wide', width: 1920, height: 1080 },
 ];
 
+/** Overflow/touch protocol — extra widths without exploding the 5×5 theme matrix. */
+const PROTOCOL_VIEWPORTS = [
+	{ name: 'iphone-se', width: 375, height: 667 },
+	{ name: 'iphone-plus', width: 414, height: 896 },
+	{ name: 'nc-nav-collapse', width: 1024, height: 768 },
+	{ name: 'desktop-1280', width: 1280, height: 800 },
+];
+
 /** Representative axe cases — full WCAG proof without N×M explosion */
 const AXE_MATRIX = [
 	{ viewport: VIEWPORTS[1], theme: THEME_PRESETS[0], mode: 'view' },
@@ -224,6 +232,31 @@ test.describe('HomeCheck responsive + theme matrix', () => {
 				await assertNoHorizontalOverflow(page, `${caseName} edit`);
 			});
 		}
+	}
+
+	for (const viewport of PROTOCOL_VIEWPORTS) {
+		test(`protocol overflow: ${viewport.name} (${viewport.width}px)`, async ({ page }) => {
+			await page.setViewportSize({ width: viewport.width, height: viewport.height });
+			await openHomeCheck(page);
+			await assertNoHorizontalOverflow(page, viewport.name);
+			const editBtn = page.locator('#hmk-edit-toggle');
+			const box = await editBtn.boundingBox();
+			expect(box).not.toBeNull();
+			expect(box.height).toBeGreaterThanOrEqual(44);
+			expect(box.width).toBeGreaterThanOrEqual(44);
+			await editBtn.click();
+			await expect(page.locator('#hmk-edit-hint')).toBeVisible();
+			await assertNoHorizontalOverflow(page, `${viewport.name} edit`);
+			const kebab = page.locator('#hmk-panels .hmk-pane[data-type="app"] .hmk-pane__menu summary').first();
+			await kebab.click();
+			const menu = page.locator('#hmk-panels .hmk-pane[data-type="app"] .hmk-menu').first();
+			await expect(menu.locator('button').first()).toBeVisible();
+			const menuBox = await menu.boundingBox();
+			expect(menuBox).not.toBeNull();
+			expect(menuBox.x).toBeGreaterThanOrEqual(-1);
+			expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(viewport.width + 1);
+			await assertNoHorizontalOverflow(page, `${viewport.name} menu`);
+		});
 	}
 
 	for (const { viewport, theme, mode } of AXE_MATRIX) {
