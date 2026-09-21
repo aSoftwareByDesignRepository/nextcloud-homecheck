@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 — 2026-09-21
+
+- **Nextcloud:** raise `max-version` to **35** (Hub 26 Summer) so App Store updates are offered on current stable.
+- Docs: store/README compatibility prose now **32–35**.
+
 ## 1.0.44 — 2026-09-15
 
 - Fix: 1.0.43 pinned canvas ink but still inherited wallpaper `--color-main-background` / `--color-primary-element-light`. That turned app icons into black squares, the edit ⋮ into a filled disc, and left the overflow menu looking empty (black labels on a dark popover). Pin Check surfaces on the content root; kebab and menu use those tokens only.

@@ -29,7 +29,7 @@ We improve this app with real-world use. Bug reports, rough edges, and ideas hel
 
 ## Requirements
 
-- Nextcloud 32–34 · PHP 8.2–8.5
+- Nextcloud 32–35 · PHP 8.2–8.5
 	]]></description>
 	<description lang="de"><![CDATA[
 # HomeCheck — persönliche App-Startseite
@@ -52,9 +52,9 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 
 ## Voraussetzungen
 
-- Nextcloud 32–34 · PHP 8.2–8.5
+- Nextcloud 32–35 · PHP 8.2–8.5
 	]]></description>
-	<version>1.0.44</version>
+	<version>1.1.0</version>
 	<licence>agpl</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Alexander Mäule</author>
 	<namespace>HomeCheck</namespace>
@@ -74,7 +74,7 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-09.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-09.png</screenshot>
 	<dependencies>
 		<php min-version="8.2" max-version="8.5"/>
-		<nextcloud min-version="32" max-version="34"/>
+		<nextcloud min-version="32" max-version="35"/>
 	</dependencies>
 	<navigations>
 		<navigation>

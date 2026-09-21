@@ -2,7 +2,7 @@
 
 Personal Nextcloud **app home**: Dashboard-style panes, Samsung-style **folders**, personal order that **syncs to the top bar**, hide/restore apps, optional start-page CTA, and an admin **seed** template (applied once).
 
-**Licence:** AGPL-3.0-or-later · **Nextcloud:** 32–34 · **PHP:** 8.2–8.5  
+**Licence:** AGPL-3.0-or-later · **Nextcloud:** 32–35 · **PHP:** 8.2–8.5  
 **Store / website:** https://nextcloud.software-by-design.de/ · **Issues:** https://github.com/aSoftwareByDesignRepository/nextcloud-homecheck/issues
 
 ## Screenshots
