@@ -58,6 +58,75 @@ test.describe('HomeCheck user journeys', () => {
 		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before, { timeout: 10000 });
 	});
 
+	test('rename save restores focus to the rebuilt pane, not document.body', async ({ page }) => {
+		await expect(page.locator('#homecheck-app')).toBeVisible();
+		await page.locator('#hmk-edit-toggle').click();
+		const before = await folderCount(page);
+		await page.locator('#hmk-new-folder').click();
+		await waitForLayoutSave(page);
+		const pane = folderAt(page, before);
+		const paneId = await pane.getAttribute('data-id');
+		await clickCardMenuItem(pane, /Rename|Umbenennen/i);
+		await expect(page.locator('#hmk-prompt-dialog')).toBeVisible();
+		await page.locator('#hmk-prompt-input').fill('FocusProbe' + Date.now().toString().slice(-5));
+		await page.locator('#hmk-prompt-ok').click();
+		await waitForLayoutSave(page);
+		/* render() detached the pre-dialog node; focus must land on the successor. */
+		const focus = await page.evaluate(() => {
+			const a = document.activeElement;
+			const host = a && a.closest ? a.closest('[data-id]') : null;
+			return { tag: a ? a.tagName : '', id: host ? host.getAttribute('data-id') : null };
+		});
+		expect(focus.tag).not.toBe('BODY');
+		expect(focus.id).toBe(paneId);
+	});
+
+	test('folder-dialog row remove keeps focus inside the dialog, not on body', async ({ page }) => {
+		await expect(page.locator('#homecheck-app')).toBeVisible();
+		await page.locator('#hmk-edit-toggle').click();
+		await page.locator('#hmk-new-folder').click();
+		await waitForLayoutSave(page);
+		const folder = page.locator('#hmk-panels .hmk-pane[data-type="folder"]').first();
+		/* One folder → Add to folder auto-adds without the picker. */
+		const appPane = page.locator('#hmk-panels .hmk-pane[data-type="app"]').first();
+		await clickCardMenuItem(appPane, /Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i);
+		await waitForLayoutSave(page);
+		await openFolderCard(folder);
+		await expect(page.locator('#hmk-folder-dialog')).toBeVisible();
+		const row = page.locator('#hmk-folder-grid .hmk-pane__row').first();
+		await expect(row).toBeVisible();
+		/* Real clicks so the menuitem button genuinely holds DOM focus (the
+		   path the critic probed: repaint detached it → body). */
+		await row.locator('summary').click();
+		await row.getByRole('menuitem', { name: /Remove from folder|Aus Ordner entfernen/i }).click();
+		await waitForLayoutSave(page);
+		const focus = await page.evaluate(() => {
+			const a = document.activeElement;
+			return {
+				tag: a ? a.tagName : '',
+				id: a ? a.id : '',
+				inDialog: !!(a && a.closest && a.closest('#hmk-folder-dialog')),
+			};
+		});
+		expect(focus.tag).not.toBe('BODY');
+		expect(focus.inDialog).toBe(true);
+	});
+
+	test('delete confirm restores focus to a stable control after the pane is gone', async ({ page }) => {
+		await expect(page.locator('#homecheck-app')).toBeVisible();
+		await page.locator('#hmk-edit-toggle').click();
+		const before = await folderCount(page);
+		await page.locator('#hmk-new-folder').click();
+		await waitForLayoutSave(page);
+		await clickCardMenuItem(folderAt(page, before), /Delete folder|Ordner löschen/i);
+		await expect(page.locator('#hmk-confirm-dialog')).toBeVisible();
+		await page.locator('#hmk-confirm-ok').click();
+		await waitForLayoutSave(page);
+		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before, { timeout: 10000 });
+		const focusedId = await page.evaluate(() => document.activeElement && document.activeElement.id);
+		expect(focusedId).toBe('hmk-edit-toggle');
+	});
+
 	test('Add to folder opens picker: cancel leaves app; confirm adds member', async ({ page }) => {
 		await expect(page.locator('#homecheck-app')).toBeVisible();
 		await page.locator('#hmk-edit-toggle').click();

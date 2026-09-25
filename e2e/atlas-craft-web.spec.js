@@ -144,6 +144,20 @@ async function prepareDeskletCraft(page) {
 		const url = (window.OC?.generateUrl
 			? window.OC.generateUrl('/apps/dashboard/api/v3/layout')
 			: '/index.php/apps/dashboard/api/v3/layout');
+		/* NC35 exposes the dashboard layout API on the OCS endpoint only —
+		 * /index.php/apps/dashboard/api/v3/layout is 404 there. */
+		const ocsUrl = '/ocs/v2.php/apps/dashboard/api/v3/layout';
+		await fetch(ocsUrl, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				'OCS-APIRequest': 'true',
+				'Content-Type': 'application/json',
+				requesttoken: token,
+				Accept: 'application/json',
+			},
+			body: JSON.stringify({ layout: ['homecheck-launcher', 'recommendations', 'calendar'] }),
+		}).catch(() => null);
 		await fetch(url, {
 			method: 'POST',
 			credentials: 'same-origin',

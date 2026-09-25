@@ -137,6 +137,8 @@
 	let saveChain = Promise.resolve();
 	/** @type {HTMLElement|null} */
 	let focusReturn = null;
+	/** @type {string|null} Selector to re-find focusReturn's logical successor after render() detaches it. */
+	let focusReturnSel = null;
 	/** @type {string|null} */
 	let openFolderId = null;
 
@@ -659,7 +661,7 @@
 		render();
 	}
 
-	function deleteFolder(folderId) {
+	function deleteFolder(folderId, fromEl) {
 		confirmAction(t.confirmDeleteFolder, t.delete, function () {
 			const idx = findItemIndex(folderId);
 			if (idx < 0) {
@@ -682,7 +684,7 @@
 			}
 			scheduleSave();
 			render();
-		});
+		}, fromEl);
 	}
 
 	function reorderInsertIndex(from, to, placeAfter) {
@@ -730,7 +732,7 @@
 		render();
 	}
 
-	function addAppToFolderFlow(appId) {
+	function addAppToFolderFlow(appId, fromEl) {
 		const folders = state.layout.items.filter(function (it) { return it.type === 'folder'; });
 		if (folders.length === 0) {
 			createFolderWithApp(appId);
@@ -740,7 +742,7 @@
 			addAppToFolder(appId, folders[0].id);
 			return;
 		}
-		showFolderPicker(appId);
+		showFolderPicker(appId, fromEl);
 	}
 
 	function addAppToFolder(appId, folderId) {
@@ -971,7 +973,7 @@
 		}
 	}
 
-	function renameFolder(folderId) {
+	function renameFolder(folderId, fromEl) {
 		const idx = findItemIndex(folderId);
 		if (idx < 0) {
 			return;
@@ -986,11 +988,11 @@
 			if (openFolderId === folderId) {
 				paintFolderDialog(items[idx]);
 			}
-		});
+		}, fromEl);
 	}
 
-	function promptName(title, label, value, onOk) {
-		focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+	function promptName(title, label, value, onOk, returnEl) {
+		setFocusReturn(returnEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null));
 		el.promptTitle.textContent = title;
 		el.promptLabel.textContent = label;
 		el.promptInput.value = value || '';
@@ -1054,11 +1056,11 @@
 		};
 	}
 
-	function confirmAction(message, confirmLabel, onConfirm) {
+	function confirmAction(message, confirmLabel, onConfirm, returnEl) {
 		if (!el.confirmDialog) {
 			return;
 		}
-		focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		setFocusReturn(returnEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null));
 		el.confirmMessage.textContent = message;
 		el.confirmOk.textContent = confirmLabel || t.delete;
 		el.confirmDialog.showModal();
@@ -1098,12 +1100,12 @@
 		el.confirmOk.onclick = function () { finish(true); };
 	}
 
-	function showFolderPicker(appId) {
+	function showFolderPicker(appId, returnEl) {
 		if (!el.folderPicker || !el.folderPickerList) {
 			return;
 		}
 		const folders = state.layout.items.filter(function (it) { return it.type === 'folder'; });
-		focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		setFocusReturn(returnEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null));
 		el.folderPickerList.textContent = '';
 		folders.forEach(function (folder) {
 			const btn = document.createElement('button');
@@ -1188,15 +1190,15 @@
 				menu.appendChild(menuButton(t.moveLeft, function () { details.open = false; moveItem(item.id, -1); }));
 				menu.appendChild(menuButton(t.moveRight, function () { details.open = false; moveItem(item.id, 1); }));
 				menu.appendChild(menuButton(t.newFolder, function () { details.open = false; createFolderWithApp(item.id); }));
-				menu.appendChild(menuButton(t.addToFolder, function () { details.open = false; addAppToFolderFlow(item.id); }));
+				menu.appendChild(menuButton(t.addToFolder, function () { details.open = false; addAppToFolderFlow(item.id, summary); }));
 				menu.appendChild(menuButton(t.hideApp, function () { details.open = false; hideApp(item.id, null); }));
 			} else if (item.type === 'folder') {
 				menu.appendChild(menuButton(t.moveLeft, function () { details.open = false; moveItem(item.id, -1); }));
 				menu.appendChild(menuButton(t.moveRight, function () { details.open = false; moveItem(item.id, 1); }));
 				menu.appendChild(menuButton(t.openFolder, function () { details.open = false; openFolder(item, summary); }));
-				menu.appendChild(menuButton(t.rename, function () { details.open = false; renameFolder(item.id); }));
+				menu.appendChild(menuButton(t.rename, function () { details.open = false; renameFolder(item.id, summary); }));
 				menu.appendChild(menuButton(t.hideApp, function () { details.open = false; hideFolder(item.id); }));
-				menu.appendChild(menuButton(t.deleteFolder, function () { details.open = false; deleteFolder(item.id); }));
+				menu.appendChild(menuButton(t.deleteFolder, function () { details.open = false; deleteFolder(item.id, summary); }));
 			}
 		}
 		details.appendChild(menu);
@@ -1321,6 +1323,11 @@
 	function paintFolderDialog(folder) {
 		openFolderId = folder.id;
 		el.folderTitle.textContent = folder.name || t.folder;
+		/* Same rebuild-detach class as render(): a focused row/menu descendant
+		   must be re-resolved after the grid is rebuilt. */
+		const restoreSel = el.folderGrid.contains(document.activeElement)
+			? focusSelFor(document.activeElement)
+			: null;
 		el.folderGrid.textContent = '';
 		const kids = folder.children || [];
 		if (kids.length === 0) {
@@ -1330,6 +1337,9 @@
 			p.className = 'hmk-muted';
 			p.textContent = t.emptyFolder;
 			el.folderGrid.appendChild(p);
+			if (restoreSel && el.folderClose) {
+				el.folderClose.focus();
+			}
 			return;
 		}
 		el.folderGrid.setAttribute('role', 'list');
@@ -1341,10 +1351,18 @@
 			}
 			el.folderGrid.appendChild(makeListRow(entry, { folderId: folder.id }));
 		});
+		if (restoreSel) {
+			const next = el.folderGrid.querySelector(restoreSel);
+			if (next && typeof next.focus === 'function') {
+				next.focus();
+			} else if (el.folderClose) {
+				el.folderClose.focus();
+			}
+		}
 	}
 
 	function openFolder(folder, fromEl) {
-		focusReturn = fromEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+		setFocusReturn(fromEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null));
 		paintFolderDialog(folder);
 		el.folderDialog.showModal();
 		el.folderClose.focus();
@@ -1442,6 +1460,11 @@
 		if (!el.panels) {
 			return;
 		}
+		/* Preserve focus across the rebuild: the focused pane descendant is
+		   detached below, so remember a stable selector for its successor. */
+		const restoreSel = el.panels.contains(document.activeElement)
+			? focusSelFor(document.activeElement)
+			: null;
 		el.panels.textContent = '';
 		if (items.length === 0) {
 			el.empty.hidden = false;
@@ -1475,6 +1498,14 @@
 			el.instructions.textContent = editing ? t.editSubtitle : t.viewSubtitle;
 		}
 		paintCta();
+		if (restoreSel && !root.querySelector('dialog[open]')) {
+			const next = el.panels.querySelector(restoreSel);
+			if (next && typeof next.focus === 'function') {
+				next.focus();
+			} else if (el.editToggle) {
+				el.editToggle.focus();
+			}
+		}
 	}
 
 	function paintCta() {
@@ -1551,11 +1582,41 @@
 		});
 	}
 
+	function focusSelFor(node) {
+		if (!node || !node.closest) {
+			return null;
+		}
+		const host = node.closest('[data-id]');
+		if (!host || !host.dataset.id) {
+			return null;
+		}
+		let inner = null;
+		if (node.closest('.hmk-pane__menu')) inner = '.hmk-pane__menu summary';
+		else if (node.matches('.hmk-pane__row-launch')) inner = '.hmk-pane__row-launch';
+		else if (node.matches('.hmk-pane__launch')) inner = '.hmk-pane__launch';
+		else if (node.tagName === 'A') inner = 'a';
+		else if (node.tagName === 'BUTTON') inner = 'button';
+		return inner ? '[data-id="' + CSS.escape(host.dataset.id) + '"] ' + inner : null;
+	}
+
+	function setFocusReturn(node) {
+		focusReturn = node;
+		focusReturnSel = focusSelFor(node);
+	}
+
 	function restoreFocus() {
-		if (focusReturn && typeof focusReturn.focus === 'function') {
-			focusReturn.focus();
+		let target = focusReturn;
+		if (target && !target.isConnected && focusReturnSel) {
+			target = document.querySelector(focusReturnSel);
+		}
+		if ((!target || !target.isConnected) && el.editToggle) {
+			target = el.editToggle;
+		}
+		if (target && typeof target.focus === 'function') {
+			target.focus();
 		}
 		focusReturn = null;
+		focusReturnSel = null;
 	}
 
 	if (el.editToggle) {
