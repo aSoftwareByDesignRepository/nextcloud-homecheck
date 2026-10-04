@@ -1,9 +1,20 @@
 # Changelog
 
-## 1.1.0 — 2026-09-21
+All notable changes to this project will be documented in this file.
 
-- **Nextcloud:** raise `max-version` to **35** (Hub 26 Summer) so App Store updates are offered on current stable.
-- Docs: store/README compatibility prose now **32–35**.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 1.1.1 - 2026-10-04
+
+### Fixed
+
+- Localization: fr/pt_BR/pl translation mirrors now carry the correct plural rules (Polish 3-form, French/Brazilian-Portuguese n>1) — plural strings rendered wrong before.
+- Admin settings save reliability fix; high-contrast theme selectors; shared feedback-footer component resynced.
+
+### Changed
+
+- Atlas v3.5.14 verification pass; store screenshot URLs corrected.
 
 ## 1.0.44 — 2026-09-15
 
