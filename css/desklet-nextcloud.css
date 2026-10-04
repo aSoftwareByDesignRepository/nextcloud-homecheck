@@ -20,7 +20,8 @@
 }
 body.theme--dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img,
 body.theme-dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img,
-body[data-theme-dark] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img {
+body[data-theme-dark] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img,
+body[data-theme-dark-highcontrast] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) .panel--header > h2 > img {
 	filter: brightness(0) invert(1);
 }
 
@@ -89,7 +90,8 @@ body[data-theme-dark] #app-dashboard .panel:has(.panel--header img[src*="/homech
 }
 body.theme--dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before,
 body.theme-dark #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before,
-body[data-theme-dark] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before {
+body[data-theme-dark] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before,
+body[data-theme-dark-highcontrast] #app-dashboard .panel:has(.panel--header img[src*="/homecheck/"]) a.item-list__entry::before {
 	filter: brightness(0) invert(1);
 }
 

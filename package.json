@@ -2,7 +2,7 @@
     "name": "homecheck",
     "private": true,
     "scripts": {
-        "test:js": "node tests/js/layout-client.test.js && node tests/js/desklet-chrome.test.js && node tests/js/icon-contrast.test.js",
+        "test:js": "node tests/js/layout-client.test.js && node tests/js/desklet-chrome.test.js && node tests/js/icon-contrast.test.js && node tests/js/app-feedback.test.cjs",
         "test:css": "node tests/css/theme-contract.test.js",
         "test:arch": "php tests/Architecture/absolute-no-gos.php",
         "test:unit": "npm run test:js && npm run test:css && npm run test:arch",

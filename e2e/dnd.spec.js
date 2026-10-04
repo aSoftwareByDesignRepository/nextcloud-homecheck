@@ -5,6 +5,7 @@ const {
 	resetLayoutToFlatApps,
 	clickCardMenuItem,
 	waitForLayoutSave,
+	hmkMsg,
 } = require('./helpers');
 
 test.describe('HomeCheck drag-and-drop reorder', () => {
@@ -59,7 +60,7 @@ test.describe('HomeCheck drag-and-drop reorder', () => {
 		const first = page.locator('#hmk-panels .hmk-pane[data-type="app"]').nth(0);
 		const idA = await first.getAttribute('data-id');
 		const savePromise = waitForLayoutSave(page);
-		await clickCardMenuItem(first, /Move right|Nach rechts|Déplacer à droite|Mover a la derecha/i);
+		await clickCardMenuItem(first, await hmkMsg(page, 'moveRight'));
 		await savePromise;
 		const order = await page.locator('#hmk-panels .hmk-pane[data-type="app"]').evaluateAll(
 			(nodes) => nodes.map((n) => n.getAttribute('data-id')),

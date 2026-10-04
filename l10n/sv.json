@@ -66,7 +66,7 @@
         "Open GitHub Issues": "Öppna GitHub Issues",
         "Open HomeCheck after you sign in": "Öppna HomeCheck efter inloggning",
         "Open launcher": "Öppna launcher",
-        "Optional seed layout for users who have never opened HomeCheck. Applied once; users can change everything afterwards. Folders never appear in the top bar.": "Valfri startlayout för användare som aldrig öppnat HomeCheck. Tillämpas en gång; därefter kan alla ändra allt. Mappar visas aldrig i topplisten.",
+        "Optional seed layout for users who have never opened HomeCheck. Applied once; users can change everything afterwards. Folders never appear in the top bar.": "Valfri startlayout för användare som aldrig öppnat HomeCheck. Tillämpas en gång; därefter kan alla ändra allt. Mappar visas aldrig i toppraden.",
         "Remove from folder": "Ta bort från mapp",
         "Rename": "Byt namn",
         "Rename folder": "Byt namn på mapp",
@@ -91,8 +91,8 @@
         "This folder is empty — add apps from Edit.": "Den här mappen är tom — lägg till appar via Redigera.",
         "Too many apps in this folder (max 40)": "För många appar i den här mappen (max 40)",
         "Too many items on the home screen (max 100)": "För många objekt på startsidan (max 100)",
-        "Unset as home": "Ta bort som hem",
-        "Use as home": "Använd som hem",
+        "Unset as home": "Ta bort som startsida",
+        "Use as home": "Använd som startsida",
         "Use as start page": "Använd som startsida",
         "Your apps": "Dina appar"
     }

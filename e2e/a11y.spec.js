@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
-const { login, openHomeCheck, folderCount, folderAt, openFolderCard } = require('./helpers');
+const { login, openHomeCheck, folderCount, folderAt, openFolderCard, hmkMsg } = require('./helpers');
 
 async function scan(page, label) {
 	const results = await new AxeBuilder({ page })
@@ -37,7 +37,7 @@ test.describe('HomeCheck accessibility', () => {
 		} else {
 			const before = await folderCount(page);
 			await page.locator('#hmk-new-folder').click();
-			await expect(page.locator('#hmk-status')).toContainText(/Saved|Gespeichert/i, { timeout: 15000 });
+			await expect(page.locator('#hmk-status')).toContainText(await hmkMsg(page, 'saved'), { timeout: 15000 });
 			await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before + 1);
 			await openFolderCard(folderAt(page, before));
 		}

@@ -172,6 +172,81 @@ final class ApiControllerTest extends TestCase
 		$this->assertTrue($res->getData()['data']['ctaDismissed']);
 	}
 
+	/**
+	 * Strict bool contract: garbage/loose strings must 400 without mutating state.
+	 * 'yes', 'on', '2', 'garbage', whitespace — filter_var would silently coerce
+	 * these to false and write; strict parsing must reject instead.
+	 */
+	public static function invalidBoolValues(): array
+	{
+		return [
+			['yes'], ['on'], ['2'], ['garbage'], [''], [' '], [2], [0.5], [[]],
+		];
+	}
+
+	/** @dataProvider invalidBoolValues */
+	public function testDefaultLandingRejectsInvalidBool(mixed $value): void
+	{
+		$layouts = $this->createMock(LayoutService::class);
+		$layouts->expects($this->never())->method('setDefaultLanding');
+		$layouts->expects($this->never())->method('dismissCta');
+		$request = $this->createMock(IRequest::class);
+		$request->method('getParams')->willReturn(['enable' => $value]);
+		$session = $this->createMock(IUserSession::class);
+		$session->method('getUser')->willReturn($this->user());
+		$c = new ApiController('homecheck', $request, $session, $this->createMock(IGroupManager::class), $layouts);
+		$res = $c->defaultLanding();
+		$this->assertSame(400, $res->getStatus());
+		$this->assertSame('validation_failed', $res->getData()['error']['code']);
+	}
+
+	public function testDefaultLandingStringFalseDisables(): void
+	{
+		$layouts = $this->createMock(LayoutService::class);
+		/* Form-encoded "false" must parse to boolean false, never truthy. */
+		$layouts->expects($this->once())->method('setDefaultLanding')->with('alice', false, false);
+		$layouts->method('isDefaultLanding')->willReturn(false);
+		$request = $this->createMock(IRequest::class);
+		$request->method('getParams')->willReturn(['enable' => 'false']);
+		$session = $this->createMock(IUserSession::class);
+		$session->method('getUser')->willReturn($this->user());
+		$c = new ApiController('homecheck', $request, $session, $this->createMock(IGroupManager::class), $layouts);
+		$res = $c->defaultLanding();
+		$this->assertSame(200, $res->getStatus());
+		$this->assertFalse($res->getData()['data']['isDefaultLanding']);
+	}
+
+	public function testDefaultLandingStringTrueEnables(): void
+	{
+		$layouts = $this->createMock(LayoutService::class);
+		$layouts->expects($this->once())->method('setDefaultLanding')->with('alice', true, true);
+		$layouts->method('isDefaultLanding')->willReturn(true);
+		$request = $this->createMock(IRequest::class);
+		$request->method('getParams')->willReturn(['enable' => 'true', 'dismiss' => 'false']);
+		$session = $this->createMock(IUserSession::class);
+		$session->method('getUser')->willReturn($this->user());
+		$c = new ApiController('homecheck', $request, $session, $this->createMock(IGroupManager::class), $layouts);
+		$res = $c->defaultLanding();
+		$this->assertSame(200, $res->getStatus());
+		$this->assertTrue($res->getData()['data']['isDefaultLanding']);
+	}
+
+	public function testDefaultLandingDismissStringFalse(): void
+	{
+		$layouts = $this->createMock(LayoutService::class);
+		/* 'dismiss' => '0' must not take the dismiss-only branch. */
+		$layouts->expects($this->never())->method('dismissCta');
+		$layouts->expects($this->once())->method('setDefaultLanding')->with('alice', true, true);
+		$layouts->method('isDefaultLanding')->willReturn(true);
+		$request = $this->createMock(IRequest::class);
+		$request->method('getParams')->willReturn(['dismiss' => '0', 'enable' => '1']);
+		$session = $this->createMock(IUserSession::class);
+		$session->method('getUser')->willReturn($this->user());
+		$c = new ApiController('homecheck', $request, $session, $this->createMock(IGroupManager::class), $layouts);
+		$res = $c->defaultLanding();
+		$this->assertSame(200, $res->getStatus());
+	}
+
 	public function testAdminPutAdminTemplatePersists(): void
 	{
 		$template = ['version' => 1, 'revision' => 0, 'items' => [['type' => 'app', 'id' => 'files']]];

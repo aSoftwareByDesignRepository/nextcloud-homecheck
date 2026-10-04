@@ -49,6 +49,10 @@ class LayoutService
 				$decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
 				$stored = $this->validator->validate($decoded, true);
 			} catch (\Throwable) {
+				// best-effort: the guarded calls are reads (decode+validate of stored
+				// JSON); catching marks the stored layout corrupt so it is regenerated
+				// and re-persisted below (US-009) — a deliberate recovery, not a
+				// swallowed write failure.
 				$corrupt = true;
 				$stored = null;
 				$this->logger->warning('HomeCheck corrupt personal layout; regenerating', [

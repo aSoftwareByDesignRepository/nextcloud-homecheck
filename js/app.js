@@ -364,7 +364,19 @@
 		const epochAtStart = localEpoch;
 		const snapshot = JSON.parse(JSON.stringify(state.layout));
 		dirty = false;
-		const { res, data } = await api('PUT', layoutUrl(), { layout: snapshot });
+		let res, data;
+		try {
+			const out = await api('PUT', layoutUrl(), { layout: snapshot });
+			res = out.res;
+			data = out.data;
+		} catch (e) {
+			/* Network-level failure (offline/aborted): keep dirty so the next
+			   mutation or beforeunload retry re-saves, and surface a human
+			   error instead of sticking on "Saving…". */
+			dirty = true;
+			setStatus(t.saveFailed, true);
+			return;
+		}
 		if (!data.ok) {
 			dirty = true;
 			if (res.status === 409) {
@@ -966,11 +978,17 @@
 		});
 	}
 
+	function showModalIdempotent(dlg) {
+		/* showModal() throws InvalidStateError on an already-open <dialog> —
+		   keep every opener idempotent (modal restore contract). */
+		if (dlg && typeof dlg.showModal === 'function' && !dlg.open) {
+			dlg.showModal();
+		}
+	}
+
 	function openHiddenDialog() {
 		paintHiddenDialog();
-		if (el.hiddenDialog && typeof el.hiddenDialog.showModal === 'function') {
-			el.hiddenDialog.showModal();
-		}
+		showModalIdempotent(el.hiddenDialog);
 	}
 
 	function renameFolder(folderId, fromEl) {
@@ -997,7 +1015,8 @@
 		el.promptLabel.textContent = label;
 		el.promptInput.value = value || '';
 		el.promptError.textContent = '';
-		el.promptDialog.showModal();
+		el.promptInput.removeAttribute('aria-invalid');
+		showModalIdempotent(el.promptDialog);
 		el.promptInput.focus();
 		el.promptInput.select();
 
@@ -1015,6 +1034,7 @@
 		}
 		function onPromptInput() {
 			el.promptError.textContent = '';
+			el.promptInput.removeAttribute('aria-invalid');
 		}
 		function onPromptKey(ev) {
 			if (ev.key === 'Enter') {
@@ -1041,11 +1061,13 @@
 			const name = (el.promptInput.value || '').trim();
 			if (!name || name.length > 40) {
 				el.promptError.textContent = t.nameInvalid;
+				el.promptInput.setAttribute('aria-invalid', 'true');
 				el.promptInput.focus();
 				return;
 			}
 			if (!/^[\p{L}\p{N} _\-\.\/\(\)]+$/u.test(name)) {
 				el.promptError.textContent = t.nameChars;
+				el.promptInput.setAttribute('aria-invalid', 'true');
 				el.promptInput.focus();
 				return;
 			}
@@ -1063,7 +1085,7 @@
 		setFocusReturn(returnEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null));
 		el.confirmMessage.textContent = message;
 		el.confirmOk.textContent = confirmLabel || t.delete;
-		el.confirmDialog.showModal();
+		showModalIdempotent(el.confirmDialog);
 		el.confirmCancel.focus();
 
 		let cleaned = false;
@@ -1125,7 +1147,7 @@
 			});
 			el.folderPickerList.appendChild(btn);
 		});
-		el.folderPicker.showModal();
+		showModalIdempotent(el.folderPicker);
 		if (el.folderPickerList.firstElementChild) {
 			/** @type {HTMLElement} */ (el.folderPickerList.firstElementChild).focus();
 		}
@@ -1364,7 +1386,7 @@
 	function openFolder(folder, fromEl) {
 		setFocusReturn(fromEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null));
 		paintFolderDialog(folder);
-		el.folderDialog.showModal();
+		showModalIdempotent(el.folderDialog);
 		el.folderClose.focus();
 	}
 
@@ -1680,8 +1702,16 @@
 	});
 
 	document.addEventListener('keydown', function (ev) {
-		if (ev.key === 'Escape' && el.folderDialog.open) {
-			el.folderDialog.close();
+		/* Nextcloud core suppresses the native <dialog> Escape→cancel close, so
+		   every modal needs a manual Escape path (folder + confirm already
+		   have theirs; pick them all up here — closes the TOP-most open one). */
+		if (ev.key !== 'Escape') {
+			return;
+		}
+		const dlg = [el.hiddenDialog, el.folderPicker, el.promptDialog, el.folderDialog]
+			.find(function (d) { return d && d.open; });
+		if (dlg) {
+			dlg.close();
 		}
 	});
 

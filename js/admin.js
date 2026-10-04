@@ -55,16 +55,23 @@
 		err.textContent = '';
 		status.textContent = t.saving;
 		const body = { requesttoken: token(), template: template };
-		const res = await fetch(url('/apps/homecheck/api/admin/template'), {
-			method: 'PUT',
-			credentials: 'same-origin',
-			headers: {
-				requesttoken: token(),
-				'Content-Type': 'application/json',
-				Accept: 'application/json',
-			},
-			body: JSON.stringify(body),
-		});
+		let res;
+		try {
+			res = await fetch(url('/apps/homecheck/api/admin/template'), {
+				method: 'PUT',
+				credentials: 'same-origin',
+				headers: {
+					requesttoken: token(),
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+				},
+				body: JSON.stringify(body),
+			});
+		} catch (e) {
+			err.textContent = t.saveFailed;
+			status.textContent = '';
+			return;
+		}
 		const data = await res.json().catch(function () { return { ok: false }; });
 		if (!data.ok) {
 			err.textContent = (data.error && data.error.message) || t.saveFailed;

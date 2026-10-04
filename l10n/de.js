@@ -21,7 +21,7 @@ OC.L10N.register(
 	"Drag panes to rearrange. Hide apps you do not need. Tap Done when finished." : "Ziehen Sie Kacheln zum Sortieren. Blenden Sie Apps aus, die Sie nicht brauchen. Tippen Sie auf Fertig, wenn Sie fertig sind.",
 	"Edit" : "Bearbeiten",
 	"Editing your apps" : "Apps bearbeiten",
-	"Email is best-effort — no reply SLA. Need booked help? Use Support & us." : "E-Mail ohne Antwort-SLA. Für gebuchte Hilfe nutzen Sie „Hilfe & Support“.",
+	"Email is best-effort — no reply SLA. Need booked help? Use Support & us." : "E-Mail ohne Antwort-SLA. Nutzen Sie für gebuchte Hilfe „Hilfe & Support“.",
 	"Example: {\"version\":1,\"revision\":0,\"items\":[{\"type\":\"folder\",\"id\":\"fld_abcdefgh\",\"name\":\"Work\",\"children\":[\"files\",\"calendar\"]}]}" : "Beispiel: {\"version\":1,\"revision\":0,\"items\":[{\"type\":\"folder\",\"id\":\"fld_abcdefgh\",\"name\":\"Work\",\"children\":[\"files\",\"calendar\"]}]}",
 	"Folder" : "Ordner",
 	"Folder hidden from HomeCheck" : "Ordner in HomeCheck ausgeblendet",
@@ -93,4 +93,5 @@ OC.L10N.register(
 	"Use as start page" : "Als Startseite nutzen",
 	"Your apps" : "Ihre Apps"
 	},
-	"nplurals=2; plural=(n != 1);");
+	"nplurals=2; plural=(n != 1);"
+);

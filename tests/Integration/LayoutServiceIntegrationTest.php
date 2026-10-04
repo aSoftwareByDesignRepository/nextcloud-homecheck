@@ -33,7 +33,9 @@ final class LayoutServiceIntegrationTest extends TestCase
 
 	protected function setUp(): void
 	{
-		if (!class_exists(\OC::class) && !class_exists(\OCP\Server::class)) {
+		/* Stub-mode guard: the standalone Doctrine/OCP stubs define \OC::$server
+		   with a dummy container — require the real IServerContainer. */
+		if (!isset(\OC::$server) || !(\OC::$server instanceof \OCP\IServerContainer)) {
 			$this->markTestSkipped('Nextcloud runtime required (run via docker compose exec)');
 		}
 		$users = Server::get(IUserManager::class);

@@ -115,8 +115,10 @@ class ApiController extends Controller
 			if (!$hasEnable && !$hasDismiss) {
 				return $this->fail('validation_failed', Http::STATUS_BAD_REQUEST, 'enable or dismiss required');
 			}
-			$enable = $hasEnable && filter_var($params['enable'], FILTER_VALIDATE_BOOLEAN);
-			$dismiss = $hasDismiss && filter_var($params['dismiss'], FILTER_VALIDATE_BOOLEAN);
+			/* Strict bool: only 1/'1'/'true'/true and 0/'0'/'false'/false are legal.
+			   Garbage must be rejected — never silently coerced into a write. */
+			$enable = $hasEnable ? $this->strictBool($params['enable'], 'enable') : false;
+			$dismiss = $hasDismiss ? $this->strictBool($params['dismiss'], 'dismiss') : false;
 			if ($dismiss && !$enable) {
 				$this->layouts->dismissCta($uid);
 				return $this->ok(['dismissed' => true, 'isDefaultLanding' => $this->layouts->isDefaultLanding($uid)]);
@@ -174,6 +176,30 @@ class ApiController extends Controller
 		} catch (DomainException $e) {
 			return $this->fromDomain($e);
 		}
+	}
+
+	private function strictBool(mixed $value, string $field): bool
+	{
+		if (is_bool($value)) {
+			return $value;
+		}
+		if (is_int($value) && ($value === 0 || $value === 1)) {
+			return $value === 1;
+		}
+		if (is_string($value)) {
+			$v = strtolower(trim($value));
+			if ($v === '1' || $v === 'true') {
+				return true;
+			}
+			if ($v === '0' || $v === 'false') {
+				return false;
+			}
+		}
+		throw new DomainException(
+			'validation_failed',
+			$field . ' must be a boolean (1/0/true/false)',
+			Http::STATUS_BAD_REQUEST,
+		);
 	}
 
 	private function fromDomain(DomainException $e): JSONResponse

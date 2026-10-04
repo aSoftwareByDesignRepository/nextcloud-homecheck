@@ -19,6 +19,8 @@ const {
 	folderAt,
 	openFolderCard,
 	waitForLayoutSave,
+	hmkMsg,
+	hmkAdminMsg,
 } = require('./helpers');
 
 const outDir = path.resolve(
@@ -270,12 +272,10 @@ async function prepareDeskletCraft(page) {
 	};
 
 	await paintLightCanvasInk();
-	/* Prefer icon-marked HomeCheck panel; fall back to "Your apps" title */
-	const byIcon = page.locator('#app-dashboard .panel:has(img[src*="/homecheck/"])');
-	const byTitle = page.locator('#app-dashboard .panel').filter({ hasText: /Your apps|Deine Apps|Vos applications/i });
-	const panel = byIcon.or(byTitle).first();
+	/* Icon-marked HomeCheck panel only — widget title string is user-locale text */
+	const panel = page.locator('#app-dashboard .panel:has(img[src*="/homecheck/"])').first();
 	await expect(panel, 'HomeCheck launcher desklet panel').toBeVisible({ timeout: 30_000 });
-	await expect(panel.getByText(/HomeCheck/i).first(), 'desklet lists HomeCheck launcher').toBeVisible({ timeout: 10_000 });
+	await expect(panel.getByText(/HomeCheck/i).first(), 'desklet lists HomeCheck launcher').toBeVisible({ timeout: 10_000 }); // i18n: frozen brand — WidgetItem title is the msgid "HomeCheck" (never translated)
 	await panel.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' })).catch(() => {});
 	await page.waitForTimeout(700);
 	/* Re-assert still present after scroll/repaint */
@@ -389,7 +389,7 @@ test.describe('Atlas web craft screenshots', () => {
 		const first = page.locator('#hmk-panels .hmk-pane[data-type="app"]').nth(0);
 		const idA = await first.getAttribute('data-id');
 		const savePromise = waitForLayoutSave(page);
-		await clickCardMenuItem(first, /Move right|Nach rechts|Déplacer à droite|Mover a la derecha/i);
+		await clickCardMenuItem(first, await hmkMsg(page, 'moveRight'));
 		await savePromise;
 		await expect.poll(async () => {
 			const order = await page.locator('#hmk-panels .hmk-pane[data-type="app"]').evaluateAll(
@@ -402,7 +402,7 @@ test.describe('Atlas web craft screenshots', () => {
 		/* Journey: create populated folder from app menu (members in dialog) */
 		const before = await folderCount(page);
 		const seedApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').last();
-		await clickCardMenuItem(seedApp, /New folder|Neuer Ordner|Nouveau dossier|Nueva carpeta|Nuova cartella/i);
+		await clickCardMenuItem(seedApp, await hmkMsg(page, 'newFolder'));
 		await waitForLayoutSave(page);
 		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before + 1);
 		const folderPane = folderAt(page, before);
@@ -414,7 +414,7 @@ test.describe('Atlas web craft screenshots', () => {
 		await expect(page.locator('#hmk-folder-dialog')).toBeHidden();
 
 		/* Rename form — unfocused then keyboard-focused with visible ring */
-		await clickCardMenuItem(folderPane, /Rename|Umbenennen|Renommer|Cambiar nombre|Rinomina/i);
+		await clickCardMenuItem(folderPane, await hmkMsg(page, 'rename'));
 		await expect(page.locator('#hmk-prompt-dialog')).toBeVisible({ timeout: 10_000 });
 		const renameInput = page.locator('#hmk-prompt-input');
 		await renameInput.fill('Team folder');
@@ -434,7 +434,7 @@ test.describe('Atlas web craft screenshots', () => {
 		/* Validation error craft: empty name → #hmk-prompt-error (not happy-path rename) */
 		await renameInput.fill('');
 		await page.locator('#hmk-prompt-ok').click();
-		await expect(page.locator('#hmk-prompt-error')).toContainText(/Name must be 1–40 characters|1.?40/i);
+		await expect(page.locator('#hmk-prompt-error')).toContainText(await hmkMsg(page, 'nameInvalid'));
 		await shot(page, 'rename-validation-error', meta);
 		await renameInput.fill('Team folder');
 		await page.locator('#hmk-prompt-ok').click();
@@ -445,7 +445,7 @@ test.describe('Atlas web craft screenshots', () => {
 		await waitForLayoutSave(page);
 		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before + 2);
 		const pickApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').first();
-		await clickCardMenuItem(pickApp, /Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i);
+		await clickCardMenuItem(pickApp, await hmkMsg(page, 'addToFolder'));
 		await expect(page.locator('#hmk-folder-picker')).toBeVisible({ timeout: 10_000 });
 		await expect(page.locator('#hmk-folder-picker-list [role="listitem"]')).toHaveCount(2);
 		await shot(page, 'folder-picker', meta);
@@ -453,7 +453,7 @@ test.describe('Atlas web craft screenshots', () => {
 		await expect(page.locator('#hmk-folder-picker')).toBeHidden();
 
 		/* Delete confirm */
-		await clickCardMenuItem(folderPane, /Delete folder|Ordner löschen|Supprimer|Eliminar carpeta|Elimina cartella/i);
+		await clickCardMenuItem(folderPane, await hmkMsg(page, 'deleteFolder'));
 		await expect(page.locator('#hmk-confirm-dialog')).toBeVisible({ timeout: 10_000 });
 		await shot(page, 'delete-confirm', meta);
 		await page.locator('#hmk-confirm-cancel').click();
@@ -461,7 +461,7 @@ test.describe('Atlas web craft screenshots', () => {
 
 		/* Hidden apps: hide one app so dialog is populated, then craft */
 		const hideApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').last();
-		await clickCardMenuItem(hideApp, /Hide|Ausblenden|Masquer|Ocultar/i);
+		await clickCardMenuItem(hideApp, await hmkMsg(page, 'hideApp'));
 		await waitForLayoutSave(page).catch(() => {});
 		await expect(page.locator('#hmk-hidden-apps')).toBeVisible({ timeout: 10_000 });
 		await page.locator('#hmk-hidden-apps').click();
@@ -572,8 +572,8 @@ test.describe('Atlas web craft screenshots', () => {
 				/* Admin Invalid JSON error craft */
 				await seedBox.fill('{ not-json');
 				await page.locator('#hmk-admin-save').click();
-				/* EN "Invalid JSON" / DE "Ungültiges JSON" (and sibling locales). */
-				await expect(page.locator('#hmk-admin-error')).toContainText(/Invalid JSON|Ungültiges JSON|JSON/i);
+				/* Client-side JSON.parse failure → localized invalidJson msgid (any locale). */
+				await expect(page.locator('#hmk-admin-error')).toContainText(await hmkAdminMsg(page, 'invalidJson'));
 				const adminErrContrast = await page.evaluate(() => {
 					const el = document.getElementById('hmk-admin-error');
 					if (!el) {
@@ -646,7 +646,8 @@ test.describe('Atlas web craft screenshots', () => {
 							contentType: 'application/json',
 							body: JSON.stringify({
 								ok: false,
-								error: { message: 'Could not save the seed — fix any errors and try again' },
+								/* Empty message → UI falls back to localized saveFailed msgid. */
+								error: { message: '' },
 							}),
 						});
 						return;
@@ -654,7 +655,7 @@ test.describe('Atlas web craft screenshots', () => {
 					await route.continue();
 				});
 				await page.locator('#hmk-admin-save').click();
-				await expect(page.locator('#hmk-admin-error')).toContainText(/Could not save the seed|try again/i);
+				await expect(page.locator('#hmk-admin-error')).toContainText(await hmkAdminMsg(page, 'saveFailed'));
 				await shot(page, 'admin-save-failed', meta);
 				await page.unroute('**/apps/homecheck/api/admin/template**');
 			}

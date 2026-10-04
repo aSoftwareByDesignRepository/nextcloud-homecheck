@@ -10,7 +10,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
-const { login, openHomeCheck, clickCardMenuItem, waitForLayoutSave } = require('./helpers');
+const { login, openHomeCheck, clickCardMenuItem, waitForLayoutSave, hmkMsg } = require('./helpers');
 
 const outDir = path.resolve(__dirname, '../screenshots');
 
@@ -231,7 +231,7 @@ test.describe('App Store screenshots', () => {
 		await shot(page, 'homecheck-screenshot-04.png');
 
 		/* 05 — Folder dialog */
-		await clickCardMenuItem(folderPane, /Open folder|Ordner öffnen/i);
+		await clickCardMenuItem(folderPane, await hmkMsg(page, 'openFolder'));
 		await expect(page.locator('#hmk-folder-dialog')).toBeVisible();
 		await page.waitForTimeout(400);
 		await shot(page, 'homecheck-screenshot-05.png');
@@ -272,7 +272,7 @@ test.describe('App Store screenshots', () => {
 		await expect(page.locator('#hmk-hidden-dialog')).toBeHidden();
 
 		/* 07 — Rename folder prompt */
-		await clickCardMenuItem(folderPane, /Rename|Umbenennen/i);
+		await clickCardMenuItem(folderPane, await hmkMsg(page, 'rename'));
 		await expect(page.locator('#hmk-prompt-dialog')).toBeVisible();
 		await page.locator('#hmk-prompt-input').fill('Büro & Kalender');
 		await page.waitForTimeout(300);

@@ -14,7 +14,7 @@ class ContainerServiceResolutionIntegrationTest extends TestCase
 {
 	protected function setUp(): void
 	{
-		if (!class_exists(\OC::class) || !isset(\OC::$server)) {
+		if (!isset(\OC::$server) || !(\OC::$server instanceof \OCP\IServerContainer)) {
 			$this->markTestSkipped('Nextcloud is not bootstrapped (set NEXTCLOUD_ROOT or run inside Docker).');
 		}
 	}

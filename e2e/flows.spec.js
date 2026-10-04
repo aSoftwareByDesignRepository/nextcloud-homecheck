@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { login, openHomeCheck, resetLayoutToFlatApps, clickCardMenuItem, folderCount, folderAt, openFolderCard, waitForLayoutSave } = require('./helpers');
+const { login, openHomeCheck, resetLayoutToFlatApps, clickCardMenuItem, folderCount, folderAt, openFolderCard, waitForLayoutSave, hmkMsg, hmkAdminMsg } = require('./helpers');
 
 test.describe('HomeCheck user journeys', () => {
 	test.beforeEach(async ({ page }) => {
@@ -19,7 +19,7 @@ test.describe('HomeCheck user journeys', () => {
 
 		const folderName = 'QuickFolder' + Date.now().toString().slice(-5);
 		const folderPane = folderAt(page, before);
-		await clickCardMenuItem(folderPane, /Rename|Umbenennen/i);
+		await clickCardMenuItem(folderPane, await hmkMsg(page, 'rename'));
 		await page.locator('#hmk-prompt-input').fill(folderName);
 		await page.locator('#hmk-prompt-ok').click();
 		await waitForLayoutSave(page);
@@ -32,7 +32,7 @@ test.describe('HomeCheck user journeys', () => {
 		const before = await folderCount(page);
 		const firstApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').last();
 		const appName = ((await firstApp.locator('.hmk-pane__title-text').textContent()) || 'App').trim();
-		await clickCardMenuItem(firstApp, /New folder|Neuer Ordner/i);
+		await clickCardMenuItem(firstApp, await hmkMsg(page, 'newFolder'));
 		await waitForLayoutSave(page);
 		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before + 1);
 		const folderPane = folderAt(page, before);
@@ -51,7 +51,7 @@ test.describe('HomeCheck user journeys', () => {
 		await page.locator('#hmk-new-folder').click();
 		await waitForLayoutSave(page);
 		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before + 1);
-		await clickCardMenuItem(folderAt(page, before), /Delete folder|Ordner löschen/i);
+		await clickCardMenuItem(folderAt(page, before), await hmkMsg(page, 'deleteFolder'));
 		await expect(page.locator('#hmk-confirm-dialog')).toBeVisible();
 		await page.locator('#hmk-confirm-ok').click();
 		await waitForLayoutSave(page);
@@ -66,7 +66,7 @@ test.describe('HomeCheck user journeys', () => {
 		await waitForLayoutSave(page);
 		const pane = folderAt(page, before);
 		const paneId = await pane.getAttribute('data-id');
-		await clickCardMenuItem(pane, /Rename|Umbenennen/i);
+		await clickCardMenuItem(pane, await hmkMsg(page, 'rename'));
 		await expect(page.locator('#hmk-prompt-dialog')).toBeVisible();
 		await page.locator('#hmk-prompt-input').fill('FocusProbe' + Date.now().toString().slice(-5));
 		await page.locator('#hmk-prompt-ok').click();
@@ -89,7 +89,7 @@ test.describe('HomeCheck user journeys', () => {
 		const folder = page.locator('#hmk-panels .hmk-pane[data-type="folder"]').first();
 		/* One folder → Add to folder auto-adds without the picker. */
 		const appPane = page.locator('#hmk-panels .hmk-pane[data-type="app"]').first();
-		await clickCardMenuItem(appPane, /Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i);
+		await clickCardMenuItem(appPane, await hmkMsg(page, 'addToFolder'));
 		await waitForLayoutSave(page);
 		await openFolderCard(folder);
 		await expect(page.locator('#hmk-folder-dialog')).toBeVisible();
@@ -98,7 +98,7 @@ test.describe('HomeCheck user journeys', () => {
 		/* Real clicks so the menuitem button genuinely holds DOM focus (the
 		   path the critic probed: repaint detached it → body). */
 		await row.locator('summary').click();
-		await row.getByRole('menuitem', { name: /Remove from folder|Aus Ordner entfernen/i }).click();
+		await row.getByRole('menuitem', { name: await hmkMsg(page, 'removeFromFolder'), exact: true }).click();
 		await waitForLayoutSave(page);
 		const focus = await page.evaluate(() => {
 			const a = document.activeElement;
@@ -118,7 +118,7 @@ test.describe('HomeCheck user journeys', () => {
 		const before = await folderCount(page);
 		await page.locator('#hmk-new-folder').click();
 		await waitForLayoutSave(page);
-		await clickCardMenuItem(folderAt(page, before), /Delete folder|Ordner löschen/i);
+		await clickCardMenuItem(folderAt(page, before), await hmkMsg(page, 'deleteFolder'));
 		await expect(page.locator('#hmk-confirm-dialog')).toBeVisible();
 		await page.locator('#hmk-confirm-ok').click();
 		await waitForLayoutSave(page);
@@ -144,9 +144,9 @@ test.describe('HomeCheck user journeys', () => {
 		expect(appId).toBeTruthy();
 		const appName = ((await appPane.locator('.hmk-pane__title-text').textContent()) || 'App').trim();
 
-		await clickCardMenuItem(appPane, /Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i);
+		await clickCardMenuItem(appPane, await hmkMsg(page, 'addToFolder'));
 		await expect(page.locator('#hmk-folder-picker')).toBeVisible({ timeout: 10_000 });
-		await expect(page.locator('#hmk-folder-picker-title')).toContainText(/Choose a folder|Ordner wählen|Choisir/i);
+		await expect(page.locator('#hmk-folder-picker-title')).toContainText(await hmkMsg(page, 'chooseFolder'));
 		await expect(page.locator('#hmk-folder-picker-list [role="listitem"]')).toHaveCount(2);
 
 		await page.locator('#hmk-folder-picker-cancel').click();
@@ -155,7 +155,7 @@ test.describe('HomeCheck user journeys', () => {
 
 		await clickCardMenuItem(
 			page.locator(`#hmk-panels .hmk-pane[data-type="app"][data-id="${appId}"]`),
-			/Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i,
+			await hmkMsg(page, 'addToFolder'),
 		);
 		await expect(page.locator('#hmk-folder-picker')).toBeVisible({ timeout: 10_000 });
 		await page.locator('#hmk-folder-picker-list [role="listitem"]').first().click();
@@ -175,7 +175,7 @@ test.describe('HomeCheck user journeys', () => {
 		const appName = ((await appPane.locator('.hmk-pane__title-text').textContent()) || 'App').trim();
 		expect(appId).toBeTruthy();
 
-		await clickCardMenuItem(appPane, /Hide|Ausblenden|Masquer|Ocultar/i);
+		await clickCardMenuItem(appPane, await hmkMsg(page, 'hideApp'));
 		await waitForLayoutSave(page);
 		await expect(page.locator(`#hmk-panels .hmk-pane[data-type="app"][data-id="${appId}"]`)).toHaveCount(0);
 		await expect(page.locator('#hmk-hidden-apps')).toBeVisible();
@@ -191,7 +191,7 @@ test.describe('HomeCheck user journeys', () => {
 		await page.locator('#hmk-hidden-apps').click();
 		await expect(page.locator('#hmk-hidden-dialog')).toBeVisible();
 		const row = page.locator('#hmk-hidden-list .hmk-hidden-row').filter({ hasText: appName }).first();
-		await row.getByRole('button', { name: /Show again|Wieder anzeigen|Réafficher|Mostrar/i }).click();
+		await row.getByRole('button', { name: await hmkMsg(page, 'showApp'), exact: true }).click();
 		await waitForLayoutSave(page);
 		await expect(page.locator(`#hmk-panels .hmk-pane[data-type="app"][data-id="${appId}"]`)).toBeVisible({ timeout: 10_000 });
 		await page.locator('#hmk-hidden-close').click();
@@ -203,13 +203,13 @@ test.describe('HomeCheck user journeys', () => {
 		await page.locator('#hmk-new-folder').click();
 		await waitForLayoutSave(page);
 		const folderPane = page.locator('#hmk-panels .hmk-pane[data-type="folder"]').first();
-		await clickCardMenuItem(folderPane, /Rename|Umbenennen|Renommer|Cambiar nombre|Rinomina/i);
+		await clickCardMenuItem(folderPane, await hmkMsg(page, 'rename'));
 		await expect(page.locator('#hmk-prompt-dialog')).toBeVisible();
 		await page.locator('#hmk-prompt-input').fill('');
 		await page.locator('#hmk-prompt-ok').click();
 		const err = page.locator('#hmk-prompt-error');
 		await expect(err).toBeVisible();
-		await expect(err).toContainText(/Name must be 1–40 characters|1.?40|Zeichen/i);
+		await expect(err).toContainText(await hmkMsg(page, 'nameInvalid'));
 		await expect(page.locator('#hmk-prompt-dialog')).toBeVisible();
 		await page.locator('#hmk-prompt-cancel').click();
 		await expect(page.locator('#hmk-prompt-dialog')).toBeHidden();
@@ -226,9 +226,8 @@ test.describe('HomeCheck user journeys', () => {
 
 		await seedBox.fill('{ not-json');
 		await page.locator('#hmk-admin-save').click();
-		/* EN "Invalid JSON" / DE "Ungültiges JSON" (and sibling locales). */
-		await expect(err).toContainText(/Invalid JSON|Ungültiges JSON|JSON/i);
-		await expect(err).toContainText(/fix the syntax|try again|syntax|korrigieren|erneut/i);
+		/* Client-side JSON.parse failure → localized invalidJson msgid (any locale). */
+		await expect(err).toContainText(await hmkAdminMsg(page, 'invalidJson'));
 
 		await seedBox.fill(JSON.stringify({ version: 1, revision: 0, items: [{ type: 'app', id: 'files' }] }, null, 2));
 		await page.route('**/apps/homecheck/api/admin/template**', async (route) => {
@@ -236,14 +235,15 @@ test.describe('HomeCheck user journeys', () => {
 				await route.fulfill({
 					status: 500,
 					contentType: 'application/json',
-					body: JSON.stringify({ ok: false, error: { message: 'Could not save the seed — fix any errors and try again' } }),
+					/* Empty message → UI falls back to localized saveFailed msgid. */
+					body: JSON.stringify({ ok: false, error: { message: '' } }),
 				});
 				return;
 			}
 			await route.continue();
 		});
 		await page.locator('#hmk-admin-save').click();
-		await expect(err).toContainText(/Could not save the seed|Save failed|try again/i);
+		await expect(err).toContainText(await hmkAdminMsg(page, 'saveFailed'));
 		await page.unroute('**/apps/homecheck/api/admin/template**');
 	});
 
@@ -253,7 +253,8 @@ test.describe('HomeCheck user journeys', () => {
 				await route.fulfill({
 					status: 500,
 					contentType: 'application/json',
-					body: JSON.stringify({ ok: false, error: { message: 'Could not save — try again' } }),
+					/* Empty message → UI falls back to localized saveFailed msgid. */
+					body: JSON.stringify({ ok: false, error: { message: '' } }),
 				});
 				return;
 			}
@@ -262,12 +263,12 @@ test.describe('HomeCheck user journeys', () => {
 		await page.locator('#hmk-edit-toggle').click();
 		await page.locator('#hmk-new-folder').click();
 		const status = page.locator('#hmk-status');
-		await expect(status).toContainText(/Could not save — try again|Speichern fehlgeschlagen/i, { timeout: 15_000 });
+		await expect(status).toContainText(await hmkMsg(page, 'saveFailed'), { timeout: 15_000 });
 		await expect(status).toHaveClass(/is-error/);
 		await page.unroute('**/homecheck/api/layout**');
 	});
 
-	test('status-bar CAS conflict: PUT layout 409 → Someone changed the layout — reloading', async ({ page }) => {
+	test('status-bar CAS conflict: PUT layout 409 → localized conflict status', async ({ page }) => {
 		await page.evaluate(() => {
 			window.__HMK_E2E_HOLD_RELOAD = true;
 		});
@@ -289,7 +290,7 @@ test.describe('HomeCheck user journeys', () => {
 		await page.locator('#hmk-edit-toggle').click();
 		await page.locator('#hmk-new-folder').click();
 		const status = page.locator('#hmk-status');
-		await expect(status).toContainText(/Someone changed the layout — reloading|woanders geändert|neu laden/i, {
+		await expect(status).toContainText(await hmkMsg(page, 'conflict'), {
 			timeout: 15_000,
 		});
 		await expect(status).toHaveClass(/is-error/);
@@ -316,13 +317,13 @@ test.describe('HomeCheck user journeys', () => {
 		await page.locator('#hmk-edit-toggle').click();
 		/* New folder from app menu → folder already has 1 child (= MAX when patched). */
 		const firstApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').last();
-		await clickCardMenuItem(firstApp, /New folder|Neuer Ordner/i);
+		await clickCardMenuItem(firstApp, await hmkMsg(page, 'newFolder'));
 		await waitForLayoutSave(page);
 		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(1);
 		const secondApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').first();
-		await clickCardMenuItem(secondApp, /Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i);
+		await clickCardMenuItem(secondApp, await hmkMsg(page, 'addToFolder'));
 		const status = page.locator('#hmk-status');
-		await expect(status).toContainText(/Too many apps in this folder \(max 40\)|Zu viele Apps|máx\.?\s*40|max\.?\s*40/i, {
+		await expect(status).toContainText(await hmkMsg(page, 'limitChildren'), {
 			timeout: 10_000,
 		});
 		await expect(status).toHaveClass(/is-error/);
@@ -335,7 +336,8 @@ test.describe('HomeCheck user journeys', () => {
 				await route.fulfill({
 					status: 500,
 					contentType: 'application/json',
-					body: JSON.stringify({ ok: false, error: { message: 'Could not update start page' } }),
+					/* Empty message → UI falls back to localized startFail msgid. */
+					body: JSON.stringify({ ok: false, error: { message: '' } }),
 				});
 				return;
 			}
@@ -358,7 +360,7 @@ test.describe('HomeCheck user journeys', () => {
 			});
 		}
 		const status = page.locator('#hmk-status');
-		await expect(status).toContainText(/Could not update start page|Startseite konnte nicht|página inicial|start page/i, {
+		await expect(status).toContainText(await hmkMsg(page, 'startFail'), {
 			timeout: 15_000,
 		});
 		await expect(status).toHaveClass(/is-error/);

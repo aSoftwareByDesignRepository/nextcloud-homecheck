@@ -1,6 +1,6 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { login, openHomeCheck, resetLayoutToFlatApps, clickCardMenuItem, folderCount, folderAt, openFolderCard, waitForLayoutSave } = require('./helpers');
+const { login, openHomeCheck, resetLayoutToFlatApps, clickCardMenuItem, folderCount, folderAt, openFolderCard, waitForLayoutSave, hmkMsg } = require('./helpers');
 
 test.describe('HomeCheck launcher', () => {
 	test.beforeEach(async ({ page }) => {
@@ -23,14 +23,14 @@ test.describe('HomeCheck launcher', () => {
 		const before = await folderCount(page);
 		const firstApp = page.locator('#hmk-panels .hmk-pane[data-type="app"]').first();
 		const appName = ((await firstApp.locator('.hmk-pane__title-text').textContent()) || 'App').trim();
-		await clickCardMenuItem(firstApp, /New folder|Neuer Ordner/i);
+		await clickCardMenuItem(firstApp, await hmkMsg(page, 'newFolder'));
 		await waitForLayoutSave(page);
 		await expect(page.locator('#hmk-panels .hmk-pane[data-type="folder"]')).toHaveCount(before + 1, { timeout: 10000 });
 		await openFolderCard(folderAt(page, before));
 		await expect(page.locator('#hmk-folder-dialog')).toBeVisible();
 		const member = page.locator('#hmk-folder-grid .hmk-pane__row').filter({ hasText: appName }).first();
 		await expect(member).toBeVisible({ timeout: 5000 });
-		await clickCardMenuItem(member, /Remove from folder|Aus Ordner nehmen/i);
+		await clickCardMenuItem(member, await hmkMsg(page, 'removeFromFolder'));
 		await waitForLayoutSave(page);
 		await expect(page.locator('#hmk-folder-grid .hmk-pane__row')).toHaveCount(0, { timeout: 10000 });
 	});

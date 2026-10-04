@@ -93,4 +93,5 @@ OC.L10N.register(
 	"Use as start page" : "Use as start page",
 	"Your apps" : "Your apps"
 	},
-	"nplurals=2; plural=(n != 1);");
+	"nplurals=2; plural=(n != 1);"
+);

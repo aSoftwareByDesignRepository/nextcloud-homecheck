@@ -136,7 +136,9 @@ if ($hour >= 22 || $hour < 5) {
 			<div id="hmk-panels" class="hmk-panels" role="list" aria-label="<?php p($l->t('Apps')); ?>"></div>
 		</main>
 
-		<footer class="hmk-credit" role="contentinfo">
+		<?php /* role="region": an unscoped <footer> here would emit a stray
+		         contentinfo landmark (landmark_uniqueness lesson). */ ?>
+		<div class="hmk-credit" role="region" aria-label="<?php p($l->t('Help')); ?>">
 			<?php
 			$appFeedbackCssPrefix = 'hmk';
 			$appFeedbackVersion = '';
@@ -150,7 +152,7 @@ if ($hour >= 22 || $hour < 5) {
 					rel="noopener noreferrer"
 				><?php p($l->t('More Nextcloud apps from Software by Design')); ?><span class="hidden-visually"> <?php p($l->t('(opens in a new window)')); ?></span></a>
 			</p>
-		</footer>
+		</div>
 	</div>
 
 	<dialog id="hmk-folder-dialog" class="hmk-dialog" aria-labelledby="hmk-folder-title">
@@ -164,7 +166,7 @@ if ($hour >= 22 || $hour < 5) {
 	<dialog id="hmk-prompt-dialog" class="hmk-dialog hmk-dialog--prompt" aria-labelledby="hmk-prompt-title">
 		<h2 id="hmk-prompt-title" class="hmk-dialog__title"></h2>
 		<label class="hmk-label" for="hmk-prompt-input" id="hmk-prompt-label"></label>
-		<input type="text" id="hmk-prompt-input" class="hmk-input" maxlength="40" autocomplete="off" />
+		<input type="text" id="hmk-prompt-input" class="hmk-input" maxlength="40" autocomplete="off" aria-describedby="hmk-prompt-error" />
 		<p class="hmk-error" id="hmk-prompt-error" role="alert"></p>
 		<div class="hmk-dialog__actions">
 			<button type="button" class="button-vue secondary hmk-touch-btn" id="hmk-prompt-cancel"><?php p($l->t('Cancel')); ?></button>

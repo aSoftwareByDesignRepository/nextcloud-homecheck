@@ -34,7 +34,9 @@ $adminI18nJson = json_encode($adminI18n, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_
 		<button type="button" class="button-vue hmk-btn hmk-btn--primary" id="hmk-admin-save"><?php p($l->t('Save seed template')); ?></button>
 		<button type="button" class="button-vue hmk-btn hmk-btn--ghost" id="hmk-admin-clear"><?php p($l->t('Clear seed')); ?></button>
 	</div>
-	<footer class="hmk-credit hmk-credit--admin" role="contentinfo">
+	<?php /* role="region": an unscoped <footer> here would emit a stray
+	         contentinfo landmark (landmark_uniqueness lesson). */ ?>
+	<div class="hmk-credit hmk-credit--admin" role="region" aria-label="<?php p($l->t('Help')); ?>">
 		<?php
 		$appFeedbackCssPrefix = 'hmk';
 		$appFeedbackVersion = '';
@@ -48,5 +50,5 @@ $adminI18nJson = json_encode($adminI18n, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_
 				rel="noopener noreferrer"
 			><?php p($l->t('More Nextcloud apps from Software by Design')); ?><span class="hidden-visually"> <?php p($l->t('(opens in a new window)')); ?></span></a>
 		</p>
-	</footer>
+	</div>
 </div>

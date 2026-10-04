@@ -10,7 +10,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
-const { login, resetLayoutToFlatApps, clickCardMenuItem, waitForLayoutSave } = require('./helpers');
+const { login, resetLayoutToFlatApps, clickCardMenuItem, waitForLayoutSave, hmkMsg } = require('./helpers');
 
 const outDir = path.resolve(
 	__dirname,
@@ -52,7 +52,8 @@ test.describe('HomeCheck status-bar error crafts', () => {
 				await route.fulfill({
 					status: 500,
 					contentType: 'application/json',
-					body: JSON.stringify({ ok: false, error: { message: 'Could not save — try again' } }),
+					/* Empty message → UI falls back to localized saveFailed msgid. */
+					body: JSON.stringify({ ok: false, error: { message: '' } }),
 				});
 				return;
 			}
@@ -60,7 +61,7 @@ test.describe('HomeCheck status-bar error crafts', () => {
 		});
 		await page.locator('#hmk-edit-toggle').click();
 		await page.locator('#hmk-new-folder').click();
-		await expect(status).toContainText(/Could not save — try again|Speichern fehlgeschlagen/i, { timeout: 15_000 });
+		await expect(status).toContainText(await hmkMsg(page, 'saveFailed'), { timeout: 15_000 });
 		await shot(page, 'save-failed', meta);
 		await page.unroute('**/homecheck/api/layout**');
 		await resetLayoutToFlatApps(page);
@@ -86,7 +87,7 @@ test.describe('HomeCheck status-bar error crafts', () => {
 		});
 		await page.locator('#hmk-edit-toggle').click();
 		await page.locator('#hmk-new-folder').click();
-		await expect(status).toContainText(/Someone changed the layout — reloading|woanders geändert/i, {
+		await expect(status).toContainText(await hmkMsg(page, 'conflict'), {
 			timeout: 15_000,
 		});
 		await shot(page, 'cas-conflict', meta);
@@ -112,14 +113,14 @@ test.describe('HomeCheck status-bar error crafts', () => {
 		await page.locator('#hmk-edit-toggle').click();
 		await clickCardMenuItem(
 			page.locator('#hmk-panels .hmk-pane[data-type="app"]').last(),
-			/New folder|Neuer Ordner/i,
+			await hmkMsg(page, 'newFolder'),
 		);
 		await waitForLayoutSave(page);
 		await clickCardMenuItem(
 			page.locator('#hmk-panels .hmk-pane[data-type="app"]').first(),
-			/Add to folder|In Ordner legen|Ajouter au dossier|Añadir a carpeta/i,
+			await hmkMsg(page, 'addToFolder'),
 		);
-		await expect(status).toContainText(/Too many apps in this folder \(max 40\)|Zu viele Apps|max\.?\s*40/i, {
+		await expect(status).toContainText(await hmkMsg(page, 'limitChildren'), {
 			timeout: 10_000,
 		});
 		await shot(page, 'folder-children-limit', meta);
@@ -132,7 +133,8 @@ test.describe('HomeCheck status-bar error crafts', () => {
 				await route.fulfill({
 					status: 500,
 					contentType: 'application/json',
-					body: JSON.stringify({ ok: false, error: { message: 'Could not update start page' } }),
+					/* Empty message → UI falls back to localized startFail msgid. */
+					body: JSON.stringify({ ok: false, error: { message: '' } }),
 				});
 				return;
 			}
@@ -153,7 +155,7 @@ test.describe('HomeCheck status-bar error crafts', () => {
 				}
 			});
 		}
-		await expect(status).toContainText(/Could not update start page|Startseite konnte nicht/i, { timeout: 15_000 });
+		await expect(status).toContainText(await hmkMsg(page, 'startFail'), { timeout: 15_000 });
 		await shot(page, 'start-page-fail', meta);
 		await page.unroute('**/homecheck/api/default-landing**');
 

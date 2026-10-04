@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OCA\HomeCheck\AppInfo;
 
 use OCA\HomeCheck\Dashboard\LauncherWidget;
+use OCA\HomeCheck\Middleware\ApiExceptionMiddleware;
 use OCA\HomeCheck\Repair\UninstallCleanup;
 use OCA\HomeCheck\Service\ILayoutWriteGuard;
 use OCA\HomeCheck\Service\LayoutWriteGuard;
@@ -43,6 +44,7 @@ class Application extends App implements IBootstrap
 		$context->registerService(ILayoutWriteGuard::class, function ($c): ILayoutWriteGuard {
 			return $c->get(LayoutWriteGuard::class);
 		});
+		$context->registerMiddleware(ApiExceptionMiddleware::class);
 		$context->registerDashboardWidget(LauncherWidget::class);
 	}
 

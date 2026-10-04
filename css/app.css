@@ -83,12 +83,17 @@ body.theme-dark .hmk-admin,
 body[data-theme-dark] #app-content .hmk-app,
 body[data-theme-dark] #app-content.hmk-app,
 body[data-theme-dark] #content[class*="app-homecheck"].hmk-app,
-body[data-theme-dark] .hmk-admin {
-	--hmk-primary-fill: color-mix(in srgb, var(--hmk-primary) 62%, var(--color-main-background));
-	--hmk-danger-fill-solid: color-mix(in srgb, var(--hmk-danger-fill) 48%, var(--color-main-background));
+body[data-theme-dark] .hmk-admin,
+body[data-theme-dark-highcontrast] #app-content .hmk-app,
+body[data-theme-dark-highcontrast] #app-content.hmk-app,
+body[data-theme-dark-highcontrast] #content[class*="app-homecheck"].hmk-app,
+body[data-theme-dark-highcontrast] .hmk-admin {
 	/*
-	 * NC settings near-black: --color-error-text can land muted copper/crimson
-	 * (~4.2–4.3:1 on black). Mix toward main-text (light in dark) for AA ≥4.5:1.
+	 * Do NOT darken primary/danger fills in dark themes: NC's real dark theme
+	 * resolves --color-primary-element-text to near-black for its bright
+	 * primary fill, so a darkened fill + dark ink lands ~2.5–4.2:1 (axe
+	 * color-contrast fail, measured live under OCS-persisted dark). Keep NC's
+	 * fill+ink pair untouched — it is AA (6.3:1 on the default dark primary).
 	 */
 	--hmk-danger-ink: color-mix(in srgb, var(--color-error-text, var(--color-element-error)) 38%, var(--color-main-text));
 }
@@ -96,16 +101,20 @@ body[data-theme-dark] .hmk-admin {
 /* High-contrast settings also sit on near-black — same danger-ink AA lift */
 body.theme--highcontrast .hmk-admin,
 body.theme-highcontrast .hmk-admin,
-body[data-theme-highcontrast] .hmk-admin,
+body[data-theme-light-highcontrast] .hmk-admin,
+body[data-theme-dark-highcontrast] .hmk-admin,
 body.theme--highcontrast #app-content .hmk-app,
 body.theme--highcontrast #app-content.hmk-app,
 body.theme--highcontrast #content[class*="app-homecheck"].hmk-app,
 body.theme-highcontrast #app-content .hmk-app,
 body.theme-highcontrast #app-content.hmk-app,
 body.theme-highcontrast #content[class*="app-homecheck"].hmk-app,
-body[data-theme-highcontrast] #app-content .hmk-app,
-body[data-theme-highcontrast] #app-content.hmk-app,
-body[data-theme-highcontrast] #content[class*="app-homecheck"].hmk-app {
+body[data-theme-light-highcontrast] #app-content .hmk-app,
+body[data-theme-light-highcontrast] #app-content.hmk-app,
+body[data-theme-light-highcontrast] #content[class*="app-homecheck"].hmk-app,
+body[data-theme-dark-highcontrast] #app-content .hmk-app,
+body[data-theme-dark-highcontrast] #app-content.hmk-app,
+body[data-theme-dark-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	--hmk-danger-ink: color-mix(in srgb, var(--color-error-text, var(--color-element-error)) 38%, var(--color-main-text));
 }
 
@@ -542,18 +551,21 @@ body[data-theme-highcontrast] #content[class*="app-homecheck"].hmk-app {
 
 body.theme--highcontrast #homecheck-app .hmk-pane__icon-well,
 body.theme-highcontrast #homecheck-app .hmk-pane__icon-well,
-body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon-well {
+body[data-theme-light-highcontrast] #homecheck-app .hmk-pane__icon-well,
+body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon-well {
 	background: var(--color-main-background);
 	border-color: var(--color-main-text);
 }
 body.theme--highcontrast #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback),
 body.theme-highcontrast #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback),
-body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback) {
+body[data-theme-light-highcontrast] #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback),
+body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon:not(.hmk-pane__icon--fallback) {
 	background-color: var(--color-main-text);
 }
 body.theme--highcontrast #homecheck-app .hmk-pane__icon--fallback,
 body.theme-highcontrast #homecheck-app .hmk-pane__icon--fallback,
-body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
+body[data-theme-light-highcontrast] #homecheck-app .hmk-pane__icon--fallback,
+body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	color: var(--color-main-text);
 }
 
@@ -1003,6 +1015,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	background: var(--hmk-bg);
 	color: var(--hmk-text);
 	font: inherit;
+	box-sizing: border-box; /* content-box width:100% + padding overflows its host */
 }
 .hmk-textarea {
 	min-height: 12rem;
@@ -1040,6 +1053,17 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	box-sizing: border-box;
 }
 .hmk-muted { color: var(--hmk-muted); font-size: var(--hmk-fs-sm); }
+
+/* Long unbreakable sample JSON must wrap — it overflowed the column by ~90px @320. */
+#hmk-admin-hint {
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+/* Settings page chrome: NC section styles shrink .hmk-btn below the touch floor. */
+.hmk-admin .hmk-btn {
+	min-height: var(--hmk-touch);
+}
 
 .hmk-admin {
 	max-width: 48rem;
@@ -1090,6 +1114,8 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 .hmk-credit__link {
 	display: inline-block;
 	max-width: 100%;
+	min-height: var(--hmk-touch); /* 44px touch floor — padding alone landed 35px */
+	box-sizing: border-box;
 	padding: 0.55rem 0;
 	border: 0;
 	border-radius: 0;
@@ -1318,7 +1344,10 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	gap: var(--hmk-space-2, 0.5rem);
 }
 
-.hmk-nav-footer__trigger {
+/* Scoped under #content: bare .{p}-nav-footer__trigger loses to NC core
+ * `#app-content button` / `#app-navigation button` min-height rules
+ * (var(--default-clickable-area) → 34px) — Atlas touch-target defect. */
+#content .hmk-nav-footer__trigger {
 	display: inline-flex;
 	gap: var(--hmk-space-3, 0.75rem);
 	min-height: 44px;
@@ -1380,7 +1409,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	display: none;
 }
 
-.hmk-nav-footer__menu-item {
+#content .hmk-nav-footer__menu-item {
 	display: flex;
 	align-items: center;
 	gap: var(--hmk-space-3, 0.75rem);
@@ -1424,7 +1453,6 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 }
 
 @media (width < 480px) {
-	/* Compact phone: help popover spans the viewport instead of overflowing the credit. */
 	.hmk-nav-footer__menu {
 		left: var(--hmk-space-2, 0.5rem);
 		right: var(--hmk-space-2, 0.5rem);
@@ -1446,7 +1474,7 @@ body[data-theme-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	border: 0;
 }
 
-.hmk-nav-footer__toast-link {
+#content .hmk-nav-footer__toast-link {
 	display: inline-flex;
 	align-items: center;
 	min-height: 44px;
