@@ -1490,7 +1490,7 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 }
 
 .hmk-nav-footer__trigger:focus-visible {
-	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 60%, transparent);
+	outline: 3px solid var(--color-primary-element);
 	outline-offset: 2px;
 }
 
@@ -1550,7 +1550,7 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 }
 
 .hmk-nav-footer__menu-item:focus-visible {
-	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 60%, transparent);
+	outline: 3px solid var(--color-primary-element);
 	outline-offset: -2px;
 }
 
