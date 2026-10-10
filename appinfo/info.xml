@@ -60,7 +60,7 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-04.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-04.png</screenshot>
 	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-05.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-05.png</screenshot>
 	<screenshot small-thumbnail="https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-06.png">https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/homecheck-screenshot-06.png</screenshot>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<licence>agpl</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Alexander Mäule</author>
 	<namespace>HomeCheck</namespace>
