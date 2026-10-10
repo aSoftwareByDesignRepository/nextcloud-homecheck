@@ -24,7 +24,7 @@ $adminI18nJson = json_encode($adminI18n, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_
 		<?php p($l->t('Optional seed layout for users who have never opened HomeCheck. Applied once; users can change everything afterwards. Folders never appear in the top bar.')); ?>
 	</p>
 	<label class="hmk-label" for="hmk-admin-json"><?php p($l->t('Seed template JSON')); ?></label>
-	<textarea id="hmk-admin-json" class="hmk-textarea" rows="12" spellcheck="false" aria-describedby="hmk-admin-hint"></textarea>
+	<textarea id="hmk-admin-json" class="hmk-textarea" rows="12" spellcheck="false" aria-describedby="hmk-admin-hint hmk-admin-error"></textarea>
 	<p id="hmk-admin-hint" class="hmk-muted">
 		<?php p($l->t('Example: {"version":1,"revision":0,"items":[{"type":"folder","id":"fld_abcdefgh","name":"Work","children":["files","calendar"]}]}')); ?>
 	</p>

@@ -21,7 +21,7 @@
 import { chromium } from 'playwright'
 import AxeBuilder from '@axe-core/playwright'
 import { createHash } from 'node:crypto'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const BASE = (process.env.NC_BASE_URL || process.env.HOMECHECK_BASE_URL || 'http://localhost:8081').replace(/\/$/, '')
@@ -76,6 +76,26 @@ async function settle(page) {
 	await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))
 }
 
+/**
+ * Bring the route's own main section into the scroller's frame.
+ * scrollIntoView walks every scrollable ancestor and honours
+ * scroll-margin-top. On NC35 settings pages the scroller is
+ * #app-content-vue — there is NO #app-content and documentElement has a
+ * zero scroll range, so the old hand-picked chain never moved and every
+ * admin capture painted only the page top (hmk-vis-26 lesson).
+ */
+async function ensureSectionInFrame(page, mainSel) {
+	return page.evaluate((sel) => {
+		const main = document.querySelector(sel)
+		if (main && main.scrollIntoView) main.scrollIntoView({ block: 'start' })
+		const r = main ? main.getBoundingClientRect() : null
+		return {
+			found: !!main,
+			mainVisible: r ? r.bottom > 0 && r.top < document.documentElement.clientHeight : null,
+		}
+	}, mainSel).catch(() => ({ found: false, mainVisible: null }))
+}
+
 function record(cell) {
 	results.cells.push(cell)
 	const tag = cell.status === 'fail' ? 'FAIL' : cell.status === 'warn' ? 'warn' : 'ok'
@@ -96,7 +116,14 @@ async function loginState(browser, role) {
 		const btn = document.querySelector('[data-login-form-submit],button[type="submit"],input[type="submit"],button.login-button')
 		if (btn) /** @type {HTMLElement} */ (btn).click()
 	})
-	await page.waitForURL(/apps\/|index\.php\/apps/, { timeout: 60000 })
+	// NC's login JS submits then issues a second client-side redirect — the
+	// first navigation is aborted (net::ERR_ABORTED) and waitForURL rejects
+	// even though login succeeds. Settle briefly, then verify the session by
+	// navigating to the app: an authenticated session must not bounce to
+	// /login (same pattern the contrast probe uses).
+	await page.waitForTimeout(2000)
+	await page.goto(`${BASE}/index.php/apps/homecheck/`, { waitUntil: 'domcontentloaded', timeout: 45000 })
+	if (page.url().includes('/login')) throw new Error(`login_failed for ${USERS[role].username} — bounced back to /login`)
 	const state = await ctx.storageState()
 	await ctx.close()
 	return state
@@ -254,7 +281,7 @@ async function phaseSweep(browser) {
 		await p.evaluate(async () => {
 			const token = window.OC?.requestToken || document.querySelector('head[data-requesttoken]')?.getAttribute('data-requesttoken') || ''
 			const headers = { requesttoken: token, 'OCS-APIRequest': 'true', 'Content-Type': 'application/json', Accept: 'application/json' }
-			await fetch('/ocs/v2.php/apps/dashboard/api/v1/layout', {
+			await fetch('/ocs/v2.php/apps/dashboard/api/v3/layout', {
 				method: 'POST', credentials: 'same-origin', headers,
 				body: JSON.stringify({ layout: ['homecheck-launcher', 'recommendations', 'calendar', 'user_status'] }),
 			}).catch(() => {})
@@ -277,6 +304,10 @@ async function phaseSweep(browser) {
 			await settle(page)
 			cell.checks.http = resp ? resp.status() : 'nav-fail'
 			cell.checks.hasMain = await page.locator(route.main).first().isVisible().catch(() => false)
+			/* Sweep captures must paint the app's OWN section, not the settings
+			   page top (admin sits ~4558–7884px down — hmk-vis-26). */
+			const sect = await ensureSectionInFrame(page, route.main)
+			cell.checks.mainInFrame = sect.mainVisible
 			const ov = await checkOverflow(page)
 			cell.checks.overflow = ov
 			cell.checks.overflowOk = Math.max(ov.doc, ov.app, ov.main) <= 1
@@ -293,6 +324,7 @@ async function phaseSweep(browser) {
 				failReasons.push(`http ${cell.checks.http} (expected ${route.ok})`)
 			}
 			if (!cell.checks.hasMain) failReasons.push('main landmark missing')
+			if (sect.mainVisible === false) failReasons.push(`${route.main} not in frame after scrollIntoView`)
 			if (!themeRender.ok) failReasons.push(`theme attr missing: ${JSON.stringify(themeRender)}`)
 			if (!cell.checks.overflowOk) failReasons.push(`overflow ${JSON.stringify(ov)}`)
 			if (lm.banners.length > 1) failReasons.push(`duplicate banner: ${lm.banners.join('|')}`)
@@ -336,24 +368,71 @@ async function phaseSweep(browser) {
 			const resp = await page.goto(`${BASE}${route.path}`, { waitUntil: 'domcontentloaded' }).catch(() => null)
 			await settle(page)
 			cell.checks.http = resp ? resp.status() : 'nav-fail'
+			/* Paint the app's own section first: on the settings page #hmk-admin
+			   sits thousands of px below the fold, so a top-anchored capture +
+			   top-only touch sweep proved nothing about HomeCheck (hmk-vis-26). */
+			const sect = await ensureSectionInFrame(page, route.main)
+			cell.checks.mainInFrame = sect.mainVisible
 			const ov = await checkOverflow(page)
 			cell.checks.overflow = ov
 			cell.checks.overflowOk = Math.max(ov.doc, ov.app, ov.main) <= 1
 			cell.checks.touchOffenders = await checkTouchTargets(page)
-			// Below-fold honesty: also capture the scrolled tail of scrollable roots.
 			const shot = await snap(page, `sweep__${id}__default__${vp.w}`)
-			await page.evaluate(() => {
-				const scroller = document.getElementById('homecheck-app') || document.getElementById('app-content') || document.documentElement
-				scroller.scrollTop = scroller.scrollHeight
-				window.scrollTo(0, document.documentElement.scrollHeight)
-			}).catch(() => {})
+			/* Below-fold honesty: scroll the REAL scrollable ancestor of the
+			   route's section to its tail. NC35 settings scrolls via
+			   #app-content-vue (no #app-content; documentElement has zero
+			   range) — picking it produced scroll no-ops and byte-identical
+			   base/fold pairs (hmk-vis-26). */
+			const fold = await page.evaluate((mainSel) => {
+				const main = document.querySelector(mainSel)
+				const doc = document.documentElement
+				const range = (el) => (el ? el.scrollHeight - el.clientHeight : 0)
+				let scroller = null
+				if (main) {
+					for (let el = main.parentElement; el && el !== doc; el = el.parentElement) {
+						if (range(el) > 1) { scroller = el; break }
+					}
+				}
+				if (!scroller) {
+					for (const sel of ['#app-content-vue', '#app-content', '#homecheck-app']) {
+						const el = document.querySelector(sel)
+						if (range(el) > 1) { scroller = el; break }
+					}
+				}
+				const winRange = range(doc)
+				const pos = () => (scroller ? scroller.scrollTop : 0) + window.scrollY
+				const before = pos()
+				if (scroller) scroller.scrollTop = scroller.scrollHeight
+				window.scrollTo(0, doc.scrollHeight)
+				return {
+					scroller: scroller ? (scroller.id || scroller.tagName.toLowerCase()) : (winRange > 1 ? 'window' : 'none'),
+					scrollRange: scroller ? range(scroller) : winRange,
+					scrolled: pos() - before,
+				}
+			}, route.main).catch(() => null)
 			await page.waitForTimeout(250)
-			await snap(page, `sweep__${id}__default__${vp.w}__fold`)
+			let foldShot = null
+			const foldName = `sweep__${id}__default__${vp.w}__fold`
+			if (fold && fold.scrollRange > 1) {
+				foldShot = await snap(page, foldName)
+			} else {
+				/* No below-fold exists — keep no stale dupe on disk. */
+				rmSync(join(CAPTURES, `${foldName}.png`), { force: true })
+				delete results.captures[foldName]
+			}
+			cell.checks.foldScroll = fold
+			cell.checks.foldDiffers = foldShot ? foldShot.sha256 !== shot.sha256 : null
+			// Touch targets measured again at the fold position — real, not vacuous.
+			cell.checks.foldTouchOffenders = await checkTouchTargets(page)
 			cell.proof = shot.sha256.slice(0, 16)
 			const failReasons = []
 			if (typeof cell.checks.http !== 'number' || cell.checks.http !== route.ok) failReasons.push(`http ${cell.checks.http}`)
+			if (sect.mainVisible === false) failReasons.push(`${route.main} not in frame after scrollIntoView`)
+			if (fold && fold.scrollRange > 1 && !foldShot) failReasons.push('no fold capture despite scroll range')
+			if (fold && fold.scrollRange > 1 && cell.checks.foldDiffers === false) failReasons.push('fold capture byte-identical to base — scroll no-op')
 			if (!cell.checks.overflowOk) failReasons.push(`overflow ${JSON.stringify(ov)}`)
 			if (cell.checks.touchOffenders.length) failReasons.push(`touch<44: ${JSON.stringify(cell.checks.touchOffenders.slice(0, 6))}`)
+			if (cell.checks.foldTouchOffenders.length) failReasons.push(`fold touch<44: ${JSON.stringify(cell.checks.foldTouchOffenders.slice(0, 6))}`)
 			cell.status = failReasons.length ? 'fail' : 'ok'
 			if (failReasons.length) cell.failReasons = failReasons
 			record(cell)
@@ -882,6 +961,7 @@ async function phaseTheatre(browser) {
 		await pg.goto(`${BASE}${route.path}`, { waitUntil: 'domcontentloaded' })
 		await settle(pg)
 		const rootSel = route.user === 'admin' ? '#hmk-admin' : (id === 'dashboard' ? '#app-dashboard' : '#homecheck-app')
+		await ensureSectionInFrame(pg, route.main) // paint the app's section, not the page top (hmk-vis-26)
 		await hunt(pg, rootSel, id)
 		await snap(pg, `theatre__${id}__dark`)
 		if (route.user === 'admin') {

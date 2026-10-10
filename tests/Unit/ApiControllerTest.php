@@ -251,7 +251,7 @@ final class ApiControllerTest extends TestCase
 	{
 		$template = ['version' => 1, 'revision' => 0, 'items' => [['type' => 'app', 'id' => 'files']]];
 		$layouts = $this->createMock(LayoutService::class);
-		$layouts->expects($this->once())->method('saveAdminTemplate')->with($template)->willReturn($template);
+		$layouts->expects($this->once())->method('saveAdminTemplate')->with($template, 'admin')->willReturn($template);
 		$request = $this->createMock(IRequest::class);
 		$request->method('getParams')->willReturn(['template' => $template]);
 		$request->method('getParam')->with('template')->willReturn($template);

@@ -20,6 +20,7 @@ use OCA\HomeCheck\Service\NavigationHrefGuard;
 use OCP\IConfig;
 use OCP\INavigationManager;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 final class LayoutServiceTest extends TestCase
@@ -347,6 +348,35 @@ final class LayoutServiceTest extends TestCase
 		$this->assertSame('files', $got['items'][0]['id']);
 		$svc->saveAdminTemplate(null);
 		$this->assertNull($svc->getAdminTemplate());
+	}
+
+	public function testAdminTemplateSaveEmitsAuditLog(): void
+	{
+		$logger = $this->createMock(LoggerInterface::class);
+		$records = [];
+		$logger->method('info')->willReturnCallback(function (string $msg, array $ctx = []) use (&$records): void {
+			$records[] = [$msg, $ctx];
+		});
+		$svc = new LayoutService(
+			$this->config(),
+			$this->nav([]),
+			new LayoutValidator(),
+			new LayoutMerger(),
+			new AppOrderFlattener(),
+			new NavigationHrefGuard(),
+			$this->memoryWriteGuard(),
+			$logger,
+		);
+		$svc->saveAdminTemplate([
+			'version' => 1,
+			'items' => [['type' => 'app', 'id' => 'files']],
+		], 'rootadmin');
+		$svc->saveAdminTemplate(null, 'rootadmin');
+		$this->assertCount(2, $records);
+		$this->assertSame('rootadmin', $records[0][1]['actor']);
+		$this->assertSame('save', $records[0][1]['action']);
+		$this->assertSame(1, $records[0][1]['items']);
+		$this->assertSame('clear', $records[1][1]['action']);
 	}
 
 	public function testCorruptLayoutIsRegeneratedOnGet(): void

@@ -45,6 +45,7 @@
 	--hmk-muted: var(--color-text-maxcontrast);
 	--hmk-border: var(--color-border, color-mix(in srgb, var(--color-main-text) 12%, transparent));
 	--hmk-border-strong: var(--color-border-maxcontrast, color-mix(in srgb, var(--color-main-text) 24%, transparent));
+	--hmk-form-border: var(--color-border-maxcontrast, var(--hmk-border-strong));
 	--hmk-primary: var(--color-primary-element);
 	--hmk-primary-text: var(--color-primary-element-text);
 	--hmk-focus: 3px solid var(--color-primary-element);
@@ -291,12 +292,19 @@ body[data-theme-dark-highcontrast] #content[class*="app-homecheck"].hmk-app {
 
 .hmk-edit-hint {
 	margin: var(--hmk-space-2) auto var(--hmk-space-3);
-	padding: 0 var(--hmk-space-3);
+	padding: var(--hmk-space-2) var(--hmk-space-4);
 	max-width: 40rem;
 	text-align: center;
 	color: var(--hmk-muted, var(--color-text-maxcontrast, var(--color-main-text)));
 	font-size: var(--hmk-fs-sm);
 	line-height: var(--hmk-line-base);
+	/* Solid surface while visible — muted text must not sit on the bare
+	   wallpaper canvas (DS contrast probe: canvas text measured ~2.6:1
+	   over the NC default #00679e background). */
+	background: var(--hmk-check-surface, var(--color-main-background));
+	border: 1px solid var(--hmk-border-strong, var(--color-border-maxcontrast));
+	border-radius: var(--border-radius-container-large, var(--hmk-radius-lg));
+	box-sizing: border-box;
 }
 .hmk-edit-hint[hidden] {
 	display: none !important;
@@ -336,7 +344,7 @@ body[data-theme-dark-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	/* Direct NC surface tokens — avoid primary-light (pale) under dark ink */
 	background-color: var(--color-background-dark, var(--hmk-bg-soft, var(--color-main-background)));
 	color: var(--color-main-text);
-	border: 1px solid var(--color-border, var(--hmk-border, transparent));
+	border: 1px solid var(--hmk-form-border, var(--hmk-border, transparent));
 	border-radius: var(--border-radius-element, var(--border-radius, 8px));
 	box-shadow: none;
 	font-weight: 600;
@@ -385,6 +393,57 @@ body[data-theme-dark-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	outline: none;
 }
 
+/*
+ * Dark themes: card boundaries must clear 3:1 against the host canvas —
+ * --color-border (#292929) measured 2.38:1 over the NC #00679e fallback
+ * canvas, and --color-border-maxcontrast is *translucent* in dark so it
+ * blends back into the card face (1.49:1). An opaque mix toward
+ * main-text keeps a real, visible edge in every dark variant.
+ */
+body.theme--dark #homecheck-app .hmk-pane,
+body.theme-dark #homecheck-app .hmk-pane,
+body[data-theme-dark] #homecheck-app .hmk-pane,
+body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane,
+body.theme--dark #homecheck-app .hmk-cta.notecard,
+body.theme-dark #homecheck-app .hmk-cta.notecard,
+body[data-theme-dark] #homecheck-app .hmk-cta.notecard,
+body[data-theme-dark-highcontrast] #homecheck-app .hmk-cta.notecard,
+body.theme--dark .hmk-credit,
+body.theme-dark .hmk-credit,
+body[data-theme-dark] .hmk-credit,
+body[data-theme-dark-highcontrast] .hmk-credit,
+body.theme--dark .hmk-edit-hint,
+body.theme-dark .hmk-edit-hint,
+body[data-theme-dark] .hmk-edit-hint,
+body[data-theme-dark-highcontrast] .hmk-edit-hint {
+	border-color: color-mix(in srgb, var(--color-main-text) 78%, var(--color-main-background));
+}
+
+/*
+ * Server-pinned NC high-contrast themes (body[data-theme-*-highcontrast] /
+ * .theme--highcontrast): same card-boundary hardening the prefers-contrast
+ * block below already applies for OS-level HC — card edges were ~1.5:1.
+ */
+body.theme--highcontrast #homecheck-app .hmk-pane,
+body.theme-highcontrast #homecheck-app .hmk-pane,
+body[data-theme-light-highcontrast] #homecheck-app .hmk-pane,
+body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane,
+body.theme--highcontrast #homecheck-app .hmk-cta.notecard,
+body.theme-highcontrast #homecheck-app .hmk-cta.notecard,
+body[data-theme-light-highcontrast] #homecheck-app .hmk-cta.notecard,
+body[data-theme-dark-highcontrast] #homecheck-app .hmk-cta.notecard,
+body.theme--highcontrast .hmk-credit,
+body.theme-highcontrast .hmk-credit,
+body[data-theme-light-highcontrast] .hmk-credit,
+body[data-theme-dark-highcontrast] .hmk-credit,
+body.theme--highcontrast .hmk-edit-hint,
+body.theme-highcontrast .hmk-edit-hint,
+body[data-theme-light-highcontrast] .hmk-edit-hint,
+body[data-theme-dark-highcontrast] .hmk-edit-hint {
+	border-width: 2px;
+	border-color: var(--color-main-text);
+}
+
 /* Individual Dashboard-style panes — positionable, wrap responsively */
 .hmk-panels {
 	width: auto;
@@ -402,7 +461,10 @@ body[data-theme-dark-highcontrast] #content[class*="app-homecheck"].hmk-app {
 }
 
 .hmk-pane {
-	--color-text-maxcontrast: var(--color-text-maxcontrast, var(--color-main-text));
+	/* NOTE: no scoped --color-text-maxcontrast re-declare here — a
+	 * self-referencing var() is cyclic and computes to guaranteed-invalid,
+	 * silently collapsing muted ink to `inherit` inside every pane
+	 * (scoped_token_shadow). Panes resolve NC's global token normally. */
 	width: var(--hmk-pane-width, 22rem);
 	max-width: 100%;
 	margin: var(--hmk-space-4);
@@ -846,17 +908,23 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 }
 .hmk-status:not(:empty) {
 	background: var(--hmk-bg-soft);
-	border: 1px solid var(--hmk-border);
+	/* border-strong: on pale host surfaces (admin section, white cards) a
+	   --color-border edge measures ~1.1:1 — status wells need >=3:1 (1.4.11). */
+	border: 1px solid var(--hmk-border-strong, var(--color-border-maxcontrast));
 }
 .hmk-status.is-error {
 	color: var(--hmk-danger-ink);
 	background: color-mix(in srgb, var(--hmk-danger-ink) 8%, var(--hmk-bg-card));
-	border-color: color-mix(in srgb, var(--hmk-danger-ink) 35%, transparent);
+	/* 60% alpha keeps the danger edge >=3:1 against both the well fill and
+	   light host surfaces (38% measured 2.1:1). */
+	border-color: color-mix(in srgb, var(--hmk-danger-ink) 60%, transparent);
 }
 .hmk-status.is-success {
 	color: var(--hmk-text);
 	background: color-mix(in srgb, var(--hmk-primary) 10%, var(--hmk-bg-card));
-	border-color: color-mix(in srgb, var(--hmk-primary) 30%, transparent);
+	/* Primary at 30% alpha measured 1.55:1 on light surfaces (65% still only
+	   2.8:1) — 85% clears the 3:1 non-text boundary. */
+	border-color: color-mix(in srgb, var(--hmk-primary) 85%, transparent);
 }
 
 .hmk-empty,
@@ -978,7 +1046,9 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	min-height: var(--hmk-touch);
 	width: 100%;
 	padding: var(--hmk-space-3) var(--hmk-space-4);
-	border: 2px solid var(--hmk-border);
+	/* Interactive picker rows are controls — form-border (maxcontrast), not
+	   the decorative card border (1.1:1 on light surfaces). */
+	border: 2px solid var(--hmk-form-border, var(--hmk-border-strong));
 	border-radius: var(--hmk-radius-md);
 	background: var(--hmk-bg-card);
 	color: var(--hmk-text);
@@ -1029,6 +1099,26 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	outline: var(--hmk-focus);
 	outline-offset: 2px;
 }
+/*
+ * aria-invalid must carry painted danger chrome (learned class: aria-invalid
+ * unpainted — JS set the attribute but no rule drew the state, so an invalid
+ * control looked identical to a valid one). The #homecheck-app / #hmk-admin
+ * scope beats NC core inputs.css :hover/:focus repaints, which would
+ * otherwise drop the error paint exactly when the field has focus.
+ */
+#homecheck-app input[aria-invalid='true'],
+#homecheck-app select[aria-invalid='true'],
+#homecheck-app textarea[aria-invalid='true'],
+#homecheck-app .hmk-input[aria-invalid='true'],
+#homecheck-app .hmk-textarea[aria-invalid='true'],
+#hmk-admin input[aria-invalid='true'],
+#hmk-admin select[aria-invalid='true'],
+#hmk-admin textarea[aria-invalid='true'],
+#hmk-admin .hmk-input[aria-invalid='true'],
+#hmk-admin .hmk-textarea[aria-invalid='true'] {
+	border-color: var(--hmk-danger-ink, var(--color-error-text, var(--color-error)));
+	box-shadow: 0 0 0 1px var(--hmk-danger-ink, var(--color-error-text, var(--color-error)));
+}
 .hmk-error {
 	color: var(--hmk-danger-ink);
 	min-height: 1.25rem;
@@ -1047,7 +1137,8 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 #hmk-admin p#hmk-admin-error:not(:empty) {
 	color: var(--hmk-danger-ink);
 	background: color-mix(in srgb, var(--hmk-danger-ink) 12%, var(--color-main-background));
-	border: 1px solid color-mix(in srgb, var(--hmk-danger-ink) 38%, transparent);
+	/* 60% matches the .hmk-status.is-error edge — 38% measured 2.1:1. */
+	border: 1px solid color-mix(in srgb, var(--hmk-danger-ink) 60%, transparent);
 	border-radius: var(--hmk-radius-sm);
 	padding: var(--hmk-space-2) var(--hmk-space-3);
 	box-sizing: border-box;
@@ -1067,6 +1158,23 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 
 .hmk-admin {
 	max-width: 48rem;
+}
+/*
+ * NC core .app-navigation-toggle (34×34) sits absolute at the content
+ * top-left of the #app-content-vue settings scroller, outside the scroll
+ * chain — a section scrolled to the scroller top paints its heading under
+ * it (hmk-vis-27: measured 11px x-overlap on the 'H' at every viewport).
+ * Core mobile.scss solves the same geometry for .files-controls with
+ * padding-inline-start: 44px — match that: margin-inline-start moves the
+ * heading box past the toggle column at EVERY scroll position (not only
+ * scrollIntoView landings), and scroll-margin-top makes anchored landings
+ * rest below the toggle band.
+ */
+#hmk-admin {
+	scroll-margin-top: calc(var(--default-clickable-area, 44px) + var(--hmk-space-2));
+}
+#hmk-admin > h2 {
+	margin-inline-start: var(--default-clickable-area, 44px);
 }
 
 .hmk-admin.hmk-shell--constrained {
@@ -1093,8 +1201,17 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	box-sizing: border-box;
 	/* With few apps, sit at the bottom of the viewport; with many, follow the panes */
 	margin-top: auto;
+	margin-inline: auto;
 	padding: var(--hmk-space-5) var(--hmk-space-3) var(--hmk-space-3);
 	text-align: center;
+	/* Solid surface card — the credit link and Help trigger sat on the bare
+	   wallpaper canvas and measured 2.6:1 over the NC default #00679e
+	   background (WCAG 1.4.3 fail). Same notecard language as .hmk-cta. */
+	max-width: 48rem;
+	background: var(--hmk-check-surface, var(--color-main-background));
+	border: 1px solid var(--hmk-border-strong, var(--color-border-maxcontrast));
+	border-radius: var(--border-radius-container-large, var(--hmk-radius-lg));
+	box-shadow: var(--hmk-shadow);
 }
 .hmk-credit > * {
 	width: 100%;
@@ -1105,7 +1222,8 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	align-items: flex-start;
 	text-align: left;
 	margin-top: var(--hmk-space-5);
-	padding: var(--hmk-space-4) 0 0;
+	margin-inline: 0;
+	padding: var(--hmk-space-4);
 }
 .hmk-credit__text {
 	margin: 0;
@@ -1221,6 +1339,8 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 		--hmk-border-strong: var(--color-main-text);
 	}
 	.hmk-pane,
+	.hmk-credit,
+	.hmk-edit-hint,
 	#homecheck-app .hmk-cta.notecard {
 		background-color: var(--hmk-check-surface, var(--color-main-background));
 		border-width: 2px;
@@ -1561,4 +1681,21 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 }
 .hmk-credit .hmk-nav-footer__trigger {
 	min-height: 44px;
+}
+
+/*
+ * Control-border baseline (WCAG 1.4.11 >= 3:1) — DESIGN-SYSTEM §3.6.0.
+ * Only re-colours borders that are already drawn; state classes keep theirs.
+ */
+#app-content input:not([type='range'], [type='hidden'], [type='color'], [type='file'], [type='image'], [type='submit'], [type='button'], [type='reset'], .form-input--error, .form-input--success, .form-input--warning, .has-error, [aria-invalid='true'], .has-error *),
+#app-content select:not(.form-input--error, .form-input--success, .form-input--warning, [aria-invalid='true'], .has-error *),
+#app-content textarea:not(.form-input--error, .form-input--success, .form-input--warning, [aria-invalid='true'], .has-error *),
+#app-content button:not(.primary, .error, .warning, .success, .danger, .button-vue),
+#app-content .button:not(.primary, .error, .warning, .success, .danger),
+.oc-dialog input:not([type='range'], [type='hidden'], [type='color'], [type='file']),
+.oc-dialog select,
+.oc-dialog textarea,
+.oc-dialog button:not(.primary, .error, .warning, .success, .danger, .button-vue),
+.oc-dialog .button:not(.primary, .error, .warning, .success, .danger) {
+	border-color: var(--hmk-form-border, var(--color-border-maxcontrast, var(--color-border)));
 }

@@ -52,8 +52,13 @@
 	}
 
 	async function put(template) {
+		/* In-flight guard: a second click while the PUT is pending must not
+		   fan out a duplicate write (double_submit class). */
+		saveBtn.disabled = true;
+		clearBtn.disabled = true;
 		err.textContent = '';
 		status.textContent = t.saving;
+		ta.removeAttribute('aria-invalid');
 		const body = { requesttoken: token(), template: template };
 		let res;
 		try {
@@ -68,11 +73,15 @@
 				body: JSON.stringify(body),
 			});
 		} catch (e) {
+			saveBtn.disabled = false;
+			clearBtn.disabled = false;
 			err.textContent = t.saveFailed;
 			status.textContent = '';
 			return;
 		}
 		const data = await res.json().catch(function () { return { ok: false }; });
+		saveBtn.disabled = false;
+		clearBtn.disabled = false;
 		if (!data.ok) {
 			err.textContent = (data.error && data.error.message) || t.saveFailed;
 			status.textContent = '';
@@ -87,9 +96,14 @@
 		try {
 			parsed = JSON.parse(ta.value || '{}');
 		} catch (e) {
+			/* WCAG 3.3.1/3.3.3: pin the invalid state on the control itself —
+			   aria-invalid drives the painted danger border + SR announce. */
+			ta.setAttribute('aria-invalid', 'true');
 			err.textContent = t.invalidJson;
+			ta.focus();
 			return;
 		}
+		ta.removeAttribute('aria-invalid');
 		put(parsed);
 	});
 	clearBtn.addEventListener('click', function () {

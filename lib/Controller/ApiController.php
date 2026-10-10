@@ -146,7 +146,7 @@ class ApiController extends Controller
 	public function putAdminTemplate(): JSONResponse
 	{
 		try {
-			$this->requireAdmin();
+			$actorUid = $this->requireAdmin();
 			$params = $this->request->getParams();
 			$template = $this->request->getParam('template');
 			$hasTemplateKey = array_key_exists('template', $params);
@@ -165,13 +165,13 @@ class ApiController extends Controller
 				}
 			}
 			if ($hasTemplateKey && $template === null) {
-				$saved = $this->layouts->saveAdminTemplate(null);
+				$saved = $this->layouts->saveAdminTemplate(null, $actorUid);
 				return $this->ok(['template' => $saved]);
 			}
 			if (!is_array($template)) {
 				return $this->fail('layout_version', Http::STATUS_BAD_REQUEST, 'Missing template');
 			}
-			$saved = $this->layouts->saveAdminTemplate($template);
+			$saved = $this->layouts->saveAdminTemplate($template, $actorUid);
 			return $this->ok(['template' => $saved]);
 		} catch (DomainException $e) {
 			return $this->fromDomain($e);
@@ -216,7 +216,7 @@ class ApiController extends Controller
 		return $user->getUID();
 	}
 
-	private function requireAdmin(): void
+	private function requireAdmin(): string
 	{
 		$user = $this->userSession->getUser();
 		if ($user === null) {
@@ -225,5 +225,6 @@ class ApiController extends Controller
 		if (!$this->groupManager->isAdmin($user->getUID())) {
 			throw new DomainException('forbidden', 'Admin required', 403);
 		}
+		return $user->getUID();
 	}
 }

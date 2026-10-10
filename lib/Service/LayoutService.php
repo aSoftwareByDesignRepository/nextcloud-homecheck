@@ -269,18 +269,33 @@ class LayoutService
 	}
 
 	/**
+	 * Admin policy mutation — always emits an audit record (actor + outcome),
+	 * same bar as the per-user layout write path (api-security §7).
+	 *
 	 * @param array<string,mixed>|null $template null clears
+	 * @param string|null $actorUid acting admin uid for the audit record
 	 * @return array{version:int,revision:int,items:list<array<string,mixed>>}|null
 	 */
-	public function saveAdminTemplate(?array $template): ?array
+	public function saveAdminTemplate(?array $template, ?string $actorUid = null): ?array
 	{
 		if ($template === null) {
 			$this->config->deleteAppValue(Application::APP_ID, self::APP_SEED_KEY);
+			$this->logger->info('HomeCheck seed template cleared', [
+				'app' => Application::APP_ID,
+				'actor' => $actorUid ?? 'unknown',
+				'action' => 'clear',
+			]);
 			return null;
 		}
 		$validated = $this->validator->validate($template, false);
 		$validated['revision'] = 0;
 		$this->config->setAppValue(Application::APP_ID, self::APP_SEED_KEY, json_encode($validated, JSON_THROW_ON_ERROR));
+		$this->logger->info('HomeCheck seed template saved', [
+			'app' => Application::APP_ID,
+			'actor' => $actorUid ?? 'unknown',
+			'action' => 'save',
+			'items' => count($validated['items']),
+		]);
 		return $validated;
 	}
 
