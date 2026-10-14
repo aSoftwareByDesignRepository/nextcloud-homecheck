@@ -87,6 +87,7 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 	</settings>
 	<repair-steps>
 		<uninstall>
+			<step>OCA\HomeCheck\Repair\UninstallDropTables</step>
 			<step>OCA\HomeCheck\Repair\UninstallCleanup</step>
 		</uninstall>
 	</repair-steps>

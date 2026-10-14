@@ -12,6 +12,7 @@ namespace OCA\HomeCheck\AppInfo;
 use OCA\HomeCheck\Dashboard\LauncherWidget;
 use OCA\HomeCheck\Middleware\ApiExceptionMiddleware;
 use OCA\HomeCheck\Repair\UninstallCleanup;
+use OCA\HomeCheck\Repair\UninstallDropTables;
 use OCA\HomeCheck\Service\ILayoutWriteGuard;
 use OCA\HomeCheck\Service\LayoutWriteGuard;
 use OCP\AppFramework\App;
@@ -36,6 +37,13 @@ class Application extends App implements IBootstrap
 			return new UninstallCleanup(
 				$c->get(IDBConnection::class),
 				$c->get(IConfig::class),
+			);
+		});
+		$context->registerService(UninstallDropTables::class, function ($c): UninstallDropTables {
+			return new UninstallDropTables(
+				$c->get(IDBConnection::class),
+				$c->get(IConfig::class),
+				$c->get(\OCP\Files\IRootFolder::class),
 			);
 		});
 		$context->registerService(LayoutWriteGuard::class, function ($c): LayoutWriteGuard {

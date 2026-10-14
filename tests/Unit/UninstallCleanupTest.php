@@ -29,6 +29,23 @@ final class UninstallCleanupTest extends TestCase
 		$this->assertSame('Remove HomeCheck preferences and app config', $step->getName());
 	}
 
+	public function testRunPreservesDataOnDisable(): void
+	{
+		// run() in a non-removal call stack must not touch app config or prefs.
+		$config = $this->createMock(IConfig::class);
+		$config->expects($this->never())->method('deleteAppValues');
+		$config->expects($this->never())->method('setUserValue');
+
+		$db = $this->createMock(IDBConnection::class);
+		$db->expects($this->never())->method('getQueryBuilder');
+
+		$output = $this->createMock(IOutput::class);
+		$output->expects($this->once())->method('info');
+
+		$step = new UninstallCleanup($db, $config);
+		$step->run($output);
+	}
+
 	public function testRunDeletesPrefsAndStripsDefaultApp(): void
 	{
 		$config = $this->createMock(IConfig::class);
@@ -70,6 +87,6 @@ final class UninstallCleanupTest extends TestCase
 		$output->expects($this->once())->method('info');
 
 		$step = new UninstallCleanup($db, $config);
-		$step->run($output);
+		$step->runRemoval($output);
 	}
 }

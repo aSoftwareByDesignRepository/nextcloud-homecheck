@@ -35,6 +35,20 @@ class UninstallCleanup implements IRepairStep
 
 	public function run(IOutput $output): void
 	{
+		if (!UninstallRepairFlow::isRemovalContext()) {
+			$output->info('HomeCheck: preserving data on disable — app config and preferences are kept until the app is fully removed.');
+			return;
+		}
+
+		$this->runRemoval($output);
+	}
+
+	/**
+	 * Explicit-removal path. Nextcloud reaches it via {@see run()} only when the
+	 * call stack is a real app removal; tests exercise it directly.
+	 */
+	public function runRemoval(IOutput $output): void
+	{
 		$this->config->deleteAppValues(Application::APP_ID);
 
 		$qb = $this->db->getQueryBuilder();
