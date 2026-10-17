@@ -23,7 +23,8 @@ function ok(cond, msg) {
 }
 
 /** Feature rules: no raw #hex outside var(..., fallback) — HomeCheck inherits NC theming */
-const hexOutsideVar = css.replace(/var\([^)]+\)/g, '').match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+const cssNoComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+const hexOutsideVar = cssNoComments.replace(/var\([^)]+\)/g, '').match(/#[0-9a-fA-F]{3,8}\b/g) || [];
 ok(hexOutsideVar.length === 0, 'no raw hex in feature CSS (' + hexOutsideVar.join(',') + ')');
 
 ok(css.includes('#app-content .hmk-app'), 'legacy NC app-content tokens retained');

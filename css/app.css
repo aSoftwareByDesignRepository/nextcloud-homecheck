@@ -853,8 +853,7 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 /* Beat NC core heading opacity on themed pages — keep greeting on background text */
 #app-content.hmk-app h2:not(.hmk-greeting),
 #content[class*="app-homecheck"].hmk-app h2:not(.hmk-greeting),
-#app-content.hmk-app .hmk-dialog__title,
-#content[class*="app-homecheck"].hmk-app .hmk-dialog__title {
+.hmk-dialog__title {
 	color: var(--color-main-text);
 }
 
