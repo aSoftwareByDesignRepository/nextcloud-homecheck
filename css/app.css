@@ -601,7 +601,7 @@ body[data-theme-dark-highcontrast] .hmk-edit-hint {
 	background-color: transparent;
 	-webkit-mask-image: none;
 	mask-image: none;
-	color: var(--color-primary-element);
+	color: var(--hc-accent-ink, var(--color-primary-element));
 	font-weight: 700;
 	font-size: 0.95rem;
 	line-height: 1;
@@ -1250,7 +1250,7 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 }
 .hmk-credit__link:hover {
 	background: transparent;
-	color: var(--color-primary-element);
+	color: var(--hc-accent-ink, var(--color-primary-element));
 	text-decoration: underline;
 	text-underline-offset: 0.18em;
 }
