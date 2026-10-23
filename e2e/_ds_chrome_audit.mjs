@@ -837,6 +837,42 @@ async function phaseStates(browser) {
 	}
 	record(emptyCell)
 
+	// hidden_attr_display_override guard — .hmk-panels{display:flex} (and
+	// any other author display rule) must not beat the UA [hidden] rule:
+	// the app-scoped `#homecheck-app [hidden]{display:none!important}`
+	// guard pins it. Assert every [hidden] in the app root computes
+	// display:none, then replay the real consumer path (empty layout →
+	// updateChrome sets panels.hidden=true while the empty state paints).
+	{
+		const r = { id: 'hidden-attr-guard', checks: {}, status: 'ok', fails: [] }
+		const probe = () => page.evaluate(() => {
+			const out = { painted: [], total: 0 }
+			document.querySelectorAll('#homecheck-app [hidden]').forEach((el) => {
+				out.total++
+				if (getComputedStyle(el).display !== 'none') out.painted.push(el.id || el.className)
+			})
+			return out
+		})
+		const base = await probe()
+		r.checks.staticHiddenCount = base.total
+		r.checks.staticPainted = base.painted
+		// Consumer replay: hide #hmk-panels exactly like the empty-state path
+		// (el.panels.hidden=true) — pre-guard the flex rule kept it painted.
+		r.checks.panelsHiddenDisplay = await page.evaluate(() => {
+			const p = document.getElementById('hmk-panels')
+			if (!p) return null
+			p.hidden = true
+			const d = getComputedStyle(p).display
+			p.hidden = false
+			return d
+		})
+		if (!base.total) r.fails.push('no [hidden] elements found — probe is vacuous')
+		if (base.painted.length) r.fails.push(`[hidden] elements still paint: ${base.painted.join(',')}`)
+		if (r.checks.panelsHiddenDisplay !== 'none') r.fails.push(`#hmk-panels[hidden] computes display=${r.checks.panelsHiddenDisplay} — flex rule still beats UA`)
+		if (r.fails.length) r.status = 'fail'
+		record(r)
+	}
+
 	// Reachable empty surface 1: folder with no children → pane empty copy +
 	// folder dialog role=status + emptyFolder copy.
 	{

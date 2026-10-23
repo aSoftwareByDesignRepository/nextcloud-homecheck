@@ -310,6 +310,13 @@ body[data-theme-dark-highcontrast] #content[class*="app-homecheck"].hmk-app {
 	display: none !important;
 }
 
+/* Author display rules (e.g. .hmk-panels flex) beat the UA [hidden]
+   rule — pin the attribute so hidden-toggled elements never paint. */
+#homecheck-app [hidden],
+#hmk-admin [hidden] {
+	display: none !important;
+}
+
 .hmk-touch-btn {
 	min-height: var(--hmk-touch);
 	min-width: var(--hmk-touch);
