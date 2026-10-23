@@ -1697,3 +1697,14 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 .oc-dialog .button:not(.primary, .error, .warning, .success, .danger) {
 	border-color: var(--hmk-form-border, var(--color-border-maxcontrast, var(--color-border)));
 }
+
+/* Accent ink for text-on-surface: --color-primary-element as text drops below
+   WCAG AA (~4.3:1) on dark themes — blend toward main-text there. */
+body {
+	--hc-accent-ink: var(--color-primary-element);
+}
+
+body[data-theme-dark],
+body[data-theme-dark-highcontrast] {
+	--hc-accent-ink: color-mix(in srgb, var(--color-primary-element) 70%, var(--color-main-text));
+}
