@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.3 - 2026-10-25
+
+### Fixed
+
+- pin [hidden] display — author flex rule overrode UA hidden
+- define --hc-accent-ink token backing ebebe63 consumers
+- dark-theme accent-ink token + e2e user-state reset
+
+### Added
+
+- drop-tables + repair-flow steps; l10n parity sync
+
+### Changed
+
+- normalize tarball modes + host-side signature audit (GH #47)
+- shared e2e instance-lock harness
+- Atlas farm v3.5.15: homecheck seal-prep — app-feedback fleet sync + a11y fixes
+- fleet sync — drop deprecated clip: rect(), eslint-clean app-feedback regex
+
 ## 1.1.2 - 2026-10-10
 
 ### Changed
