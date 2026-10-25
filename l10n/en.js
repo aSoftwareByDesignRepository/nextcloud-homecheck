@@ -92,6 +92,5 @@ OC.L10N.register(
 	"Use as home" : "Use as home",
 	"Use as start page" : "Use as start page",
 	"Your apps" : "Your apps"
-	},
-	"nplurals=2; plural=(n != 1);"
+	}
 );
