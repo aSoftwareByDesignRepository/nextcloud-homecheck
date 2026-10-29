@@ -1548,7 +1548,8 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	font-size: var(--hmk-fs-sm, 0.875rem);
 	line-height: var(--hmk-line-base, 1.45);
 	white-space: normal;
-	overflow-wrap: anywhere;
+	/* Menu labels keep normal word breaks — anywhere tears mid-word. */
+	overflow-wrap: break-word;
 }
 
 .hmk-nav-footer__menu-item:hover {
