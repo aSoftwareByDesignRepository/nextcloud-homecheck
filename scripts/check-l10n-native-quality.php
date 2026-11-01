@@ -60,11 +60,22 @@ $formalPatterns = [
 $locales = ['de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR'];
 $ok = true;
 
+/**
+ * 'Hello'/'Hello, {name}' are the night-bucket fallback greetings
+ * (painted 22:00–05:00). Mapping them onto a time-bound greeting value
+ * ('Bonsoir') shows e.g. an evening greeting after midnight.
+ */
+$greetingCollisionPairs = [
+	'Hello' => ['Good morning', 'Good afternoon', 'Good evening'],
+	'Hello, {name}' => ['Good morning, {name}', 'Good afternoon, {name}', 'Good evening, {name}'],
+];
+
 foreach ($locales as $lang) {
 	$path = $base . '/' . $lang . '.json';
 	$cat = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
 	$identical = [];
 	$registerHits = [];
+	$greetingHits = [];
 
 	foreach ($cat['translations'] as $key => $value) {
 		if (!is_string($key) || !is_string($value)) {
@@ -87,7 +98,19 @@ foreach ($locales as $lang) {
 		}
 	}
 
-	if ($identical !== [] || $registerHits !== []) {
+	foreach ($greetingCollisionPairs as $neutralKey => $timedKeys) {
+		$neutralValue = $cat['translations'][$neutralKey] ?? null;
+		if (!is_string($neutralValue)) {
+			continue;
+		}
+		foreach ($timedKeys as $timedKey) {
+			if ($neutralValue === ($cat['translations'][$timedKey] ?? null)) {
+				$greetingHits[] = "{$neutralKey}: {$neutralValue} (== {$timedKey})";
+			}
+		}
+	}
+
+	if ($identical !== [] || $registerHits !== [] || $greetingHits !== []) {
 		$ok = false;
 		fwrite(STDERR, "== {$lang} ==\n");
 		if ($identical !== []) {
@@ -99,6 +122,12 @@ foreach ($locales as $lang) {
 		if ($registerHits !== []) {
 			fwrite(STDERR, '  Wrong register (' . count($registerHits) . "):\n");
 			foreach (array_slice($registerHits, 0, 20) as $line) {
+				fwrite(STDERR, "    - {$line}\n");
+			}
+		}
+		if ($greetingHits !== []) {
+			fwrite(STDERR, '  Time-bound fallback greeting (' . count($greetingHits) . "):\n");
+			foreach ($greetingHits as $line) {
 				fwrite(STDERR, "    - {$line}\n");
 			}
 		}
