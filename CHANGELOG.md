@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.4 - 2026-11-06
+
+### Fixed
+
+- French localization: the neutral greeting fallback now says « Salut » instead of « Bonsoir » ("good evening"), which was shown at any time of day.
+- Navigation: app-menu labels keep their word breaks on narrow sidebars — long names wrap instead of clipping.
+
+### Changed
+
+- App Store screenshots refreshed from clean marketing captures.
+- Translation catalogs regenerated across all shipped locales.
+- Shared feedback footer partial re-synced to the canonical template.
+
 ## 1.1.3 - 2026-10-25
 
 ### Fixed
@@ -302,17 +315,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 1.0.0 — 2026-08-24
 
 - Initial release: card grid, folders, personal layout, top-bar `apporder` sync, default-landing CTA, admin seed template, en/de.
-
-## [1.1.4] — 2026-11-05
-
-### Fixed
-
-- — 'Salut', not 'Bonsoir'
-- break-word)
-
-### Changed
-
-- tpl
-- Refresh App Store screenshots from clean marketing captures
-- — atlas-farm artifacts, docs and l10n batch 2026-10-25
 
