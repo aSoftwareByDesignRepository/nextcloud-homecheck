@@ -174,7 +174,7 @@ class LayoutService
 		if ($enable) {
 			array_unshift($parts, Application::APP_ID);
 		}
-		$this->config->setUserValue($uid, 'core', 'defaultapp', implode(',', $parts));
+		$this->config->setUserValue($uid, 'core', 'defaultapp', implode(',', $parts)); // fcpin:ok — managed pin: same statement unpins on disable, UninstallCleanup strips on uninstall
 	}
 
 	public function dismissCta(string $uid): void
@@ -342,7 +342,7 @@ class LayoutService
 		}
 		$flat = $this->flattener->flatten($layout, $byId);
 		try {
-			$this->config->setUserValue($uid, 'core', 'apporder', json_encode($flat, JSON_THROW_ON_ERROR));
+			$this->config->setUserValue($uid, 'core', 'apporder', json_encode($flat, JSON_THROW_ON_ERROR)); // fcpin:ok — user-chosen nav order kept deliberately (documented in UninstallCleanup)
 			return true;
 		} catch (\Throwable $e) {
 			$this->logger->error('HomeCheck apporder sync failed', [

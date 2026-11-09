@@ -84,7 +84,7 @@ class UninstallCleanup implements IRepairStep
 					continue;
 				}
 				$next = array_values(array_filter($parts, static fn (string $p): bool => $p !== Application::APP_ID));
-				$this->config->setUserValue($uid, 'core', 'defaultapp', implode(',', $next));
+				$this->config->setUserValue($uid, 'core', 'defaultapp', implode(',', $next)); // fcpin:ok — this IS the unpin path (uninstall strips APP_ID from the list)
 				$updated++;
 			}
 		} finally {
