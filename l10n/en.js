@@ -3,7 +3,7 @@ OC.L10N.register(
 	{
 	"(opens in a new tab)" : "(opens in a new tab)",
 	"(opens in a new window)" : "(opens in a new window)",
-	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s apps · %n folder on your home", "%1$s apps · %n folders on your home"],
+	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s apps · %n folder on your home","%1$s apps · %n folders on your home"],
 	"Add to folder" : "Add to folder",
 	"Apps" : "Apps",
 	"Cancel" : "Cancel",

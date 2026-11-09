@@ -3,7 +3,7 @@ OC.L10N.register(
 	{
 	"(opens in a new tab)" : "(öffnet in neuem Tab)",
 	"(opens in a new window)" : "(öffnet in einem neuen Fenster)",
-	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s Apps · %n Ordner auf Ihrer Startseite", "%1$s Apps · %n Ordner auf Ihrer Startseite"],
+	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s Apps · %n Ordner auf Ihrer Startseite","%1$s Apps · %n Ordner auf Ihrer Startseite"],
 	"Add to folder" : "In Ordner legen",
 	"Apps" : "Apps",
 	"Cancel" : "Abbrechen",
