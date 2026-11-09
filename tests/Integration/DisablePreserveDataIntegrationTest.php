@@ -24,6 +24,12 @@ final class DisablePreserveDataIntegrationTest extends TestCase
 	{
 		parent::setUp();
 
+		/* Stub-mode guard: the standalone Doctrine/OCP stubs define \OC::$server
+		   with a dummy container — require the real IServerContainer. */
+		if (!isset(\OC::$server) || !(\OC::$server instanceof \OCP\IServerContainer)) {
+			$this->markTestSkipped('Nextcloud runtime required (run via docker compose exec)');
+		}
+
 		/** @var IAppManager $appManager */
 		$appManager = \OC::$server->get(IAppManager::class);
 		if (!$appManager->isEnabledForUser(UninstallDropTables::APP_ID)) {
