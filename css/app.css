@@ -1716,3 +1716,77 @@ body[data-theme-dark],
 body[data-theme-dark-highcontrast] {
 	--hc-accent-ink: color-mix(in srgb, var(--color-primary-element) 70%, var(--color-main-text));
 }
+
+/*
+ * Transfer settings page (/settings/transfer) — base classes the synced
+ * config-transfer template relies on (hmk-card/section/callout/btn…).
+ * Scoped to .hmk-transfer-page so nothing else is affected; NC theme vars
+ * + hmk tokens only (DESIGN-SYSTEM §1).
+ */
+.hmk-transfer-page .hmk-transfer-title {
+	margin: 0 0 var(--hmk-space-5, 24px);
+	font-size: 1.4rem;
+}
+.hmk-transfer-page .hmk-main {
+	max-width: 60rem;
+	margin: 0 auto;
+	padding: var(--hmk-space-5, 24px) var(--hmk-space-4, 16px);
+}
+.hmk-transfer-page .hmk-card {
+	background: var(--hmk-bg-card, var(--color-main-background));
+	border: 1px solid var(--hmk-border, var(--color-border));
+	border-radius: var(--hmk-radius-lg, 16px);
+	padding: var(--hmk-space-5, 24px);
+	margin: 0 0 var(--hmk-space-5, 24px);
+	box-shadow: var(--hmk-shadow, none);
+}
+.hmk-transfer-page .hmk-callout {
+	border-inline-start: 4px solid var(--color-primary-element, #0082c9);
+	padding: var(--hmk-space-2, 8px) var(--hmk-space-3, 12px);
+	border-radius: var(--hmk-radius-sm, 6px);
+	background: var(--hmk-tint-info, var(--color-main-background));
+	margin: 0 0 var(--hmk-space-4, 16px);
+}
+.hmk-transfer-page .hmk-callout--info {
+	border-inline-start-color: var(--color-primary-element, #0082c9);
+	background: var(--hmk-tint-info, var(--color-main-background));
+}
+.hmk-transfer-page .hmk-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--hmk-space-1, 4px);
+	min-height: 44px;
+	padding: 8px 16px;
+	border-radius: var(--border-radius-element, var(--border-radius, 8px));
+	border: 1px solid var(--hmk-form-border, var(--hmk-border, transparent));
+	background: var(--color-background-dark, var(--hmk-bg-soft, var(--color-main-background)));
+	color: var(--color-main-text, #222);
+	font-weight: 600;
+	cursor: pointer;
+}
+.hmk-transfer-page .hmk-btn:hover:not(:disabled) {
+	background: var(--color-background-hover, var(--hmk-bg-soft));
+}
+.hmk-transfer-page .hmk-btn:focus-visible {
+	outline: 2px solid var(--color-primary-element, #0082c9);
+	outline-offset: 1px;
+}
+.hmk-transfer-page .hmk-btn:disabled {
+	opacity: .6;
+	cursor: not-allowed;
+}
+.hmk-transfer-page .hmk-btn--primary {
+	background: var(--hmk-primary-fill, var(--color-primary-element));
+	border-color: var(--hmk-primary-fill, var(--color-primary-element));
+	color: var(--hmk-primary-text, var(--color-primary-element-text));
+}
+.hmk-transfer-page .hmk-btn--primary:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--hmk-primary-fill, var(--color-primary-element)) 88%, var(--color-main-text) 12%);
+	border-color: color-mix(in srgb, var(--hmk-primary-fill, var(--color-primary-element)) 88%, var(--color-main-text) 12%);
+}
+.hmk-transfer-page .hmk-btn--secondary,
+.hmk-transfer-page .hmk-btn--ghost {
+	background: var(--color-background-dark, var(--hmk-bg-soft, var(--color-main-background)));
+	color: var(--color-main-text, #222);
+}

@@ -86,6 +86,11 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 	<settings>
 		<admin>OCA\HomeCheck\Settings\AdminSettings</admin>
 	</settings>
+	<commands>
+		<command>OCA\HomeCheck\Command\ConfigExportCommand</command>
+		<command>OCA\HomeCheck\Command\ConfigImportCommand</command>
+		<command>OCA\HomeCheck\Command\ConfigReconcileCommand</command>
+	</commands>
 	<repair-steps>
 		<uninstall>
 			<step>OCA\HomeCheck\Repair\UninstallDropTables</step>

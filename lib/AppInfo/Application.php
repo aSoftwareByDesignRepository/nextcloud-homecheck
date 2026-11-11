@@ -54,6 +54,58 @@ class Application extends App implements IBootstrap
 		});
 		$context->registerMiddleware(ApiExceptionMiddleware::class);
 		$context->registerDashboardWidget(LauncherWidget::class);
+
+		// ── Config & data transfer (test → production) ──────────────────
+		$context->registerService(\OCA\HomeCheck\ConfigTransfer\TransferManifest::class, fn () => new \OCA\HomeCheck\ConfigTransfer\TransferManifest());
+		$context->registerService(\OCA\HomeCheck\ConfigTransfer\TransferHooks::class, function ($c): \OCA\HomeCheck\ConfigTransfer\TransferHooks {
+			return new \OCA\HomeCheck\ConfigTransfer\TransferHooks(
+				$c->get(\OCA\HomeCheck\Service\LayoutValidator::class),
+				$c->get(\OCP\IGroupManager::class),
+				$c->get(\Psr\Log\LoggerInterface::class),
+			);
+		});
+		$context->registerService(\OCA\HomeCheck\ConfigTransfer\TransferPendingStore::class, fn ($c) => new \OCA\HomeCheck\ConfigTransfer\TransferPendingStore($c->get(\OCP\Files\IRootFolder::class), $c->get(IConfig::class), 'homecheck'));
+		$context->registerService(\OCA\HomeCheck\ConfigTransfer\TransferReceiptStore::class, fn ($c) => new \OCA\HomeCheck\ConfigTransfer\TransferReceiptStore($c->get(IConfig::class), 'homecheck'));
+		$context->registerService(\OCA\HomeCheck\ConfigTransfer\TransferService::class, function ($c): \OCA\HomeCheck\ConfigTransfer\TransferService {
+			return new \OCA\HomeCheck\ConfigTransfer\TransferService(
+				$c->get(IDBConnection::class),
+				$c->get(IConfig::class),
+				$c->get(\OCP\IUserManager::class),
+				$c->get(\OCP\IGroupManager::class),
+				$c->get(\OCP\Files\IRootFolder::class),
+				$c->get(\OCP\App\IAppManager::class),
+				$c->get(\OCP\Lock\ILockingProvider::class),
+				$c->get(\OCP\IURLGenerator::class),
+				$c->get(\Psr\Log\LoggerInterface::class),
+				$c->get(\OCA\HomeCheck\ConfigTransfer\TransferManifest::class),
+				$c->get(\OCA\HomeCheck\ConfigTransfer\TransferHooks::class),
+				$c->get(\OCA\HomeCheck\ConfigTransfer\TransferPendingStore::class),
+				$c->get(\OCA\HomeCheck\ConfigTransfer\TransferReceiptStore::class),
+				'homecheck',
+				$c->get(\OCP\IAppConfig::class),
+			);
+		});
+		$context->registerService(\OCA\HomeCheck\BackgroundJob\TransferApplyJob::class, function ($c): \OCA\HomeCheck\BackgroundJob\TransferApplyJob {
+			return new \OCA\HomeCheck\BackgroundJob\TransferApplyJob(
+				$c->get(\OCP\AppFramework\Utility\ITimeFactory::class),
+				$c->get(\OCA\HomeCheck\ConfigTransfer\TransferService::class),
+				$c->get(\OCP\Lock\ILockingProvider::class),
+				$c->get(\OCP\BackgroundJob\IJobList::class),
+				$c->get(\Psr\Log\LoggerInterface::class),
+			);
+		});
+		$context->registerService(\OCA\HomeCheck\Controller\TransferApiController::class, function ($c): \OCA\HomeCheck\Controller\TransferApiController {
+			return new \OCA\HomeCheck\Controller\TransferApiController(
+				'homecheck',
+				$c->get(\OCP\IRequest::class),
+				$c->get(\OCA\HomeCheck\ConfigTransfer\TransferHooks::class),
+				$c->get(\OCA\HomeCheck\ConfigTransfer\TransferService::class),
+				$c->get(\OCP\BackgroundJob\IJobList::class),
+				$c->get(\OCP\Security\Bruteforce\IThrottler::class),
+				$c->get(\OCP\IGroupManager::class),
+				$c->get(\OCP\IUserSession::class),
+			);
+		});
 	}
 
 	public function boot(IBootContext $context): void

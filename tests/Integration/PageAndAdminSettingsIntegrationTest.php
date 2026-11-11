@@ -9,11 +9,15 @@ declare(strict_types=1);
 
 namespace OCA\HomeCheck\Tests\Integration;
 
+use OCA\HomeCheck\ConfigTransfer\TransferReceiptStore;
 use OCA\HomeCheck\Controller\PageController;
 use OCA\HomeCheck\Service\LayoutService;
 use OCA\HomeCheck\Settings\AdminSettings;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\IConfig;
+use OCP\IGroupManager;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Server;
@@ -57,7 +61,15 @@ final class PageAndAdminSettingsIntegrationTest extends TestCase
 		$session = $this->createMock(IUserSession::class);
 		$session->method('getUser')->willReturn($user);
 		$layouts = Server::get(LayoutService::class);
-		$c = new PageController('homecheck', Server::get(IRequest::class), $session, $layouts);
+		$c = new PageController(
+			'homecheck',
+			Server::get(IRequest::class),
+			$session,
+			Server::get(IGroupManager::class),
+			Server::get(IURLGenerator::class),
+			new TransferReceiptStore(Server::get(IConfig::class), 'homecheck'),
+			$layouts,
+		);
 		$res = $c->index();
 		$this->assertInstanceOf(TemplateResponse::class, $res);
 		$state = $res->getParams()['initialState'];

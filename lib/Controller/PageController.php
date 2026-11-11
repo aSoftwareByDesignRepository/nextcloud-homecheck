@@ -9,12 +9,17 @@ declare(strict_types=1);
 
 namespace OCA\HomeCheck\Controller;
 
+use OCA\HomeCheck\AppInfo\Application;
+use OCA\HomeCheck\ConfigTransfer\TransferReceiptStore;
 use OCA\HomeCheck\Service\LayoutService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\IGroupManager;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\Util;
 
@@ -24,6 +29,9 @@ class PageController extends Controller
 		string $appName,
 		IRequest $request,
 		private readonly IUserSession $userSession,
+		private readonly IGroupManager $groupManager,
+		private readonly IURLGenerator $urlGenerator,
+		private readonly TransferReceiptStore $transferReceipts,
 		private readonly LayoutService $layouts,
 	) {
 		parent::__construct($appName, $request);
@@ -63,5 +71,27 @@ class PageController extends Controller
 		return new TemplateResponse('homecheck', 'main', [
 			'initialState' => $payload,
 		]);
+	}
+
+	/**
+	 * Dedicated transfer settings page (/settings/transfer) — the only
+	 * in-app settings surface HomeCheck ships; NC-system-admin gated
+	 * (door-admin == sysadmin here, same bar as TransferHooks). Any other
+	 * section — and non-admins — redirect to the app index: the page does
+	 * not exist for them.
+	 */
+	#[NoAdminRequired]
+	#[NoCSRFRequired]
+	public function settings(string $section = ''): TemplateResponse|RedirectResponse
+	{
+		$uid = (string)($this->userSession->getUser()?->getUID() ?? '');
+		if ($section === 'transfer' && $uid !== '' && $this->groupManager->isAdmin($uid)) {
+			Util::addTranslations(Application::APP_ID);
+			return new TemplateResponse(Application::APP_ID, 'transfer', [
+				'isSystemAdmin' => true,
+				'transferLastReceipt' => $this->transferReceipts->lastReceipt(),
+			]);
+		}
+		return new RedirectResponse($this->urlGenerator->linkToRoute('homecheck.page.index'));
 	}
 }
