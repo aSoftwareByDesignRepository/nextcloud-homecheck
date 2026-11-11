@@ -34,7 +34,7 @@ $retired = [
 	'Folder hidden from AppHome' => 'Folder hidden from HomeCheck',
 ];
 
-$locales = ['de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR'];
+$locales = ['de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR', 'zh_CN'];
 
 foreach ($locales as $lang) {
 	$path = $base . '/' . $lang . '.json';

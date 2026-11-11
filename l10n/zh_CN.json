@@ -3,6 +3,9 @@
 	"translations": {
 		"(opens in a new tab)": "（在新标签页中打开）",
 		"(opens in a new window)": "（在新窗口中打开）",
+		"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_": [
+			"%1$s 个应用 · 主屏幕上 %n 个文件夹"
+		],
 		"Add to folder": "添加到文件夹",
 		"Apps": "应用",
 		"Cancel": "取消",
@@ -45,8 +48,8 @@
 		"Invalid JSON — fix the syntax, then save again": "JSON 无效——请修正语法后重新保存",
 		"Loading…": "正在加载……",
 		"Make HomeCheck your start page after login?": "将 HomeCheck 设为登录后的起始页？",
-		"More Nextcloud apps from Software by Design": "Software by Design 出品的更多 Nextcloud 应用",
 		"More actions": "更多操作",
+		"More Nextcloud apps from Software by Design": "Software by Design 出品的更多 Nextcloud 应用",
 		"Move left": "左移",
 		"Move right": "右移",
 		"Name has invalid characters": "名称包含无效字符",
@@ -58,9 +61,9 @@
 		"No other apps are available for you yet.": "暂无其他可用应用。",
 		"Not now": "暂不",
 		"Not set — open HomeCheck to choose": "未设置——请打开 HomeCheck 选择",
+		"Open folder": "打开文件夹",
 		"Open GitHub Issues": "打开 GitHub Issues",
 		"Open HomeCheck after you sign in": "登录后打开 HomeCheck",
-		"Open folder": "打开文件夹",
 		"Open launcher": "打开启动器",
 		"Optional seed layout for users who have never opened HomeCheck. Applied once; users can change everything afterwards. Folders never appear in the top bar.": "为从未打开过 HomeCheck 的用户准备的可选种子布局。只应用一次；之后用户可随意更改。文件夹不会出现在顶栏。",
 		"Remove from folder": "从文件夹移除",
@@ -90,9 +93,6 @@
 		"Unset as home": "取消设为主页",
 		"Use as home": "设为主页",
 		"Use as start page": "设为起始页",
-		"Your apps": "你的应用",
-		"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_": [
-			"%1$s 个应用 · 主屏幕上 %n 个文件夹"
-		]
+		"Your apps": "你的应用"
 	}
 }
