@@ -6,13 +6,28 @@ declare(strict_types=1);
  * Verifies that all locale JSON files contain exactly the same set of msgid keys
  * (and the same key order as en.json).
  *
- * Locales: en, de, fr, es, da, nl, it, pl, sv, nb, pt, pt_BR, tr, zh_CN.
+ * Locales: en, de, fr, es, da, nl, it, pl, sv, nb, pt, pt_BR, tr, zh_CN, zh_TW.
  *
  * Usage: php scripts/check-l10n-parity.php
  */
 
 $base = __DIR__ . '/../l10n';
-$localeFiles = ['en', 'de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt', 'pt_BR', 'tr', 'zh_CN'];
+$localeFiles = ['en', 'de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt', 'pt_BR', 'tr', 'zh_CN', 'zh_TW'];
+
+// Guard the roster's input domain both ways: a shipped l10n/<locale>.json
+// that is not rostered must FAIL (silent-skip blindness), and a rostered
+// locale whose catalog is missing FAILS below in the load loop.
+$shipped = [];
+foreach (glob($base . '/*.json') ?: [] as $jsonFile) {
+	$shipped[] = basename($jsonFile, '.json');
+}
+$unrostered = array_values(array_diff($shipped, $localeFiles));
+if ($unrostered !== []) {
+	sort($unrostered);
+	fwrite(STDERR, 'Shipped catalogs missing from parity roster: ' . implode(', ', $unrostered) . "\n");
+	exit(1);
+}
+
 $catalogs = [];
 
 foreach ($localeFiles as $lang) {

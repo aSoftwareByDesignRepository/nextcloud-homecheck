@@ -34,7 +34,7 @@ $retired = [
 	'Folder hidden from AppHome' => 'Folder hidden from HomeCheck',
 ];
 
-$locales = ['de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt_BR', 'zh_CN'];
+$locales = ['de', 'fr', 'es', 'da', 'nl', 'it', 'pl', 'sv', 'nb', 'pt', 'pt_BR', 'tr', 'zh_CN', 'zh_TW'];
 
 foreach ($locales as $lang) {
 	$path = $base . '/' . $lang . '.json';
@@ -58,10 +58,22 @@ foreach ($locales as $lang) {
 	}
 
 	$cat['translations'] = $ordered;
-	file_put_contents(
-		$path,
-		json_encode($cat, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n"
-	);
+	// Preserve each catalog's existing indentation — the fleet mixes tab and
+	// 2-space serialization; a blind PRETTY_PRINT rewrite churns whole files.
+	$raw = (string) file_get_contents($path);
+	$indent = '    ';
+	if (preg_match('/^(\s+)\S/m', (string) substr($raw, strpos($raw, "\n") + 1), $im)) {
+		$indent = $im[1];
+	}
+	$json = json_encode($cat, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	if ($indent !== '    ') {
+		$json = preg_replace_callback(
+			'/^((?:    )+)/m',
+			static fn(array $m): string => str_repeat($indent, intdiv(strlen($m[1]), 4)),
+			$json
+		);
+	}
+	file_put_contents($path, $json . (str_ends_with($raw, "\n") ? "\n" : ''));
 	echo "Rebuilt {$lang}.json\n";
 }
 
