@@ -63,7 +63,7 @@
 .hmk-radio { display: flex; gap: var(--hmk-space-2, 8px); align-items: flex-start; min-height: 44px; padding: var(--hmk-space-1, 4px) 0; }
 .hmk-radio input { margin-top: 4px; min-width: 20px; min-height: 20px; }
 .hmk-radio span { min-width: 0; }
-.hmk-radio--danger strong { color: var(--color-element-error, #e9322d); }
+.hmk-radio--danger strong { color: var(--color-error-text, var(--color-element-error, var(--color-error))); }
 /* NC core pins input[type=file] to width:auto (inputs.css, 0-1-1) — the
    intrinsic ~320px min-size overflows narrow sheets. check-shell
    form-controls.css re-pins it at #content.app-* #app-content level (2-2-1)
@@ -129,7 +129,7 @@ dialog.hmk-dialog:not([open]) {
 }
 .hmk-dialog__footer .hmk-actions { display: flex; gap: var(--hmk-space-3, 12px); justify-content: flex-end; }
 .hmk-transfer-report__verdict { font-size: 1.05rem; font-weight: 600; }
-.hmk-transfer-report__verdict.is-danger { color: var(--color-element-error, #e9322d); }
+.hmk-transfer-report__verdict.is-danger { color: var(--color-error-text, var(--color-element-error, var(--color-error))); }
 .hmk-transfer-group { margin: var(--hmk-space-2, 8px) 0; }
 .hmk-transfer-group summary {
 	cursor: pointer;
@@ -139,7 +139,7 @@ dialog.hmk-dialog:not([open]) {
 	font-weight: 600;
 }
 .hmk-transfer-group.is-security summary {
-	color: var(--color-element-error, #e9322d);
+	color: var(--color-error-text, var(--color-element-error, var(--color-error)));
 }
 .hmk-transfer-group ul { margin: 0 0 var(--hmk-space-2, 8px); padding-inline-start: 1.5rem; }
 .hmk-transfer-group li { padding: 2px 0; font-family: var(--hmk-mono, monospace); font-size: .92em; word-break: break-all; }
