@@ -1271,7 +1271,7 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 	}
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768.98px) {
 	/* Phone/tablet: one-column panes; greeting + Edit stack; NC nav is already the platform hamburger below 1024. */
 	.hmk-topbar {
 		flex-wrap: wrap;
@@ -1851,6 +1851,18 @@ body[data-theme-dark-highcontrast] {
 	color: inherit;
 	font-size: 16px;
 	cursor: pointer;
+}
+/* overlay_toast_button_armor_gap: body-mounted overlays lose to NC core's
+   unscoped button repaint (width/background/border/padding/margin). Pin the
+   close button's geometry on the overlay-scoped selector. */
+#hmk-toasts button.hmk-toast__close {
+	width: auto !important;
+	margin: -8px -8px -8px 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+	border: 0 !important;
+	min-width: 44px;
+	min-height: 44px;
 }
 .hmk-toast--success {
 	border-inline-start-color: var(--color-success-text, #46ba61);
