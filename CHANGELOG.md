@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.5 - 2026-11-13
+
+### Fixed
+
+- scope host margin:auto to >=481px — restore <=480 full-bleed sheet
+- register + identical-English fixes in transfer strings (de/fr/nl)
+- overlay-close button armor + 768.98px media cap
+- resync pack — danger-ink WCAG AA var chain (contrast_below_wcag_aa)
+- route bridge alerts to app-owned hmk-toast channel
+- catalogue 86 config-transfer msgids across all 15 locales
+- zh_TW + pt/tr in rosters + shipped-vs-roster glob guard
+- margin:auto on pack dialog — NC core reset uncenters top-layer dialogs
+- sync config-transfer pack — schema cache, file-input specificity, sheet clip
+- sync config-transfer pack — positional t() interpolation
+- zh_CN canonical en key-order + parity/rebuild coverage
+
+### Added
+
+- config & data transfer — encrypted test→prod pack
+- Turkish locale + de/en sync
+
+### Changed
+
+- transfer dialog painted-geometry crafts + visible toast proof
+- ATLAS_VERTICAL_SCROLL_CONTRACT for /settings/transfer
+- resync css/common/transfer.css — dialog.hmk-dialog specificity
+- pack re-sync — replace-confirm token width (cramped_form_controls)
+- l10n: zh-Hant/zh_TW catalog + locale wiring
+- l10n: add zh_CN catalog
+- honest-skip DisablePreserveData on stub container
+- waive adjudicated foreign-config pins (fcpin:ok)
+- rewrite malformed v1.1.4 entry — fragments, end-append, off-convention header
+
 ## 1.1.4 - 2026-11-06
 
 ### Fixed
