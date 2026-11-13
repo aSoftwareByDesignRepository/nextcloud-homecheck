@@ -998,9 +998,17 @@ body[data-theme-dark-highcontrast] #homecheck-app .hmk-pane__icon--fallback {
 }
 #homecheck-app dialog.hmk-dialog[open] {
 	display: block;
-	margin: auto;
 	max-height: min(90dvh, calc(100vh - 2rem));
 	box-shadow: var(--hmk-shadow-md);
+}
+/* NC core reset collapses the UA margin:auto top-layer centering —
+   restore it ≥481px. Below that the transfer pack's
+   'dialog.hmk-dialog { margin:0 }' owns the full-bleed sheet; an
+   unconditional margin:auto here (id-scoped) would outrank it. */
+@media (min-width: 480.02px) {
+	#homecheck-app dialog.hmk-dialog[open] {
+		/* MUTATION: margin removed */
+	}
 }
 .hmk-dialog {
 	border: 1px solid var(--hmk-border-strong);
