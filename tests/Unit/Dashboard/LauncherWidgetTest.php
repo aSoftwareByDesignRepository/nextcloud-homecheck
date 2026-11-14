@@ -102,7 +102,6 @@ PHP);
 		\OC_Util::$styles = [];
 
 		$prop = new \ReflectionProperty(LauncherWidget::class, 'deskletStylesRegistered');
-		$prop->setAccessible(true);
 		$prop->setValue(null, false);
 
 		$this->widget->load();

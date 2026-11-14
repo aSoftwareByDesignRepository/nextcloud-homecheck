@@ -71,16 +71,24 @@ $lastReceipt = is_array($_['transferLastReceipt'] ?? null) ? $_['transferLastRec
 	</p>
 	<?php endif; ?>
 	<form id="hmk-transfer-import-form" class="hmk-form" novalidate>
-		<fieldset class="hmk-form-row hmk-fieldset">
+		<fieldset class="hmk-form-row hmk-fieldset" aria-describedby="hmk-transfer-replace-hint">
 			<legend><?php p($l->t('Mode')); ?></legend>
-			<label class="hmk-radio">
-				<input type="radio" name="mode" value="merge" checked>
-				<span><strong><?php p($l->t('Merge')); ?></strong> — <?php p($l->t('add and update; nothing is deleted')); ?></span>
-			</label>
-			<label class="hmk-radio hmk-radio--danger">
-				<input type="radio" name="mode" value="replace" <?php if (!$isSystemAdmin): ?>disabled<?php endif; ?>>
-				<span><strong><?php p($l->t('Replace')); ?></strong> — <?php p($l->t('make identical to the file; prod-only rows are deleted')); ?></span>
-			</label>
+			<div class="hmk-choice-cards">
+				<label class="hmk-choice-card">
+					<input type="radio" name="mode" value="merge" checked>
+					<span class="hmk-choice-card__copy">
+						<span class="hmk-choice-card__title"><?php p($l->t('Merge')); ?></span>
+						<span class="hmk-choice-card__hint"><?php p($l->t('add and update; nothing is deleted')); ?></span>
+					</span>
+				</label>
+				<label class="hmk-choice-card hmk-choice-card--danger">
+					<input type="radio" name="mode" value="replace" <?php if (!$isSystemAdmin): ?>disabled<?php endif; ?>>
+					<span class="hmk-choice-card__copy">
+						<span class="hmk-choice-card__title"><?php p($l->t('Replace')); ?></span>
+						<span class="hmk-choice-card__hint"><?php p($l->t('make identical to the file; prod-only rows are deleted')); ?></span>
+					</span>
+				</label>
+			</div>
 			<p class="hmk-form-row__hint" id="hmk-transfer-replace-hint">
 				<?php if ($isSystemAdmin): ?>
 					<?php p($l->t('Replace needs maintenance mode ON (occ maintenance:mode --on) — you will type REPLACE in the preview to confirm.')); ?>
