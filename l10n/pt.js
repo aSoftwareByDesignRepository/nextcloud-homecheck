@@ -180,6 +180,10 @@ OC.L10N.register(
 	"Writing settings" : "A escrever definições",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Pode fechar isto — o resultado é guardado e mostrado em “Última transferência”.",
 	"You do not have the rights for this action." : "Não tem permissões para esta ação.",
-	"Your apps" : "As suas aplicações"
+	"Your apps" : "As suas aplicações",
+	"1 setting" : "1 definição",
+	"%n settings" : "%n definições",
+	"1 row" : "1 linha",
+	"%n rows" : "%n linhas"
 	}
 );

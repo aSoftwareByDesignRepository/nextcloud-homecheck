@@ -213,6 +213,10 @@
 		"Writing settings": "Écriture des paramètres",
 		"You can close this — the result is saved and shown under “Last transfer”.": "Tu peux fermer ceci — le résultat est enregistré et affiché sous « Dernier transfert ».",
 		"You do not have the rights for this action.": "Tu n’as pas les droits pour cette action.",
-		"Your apps": "Tes apps"
+		"Your apps": "Tes apps",
+		"1 setting": "1 paramètre",
+		"%n settings": "%n paramètres",
+		"1 row": "1 ligne",
+		"%n rows": "%n lignes"
 	}
 }

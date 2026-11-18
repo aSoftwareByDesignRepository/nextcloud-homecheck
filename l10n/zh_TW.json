@@ -202,6 +202,10 @@
 		"Writing settings": "正在寫入設定",
 		"You can close this — the result is saved and shown under “Last transfer”.": "您可以關閉此頁——結果已儲存並顯示在“上次傳輸”下。",
 		"You do not have the rights for this action.": "您沒有此操作的授權。",
-		"Your apps": "你的應用"
+		"Your apps": "你的應用",
+		"1 setting": "1 項設定",
+		"%n settings": "%n 項設定",
+		"1 row": "1 列",
+		"%n rows": "%n 列"
 	}
 }

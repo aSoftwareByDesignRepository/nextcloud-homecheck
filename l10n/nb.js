@@ -180,6 +180,10 @@ OC.L10N.register(
 	"Writing settings" : "Skriver innstillinger",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Du kan lukke dette — resultatet lagres og vises under “Siste overføring”.",
 	"You do not have the rights for this action." : "Du har ikke rettigheter for denne handlingen.",
-	"Your apps" : "Dine apper"
+	"Your apps" : "Dine apper",
+	"1 setting" : "1 innstilling",
+	"%n settings" : "%n innstillinger",
+	"1 row" : "1 rad",
+	"%n rows" : "%n rader"
 	}
 );

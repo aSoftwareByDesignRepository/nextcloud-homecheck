@@ -213,6 +213,10 @@
 		"Writing settings": "Writing settings",
 		"You can close this — the result is saved and shown under “Last transfer”.": "You can close this — the result is saved and shown under “Last transfer”.",
 		"You do not have the rights for this action.": "You do not have the rights for this action.",
-		"Your apps": "Your apps"
+		"Your apps": "Your apps",
+		"1 setting": "1 setting",
+		"%n settings": "%n settings",
+		"1 row": "1 row",
+		"%n rows": "%n rows"
 	}
 }

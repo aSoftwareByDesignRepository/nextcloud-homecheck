@@ -180,6 +180,10 @@ OC.L10N.register(
 	"Writing settings" : "正在写入设置",
 	"You can close this — the result is saved and shown under “Last transfer”." : "您可以关闭此页——结果已保存并显示在“上次传输”下。",
 	"You do not have the rights for this action." : "您没有此操作的权限。",
-	"Your apps" : "你的应用"
+	"Your apps" : "你的应用",
+	"1 setting" : "1 项设置",
+	"%n settings" : "%n 项设置",
+	"1 row" : "1 行",
+	"%n rows" : "%n 行"
 	}
 );

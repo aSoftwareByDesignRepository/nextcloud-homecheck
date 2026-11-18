@@ -224,6 +224,10 @@
 		"Writing settings": "Zapisywanie ustawień",
 		"You can close this — the result is saved and shown under “Last transfer”.": "Możesz to zamknąć — wynik zostanie zapisany i pokazany w „Ostatni transfer”.",
 		"You do not have the rights for this action.": "Nie masz uprawnień do tej czynności.",
-		"Your apps": "Twoje aplikacje"
+		"Your apps": "Twoje aplikacje",
+		"1 setting": "1 ustawienie",
+		"%n settings": "%n ustawienia",
+		"1 row": "1 wiersz",
+		"%n rows": "%n wiersze"
 	}
 }

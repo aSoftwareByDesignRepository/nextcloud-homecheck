@@ -180,6 +180,10 @@ OC.L10N.register(
 	"Writing settings" : "Skriver inställningar",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Du kan stänga det här — resultatet sparas och visas under “Senaste överföring”.",
 	"You do not have the rights for this action." : "Du har inte behörighet för den här åtgärden.",
-	"Your apps" : "Dina appar"
+	"Your apps" : "Dina appar",
+	"1 setting" : "1 inställning",
+	"%n settings" : "%n inställningar",
+	"1 row" : "1 rad",
+	"%n rows" : "%n rader"
 	}
 );

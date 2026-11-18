@@ -213,6 +213,10 @@
 		"Writing settings": "Instellingen worden geschreven",
 		"You can close this — the result is saved and shown under “Last transfer”.": "U kunt dit sluiten — het resultaat wordt opgeslagen en getoond onder “Laatste overdracht”.",
 		"You do not have the rights for this action.": "U heeft geen rechten voor deze actie.",
-		"Your apps": "Jouw apps"
+		"Your apps": "Jouw apps",
+		"1 setting": "1 instelling",
+		"%n settings": "%n instellingen",
+		"1 row": "1 rij",
+		"%n rows": "%n rijen"
 	}
 }

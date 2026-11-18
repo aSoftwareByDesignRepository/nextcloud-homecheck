@@ -213,6 +213,10 @@
 		"Writing settings": "Skriver indstillinger",
 		"You can close this — the result is saved and shown under “Last transfer”.": "Du kan lukke dette — resultatet gemmes og vises under “Seneste overførsel”.",
 		"You do not have the rights for this action.": "Du har ikke rettigheder til denne handling.",
-		"Your apps": "Dine apps"
+		"Your apps": "Dine apps",
+		"1 setting": "1 indstilling",
+		"%n settings": "%n indstillinger",
+		"1 row": "1 række",
+		"%n rows": "%n rækker"
 	}
 }
