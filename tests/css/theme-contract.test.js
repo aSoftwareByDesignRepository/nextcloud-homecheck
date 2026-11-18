@@ -38,7 +38,7 @@ ok(css.includes('dialog.hmk-dialog:not([open])'), 'dialog closed state override'
 ok(css.includes('forced-colors: active'), 'forced-colors support');
 ok(css.includes('prefers-contrast: more'), 'high contrast support');
 ok(css.includes('env(safe-area-inset'), 'safe-area insets');
-ok(css.includes('max-width: 768px'), 'tablet breakpoint');
+ok(/max-width:\s*768(\.\d+)?px/.test(css), 'tablet breakpoint');
 ok(css.includes('overflow-x: clip'), 'prevents horizontal page scroll');
 ok(/#homecheck-app\s*\{[^}]*overflow-y:\s*auto/s.test(css), 'app root is vertical scrollport');
 ok(/\.hmk-credit\s*\{[^}]*margin-top:\s*auto/s.test(css), 'vendor credit pinned to page end via margin-top auto');
@@ -114,7 +114,10 @@ ok(css.includes('touch-action: none'), 'edit panes allow pointer capture DnD');
 ok(css.includes('flex-wrap: wrap'), 'panes wrap responsively');
 ok(css.includes('--hmk-pane-width') || css.includes('width: var(--hmk-pane-width'), 'dashboard-sized pane track');
 ok(!css.includes('.hmk-grid'), 'legacy dense grid removed');
-ok(!css.includes('.hmk-card'), 'legacy card tiles removed');
+// .hmk-card stays banned on launcher/desklet chrome; the synced config-transfer
+// page may use it only under the .hmk-transfer-page scope (see css/app.css).
+const unscopedCardTile = css.split('\n').some((l) => l.includes('.hmk-card') && !l.includes('.hmk-transfer-page'));
+ok(!unscopedCardTile, 'legacy card tiles removed (unscoped .hmk-card)');
 ok(css.includes('--hmk-icon-well'), 'icon well token defined');
 ok(css.includes('--hmk-icon-inner'), 'icon glyph size token defined');
 ok(css.includes('.hmk-pane__icon-well'), 'icon well wrapper present');

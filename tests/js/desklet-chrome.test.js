@@ -56,7 +56,10 @@ const appCss = read('css/app.css');
 ok(appCss.includes('flex-wrap: wrap'), 'panes wrap responsively');
 ok(appCss.includes('--hmk-pane-width') || appCss.includes('width: var(--hmk-pane-width'), 'dashboard-sized pane width');
 ok(!appCss.includes('.hmk-grid'), 'legacy dense grid removed');
-ok(!appCss.includes('.hmk-card'), 'legacy card tiles removed');
+// .hmk-card stays banned on launcher/desklet chrome; the synced config-transfer
+// page may use it only under the .hmk-transfer-page scope (see css/app.css).
+const unscopedCard = appCss.split('\n').some((l) => l.includes('.hmk-card') && !l.includes('.hmk-transfer-page'));
+ok(!unscopedCard, 'legacy card tiles removed (unscoped .hmk-card)');
 ok(appCss.includes('hmk-pane'), 'individual frosted panes');
 
 process.exit(failed ? 1 : 0);
