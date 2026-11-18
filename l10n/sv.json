@@ -36,6 +36,14 @@
 			"1 rad hoppades över.",
 			"%n rader hoppades över."
 		],
+		"_1 row_::_%n rows_": [
+			"1 rad",
+			"%n rader"
+		],
+		"_1 setting_::_%n settings_": [
+			"1 inställning",
+			"%n inställningar"
+		],
 		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
 			"Varning: 1 rad raderas permanent, sedan läses filens data in.",
 			"Varning: %n rader raderas permanent, sedan läses filens data in."
@@ -99,7 +107,7 @@
 		"HomeCheck is no longer your start page": "HomeCheck är inte längre din startsida",
 		"HomeCheck is your start page": "HomeCheck är din startsida",
 		"HomeCheck opens after you sign in": "HomeCheck öppnas efter inloggning",
-		"Import applied. %d settings and %d rows written.": "Importen har tillämpats. %d inställningar och %d rader skrivna.",
+		"Import applied. %1$s and %2$s written.": "Importen har tillämpats. %1$s och %2$s skrivna.",
 		"Import configuration": "Importera konfiguration",
 		"Import failed — nothing was changed.": "Importen misslyckades — inget ändrades.",
 		"Import preview": "Förhandsgranskning av import",
@@ -180,7 +188,7 @@
 		"This file was exported from a newer app version. Update this app first.": "Filen exporterades från en nyare app-version. Uppdatera appen först.",
 		"This file was exported from this instance.": "Den här filen exporterades från den här instansen.",
 		"This folder is empty — add apps from Edit.": "Den här mappen är tom — lägg till appar via Redigera.",
-		"This will update %d settings and %d rows — nothing is deleted.": "Detta uppdaterar %d inställningar och %d rader — inget raderas.",
+		"This will update %1$s and %2$s — nothing is deleted.": "Detta uppdaterar %1$s och %2$s — inget raderas.",
 		"Too many apps in this folder (max 40)": "För många appar i den här mappen (max 40)",
 		"Too many attempts — wait a minute and try again.": "För många försök — vänta en minut och försök igen.",
 		"Too many items on the home screen (max 100)": "För många objekt på startsidan (max 100)",

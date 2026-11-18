@@ -36,6 +36,14 @@
 			"1 linha ignorada.",
 			"%n linhas ignoradas."
 		],
+		"_1 row_::_%n rows_": [
+			"1 linha",
+			"%n linhas"
+		],
+		"_1 setting_::_%n settings_": [
+			"1 configuração",
+			"%n configurações"
+		],
 		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
 			"Aviso: 1 linha será excluída permanentemente e, em seguida, os dados do arquivo serão carregados.",
 			"Aviso: %n linhas serão excluídas permanentemente e, em seguida, os dados do arquivo serão carregados."
@@ -99,7 +107,7 @@
 		"HomeCheck is no longer your start page": "O HomeCheck não é mais sua página inicial",
 		"HomeCheck is your start page": "O HomeCheck é sua página inicial",
 		"HomeCheck opens after you sign in": "O HomeCheck abre depois que você entra",
-		"Import applied. %d settings and %d rows written.": "Importação aplicada. %d configurações e %d linhas gravadas.",
+		"Import applied. %1$s and %2$s written.": "Importação aplicada. %1$s e %2$s gravadas.",
 		"Import configuration": "Importar configuração",
 		"Import failed — nothing was changed.": "A importação falhou — nada foi alterado.",
 		"Import preview": "Pré-visualização da importação",
@@ -180,7 +188,7 @@
 		"This file was exported from a newer app version. Update this app first.": "Este arquivo foi exportado de uma versão mais recente do app. Atualize o app primeiro.",
 		"This file was exported from this instance.": "Este arquivo foi exportado desta instância.",
 		"This folder is empty — add apps from Edit.": "Esta pasta está vazia — adicione apps em Editar.",
-		"This will update %d settings and %d rows — nothing is deleted.": "Isso atualizará %d configurações e %d linhas — nada será excluído.",
+		"This will update %1$s and %2$s — nothing is deleted.": "Isso atualizará %1$s e %2$s — nada será excluído.",
 		"Too many apps in this folder (max 40)": "Apps demais nesta pasta (máx. 40)",
 		"Too many attempts — wait a minute and try again.": "Muitas tentativas — aguarde um minuto e tente novamente.",
 		"Too many items on the home screen (max 100)": "Itens demais na tela inicial (máx. 100)",

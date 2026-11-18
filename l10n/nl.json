@@ -36,6 +36,14 @@
 			"1 rij overgeslagen.",
 			"%n rijen overgeslagen."
 		],
+		"_1 row_::_%n rows_": [
+			"1 rij",
+			"%n rijen"
+		],
+		"_1 setting_::_%n settings_": [
+			"1 instelling",
+			"%n instellingen"
+		],
 		"_Warning: 1 row will be permanently deleted, then the file data is loaded._::_Warning: %n rows will be permanently deleted, then the file data is loaded._": [
 			"Waarschuwing: 1 rij wordt definitief verwijderd, daarna worden de bestandsgegevens geladen.",
 			"Waarschuwing: %n rijen worden definitief verwijderd, daarna worden de bestandsgegevens geladen."
@@ -99,7 +107,7 @@
 		"HomeCheck is no longer your start page": "HomeCheck is niet meer je startpagina",
 		"HomeCheck is your start page": "HomeCheck is je startpagina",
 		"HomeCheck opens after you sign in": "HomeCheck opent na het inloggen",
-		"Import applied. %d settings and %d rows written.": "Import toegepast. %d instellingen en %d rijen geschreven.",
+		"Import applied. %1$s and %2$s written.": "Import toegepast. %1$s en %2$s geschreven.",
 		"Import configuration": "Configuratie importeren",
 		"Import failed — nothing was changed.": "Import mislukt — er is niets gewijzigd.",
 		"Import preview": "Importvoorbeeld",
@@ -180,7 +188,7 @@
 		"This file was exported from a newer app version. Update this app first.": "Dit bestand is geëxporteerd uit een nieuwere app-versie. Werk de app eerst bij.",
 		"This file was exported from this instance.": "Dit bestand is vanaf deze instantie geëxporteerd.",
 		"This folder is empty — add apps from Edit.": "Deze map is leeg — voeg apps toe via Bewerken.",
-		"This will update %d settings and %d rows — nothing is deleted.": "Dit werkt %d instellingen en %d rijen bij — er wordt niets verwijderd.",
+		"This will update %1$s and %2$s — nothing is deleted.": "Dit werkt %1$s en %2$s bij — er wordt niets verwijderd.",
 		"Too many apps in this folder (max 40)": "Te veel apps in deze map (max. 40)",
 		"Too many attempts — wait a minute and try again.": "Te veel pogingen — wacht een minuut en probeer het opnieuw.",
 		"Too many items on the home screen (max 100)": "Te veel items op het startscherm (max. 100)",

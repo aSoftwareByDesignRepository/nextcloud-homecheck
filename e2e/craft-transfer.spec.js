@@ -156,11 +156,20 @@ async function assertDialogTopLayerGeometry(dialog, mode, where) {
 }
 
 test.describe('craft transfer', () => {
-	let fixture
+	let fixture, origSeed
 	test.beforeAll(() => {
 		fixture = provisionFixture()
+		// Deterministic preview counts: the manifest's one transferable key
+		// must exist on the instance so the export always carries it and the
+		// preview counts exactly 1 config write (l10n_plural_hardcode probe).
+		try { origSeed = occ(['config:app:get', 'homecheck', 'seed_template_v1']) } catch { origSeed = null }
+		occ(['config:app:set', 'homecheck', 'seed_template_v1',
+			'--value={"version":1,"revision":0,"items":[{"type":"app","id":"files"}],"hidden":[],"hiddenFolders":[]}'])
 	})
 	test.afterAll(() => {
+		if (origSeed) {
+			try { occ(['config:app:set', 'homecheck', 'seed_template_v1', `--value=${origSeed}`]) } catch { /* best effort */ }
+		}
 		deprovisionFixture(fixture?.uid)
 	})
 
@@ -196,11 +205,31 @@ test.describe('craft transfer', () => {
 		const report = page.locator('#hmk-transfer-report')
 		await expect(report).toBeVisible({ timeout: 30_000 })
 		await expect(page.locator('#hmk-transfer-report-verdict')).toContainText(/\d/)
+		// l10n_plural_hardcode: the verdict counts must come out of n() —
+		// '1 setting' singular here, never '1 settings' — joined into the
+		// %1$s/%2$s wrapper without raw tokens left over.
+		const verdictLine = await page.locator('#hmk-transfer-report-verdict').textContent()
+		expect(verdictLine || '').toContain('1 setting')
+		expect(verdictLine || '').toContain('0 rows')
+		expect(verdictLine || '').not.toMatch(/%[12]\$s|%d(?!\w)/)
 		// positional t() interpolation: localized values, never raw tokens
 		const fileLine = await page.locator('#hmk-transfer-report-file').textContent()
 		expect(fileLine || '').not.toMatch(/\{\d+\}|%\d+\$s|%d(?!\w)/)
+		// plural arms the app structurally cannot reach (max 1 transferable
+		// config key, no tables) — resolve them through the live runtime.
+		const arms = await page.evaluate(() => ({
+			s1: window.n('homecheck', '1 setting', '%n settings', 1),
+			s3: window.n('homecheck', '1 setting', '%n settings', 3),
+			r0: window.n('homecheck', '1 row', '%n rows', 0),
+			r7: window.n('homecheck', '1 row', '%n rows', 7),
+		}))
+		expect(arms).toEqual({ s1: '1 setting', s3: '3 settings', r0: '0 rows', r7: '7 rows' })
 		await assertDialogTopLayerGeometry(report, 'centered', 'report 1280')
 		await shot(page, 'hmk-admin-transfer-report-dialog-light-1280')
+
+		// The receipt toast must be asserted before the deferred reload
+		// lands (~2.5s window after the status tick sees 'done').
+		const navWait = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 120_000 })
 
 		// apply → progress dialog stays open while the job waits queued
 		await page.locator('#hmk-transfer-confirm').click()
@@ -226,9 +255,16 @@ test.describe('craft transfer', () => {
 		}
 		expect(receipt.result).toBe('applied')
 
+		// Receipt toast: n()-pluralized '1 setting and 0 rows written',
+		// never '1 settings' (l10n_plural_hardcode). Visible for the deferred
+		// reload window — craft it while painted.
+		const appliedToast = page.locator('.hmk-toast--success .hmk-toast__text')
+		await expect(appliedToast).toContainText('1 setting and 0 rows written', { timeout: 60_000 })
+		await shot(page, 'hmk-admin-transfer-applied-toast-light-1280')
+		await navWait
+
 		// page reloads after apply; the server-rendered receipt line localizes
 		// the mode — never the raw stored value.
-		await page.waitForLoadState('domcontentloaded')
 		await expect(page.locator('#hmk-transfer-last')).toBeVisible({ timeout: 20_000 })
 		const lastLine = await page.locator('#hmk-transfer-last').textContent()
 		expect(lastLine || '').not.toMatch(/\breplace\b/)
@@ -271,6 +307,9 @@ test.describe('craft transfer', () => {
 		await page.locator('#hmk-transfer-import-passphrase').fill(PASS)
 		const report = page.locator('#hmk-transfer-report')
 		await expect(report).toBeVisible({ timeout: 30_000 })
+		const verdict375 = await page.locator('#hmk-transfer-report-verdict').textContent()
+		expect(verdict375 || '').toContain('1 setting')
+		expect(verdict375 || '').not.toMatch(/%[12]\$s|%d(?!\w)/)
 		await assertDialogTopLayerGeometry(report, 'fullbleed', 'report 375')
 		await shot(page, 'hmk-admin-transfer-report-dialog-light-375')
 		await page.locator('#hmk-transfer-cancel').click()
