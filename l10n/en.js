@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "%n rows",
+	"%n settings" : "%n settings",
 	"(opens in a new tab)" : "(opens in a new tab)",
 	"(opens in a new window)" : "(opens in a new window)",
 	"(unknown — skipped)" : "(unknown — skipped)",
+	"1 row" : "1 row",
+	"1 setting" : "1 setting",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s apps · %n folder on your home","%1$s apps · %n folders on your home"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 env-bound value emptied)","(%n env-bound values emptied)"],
 	"_(1 filtered)_::_(%n filtered)_" : ["(1 filtered)","(%n filtered)"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "Writing settings",
 	"You can close this — the result is saved and shown under “Last transfer”." : "You can close this — the result is saved and shown under “Last transfer”.",
 	"You do not have the rights for this action." : "You do not have the rights for this action.",
-	"Your apps" : "Your apps",
-	"1 setting" : "1 setting",
-	"%n settings" : "%n settings",
-	"1 row" : "1 row",
-	"%n rows" : "%n rows"
+	"Your apps" : "Your apps"
 	}
 );
