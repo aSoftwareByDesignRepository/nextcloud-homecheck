@@ -43,6 +43,12 @@
 	--hmk-check-canvas: transparent;
 	--hmk-text: var(--color-main-text);
 	--hmk-muted: var(--color-text-maxcontrast);
+	/* Muted ink on tinted surfaces (callouts/badges): main-text keeps it
+	   readable where pure maxcontrast washes out on the tint fill. */
+	--hmk-muted-on-tint: color-mix(in srgb, var(--color-text-maxcontrast) 55%, var(--color-main-text));
+	/* Monospace for codes/refs (claim numbers, payment refs): NC ships no mono
+	   var, so pin a platform-native stack. */
+	--hmk-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', 'Liberation Mono', Menlo, Consolas, monospace;
 	--hmk-border: var(--color-border, color-mix(in srgb, var(--color-main-text) 12%, transparent));
 	--hmk-border-strong: var(--color-border-maxcontrast, color-mix(in srgb, var(--color-main-text) 24%, transparent));
 	--hmk-form-border: var(--color-border-maxcontrast, var(--hmk-border-strong));
