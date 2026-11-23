@@ -9,58 +9,46 @@
 	<summary>Personal app home — panes, folders, and top-bar order</summary>
 	<summary lang="de">Persönliche App-Startseite — Kacheln, Ordner und Menüleisten-Reihenfolge</summary>
 	<description><![CDATA[
-# HomeCheck — personal app home
+# HomeCheck — your apps, arranged your way
 
-Arrange the Nextcloud apps you can open as Dashboard-style panes with folders. Reordering saves to your personal layout and updates the top-bar app order (folders stay in HomeCheck only). Hide apps you do not need and restore them anytime.
-
-**Free AGPL web app.** Optional admin seed template for first-time users; every user can fully customise afterwards.
+Turn the Nextcloud app menu into a personal home: the apps you can open become Dashboard-style panes you arrange, group into folders and reorder — and the order syncs to the top bar. Hide what you don't need, bring it back anytime.
 
 ## Highlights
 
-- Dashboard-style panes with folders
-- Drag to rearrange; sync order to the top bar
-- Hide / restore apps from your home
-- Optional start-page CTA and admin seed layout
-- Theme-aware chrome with accessible controls
-
-## Feedback welcome
-
-We improve this app with real-world use. Bug reports, rough edges, and ideas help — open a GitHub Issue (https://github.com/aSoftwareByDesignRepository/nextcloud-homecheck/issues) or write to info@software-by-design.de. Your feedback directly shapes what we build next.
+- **Panes and folders** — arrange your apps like a dashboard
+- **Drag to reorder** — your layout saves instantly and mirrors the top bar
+- **Hide and restore** — declutter without losing anything
+- **Optional admin seed** — ship a starting layout to new users; everyone customises afterwards
+- **Theme-aware** — follows your Nextcloud look, accessible controls
 
 ## Requirements
 
-- Nextcloud 32–35 · PHP 8.2–8.5
+- Nextcloud 32–35
+- PHP 8.2–8.5
+
+**Free AGPL web app.**
 	]]></description>
 	<description lang="de"><![CDATA[
-# HomeCheck — persönliche App-Startseite
+# HomeCheck — Ihre Apps, so angeordnet wie Sie wollen
 
-Ordnen Sie die für Sie freigeschalteten Nextcloud-Apps als Dashboard-Kacheln mit Ordnern. Die Reihenfolge speichert Ihr Layout und aktualisiert die Menüleiste (Ordner bleiben nur in HomeCheck). Blenden Sie Apps aus und holen Sie sie jederzeit zurück.
-
-**Kostenlose AGPL-Web-App.** Optionale Admin-Seed-Vorlage für Erstnutzer; danach personalisiert jede Person selbst.
+Aus dem Nextcloud-App-Menü wird ein persönliches Zuhause: Die Apps, die Sie öffnen können, werden zu Dashboard-Panels, die Sie anordnen, in Ordner gruppieren und umsortieren — und die Reihenfolge wandert in die Top-Bar. Ausblenden, was Sie nicht brauchen; jederzeit zurückholen.
 
 ## Highlights
 
-- Dashboard-Kacheln mit Ordnern
-- Per Drag & Drop sortieren; Reihenfolge in der Menüleiste
-- Apps ausblenden und wieder anzeigen
-- Optionale Startseiten-CTA und Admin-Seed
-- Theme-sichere Oberfläche mit zugänglichen Bedienelementen
-
-## Feedback willkommen
-
-Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stolpersteine und Ideen helfen — öffnen Sie ein GitHub Issue (https://github.com/aSoftwareByDesignRepository/nextcloud-homecheck/issues) oder schreiben Sie an info@software-by-design.de. Ihr Feedback prägt direkt, was wir als Nächstes bauen.
+- **Panels und Ordner** — Ihre Apps wie ein Dashboard arrangiert
+- **Per Drag umsortieren** — Ihr Layout speichert sofort und spiegelt sich in der Top-Bar
+- **Ausblenden und zurückholen** — aufräumen, ohne etwas zu verlieren
+- **Optionaler Admin-Seed** — ein Start-Layout für neue Nutzer; danach passt jeder selbst an
+- **Theme-bewusst** — folgt Ihrem Nextcloud-Look, zugängliche Bedienelemente
 
 ## Voraussetzungen
 
-- Nextcloud 32–35 · PHP 8.2–8.5
+- Nextcloud 32–35
+- PHP 8.2–8.5
+
+**Kostenlose AGPL-Web-App.**
 	]]></description>
 
-	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/01.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/02.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/03.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/04.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/05.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/06.png</screenshot>
 	<version>1.1.5</version>
 	<licence>agpl</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de/">Alexander Mäule</author>
@@ -70,6 +58,12 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 	<website>https://nextcloud.software-by-design.de/</website>
 	<bugs>https://github.com/aSoftwareByDesignRepository/nextcloud-homecheck/issues</bugs>
 	<repository type="git">https://github.com/aSoftwareByDesignRepository/nextcloud-homecheck.git</repository>
+	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/01.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/02.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/03.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/04.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/05.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/aSoftwareByDesignRepository/nextcloud-homecheck/refs/heads/main/screenshots/appstore/06.png</screenshot>
 	<dependencies>
 		<php min-version="8.2" max-version="8.5"/>
 		<nextcloud min-version="32" max-version="35"/>
