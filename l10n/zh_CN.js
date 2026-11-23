@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "%n 行",
+	"%n settings" : "%n 项设置",
 	"(opens in a new tab)" : "（在新标签页中打开）",
 	"(opens in a new window)" : "（在新窗口中打开）",
 	"(unknown — skipped)" : "（未知——已跳过）",
+	"1 row" : "1 行",
+	"1 setting" : "1 项设置",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s 个应用 · 主屏幕上 %n 个文件夹"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["（已清空 %n 个实例绑定值）"],
 	"_(1 filtered)_::_(%n filtered)_" : ["（已过滤 %n 项）"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "正在写入设置",
 	"You can close this — the result is saved and shown under “Last transfer”." : "您可以关闭此页——结果已保存并显示在“上次传输”下。",
 	"You do not have the rights for this action." : "您没有此操作的权限。",
-	"Your apps" : "你的应用",
-	"1 setting" : "1 项设置",
-	"%n settings" : "%n 项设置",
-	"1 row" : "1 行",
-	"%n rows" : "%n 行"
+	"Your apps" : "你的应用"
 	}
 );

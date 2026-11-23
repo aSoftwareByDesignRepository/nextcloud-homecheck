@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "%n linhas",
+	"%n settings" : "%n definições",
 	"(opens in a new tab)" : "(abre num novo separador)",
 	"(opens in a new window)" : "(abre numa nova janela)",
 	"(unknown — skipped)" : "(desconhecido — ignorado)",
+	"1 row" : "1 linha",
+	"1 setting" : "1 definição",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s aplicações · %n pasta na sua página inicial","%1$s aplicações · %n pastas na sua página inicial"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 valor ligado à instância esvaziado)","(%n valores ligados à instância esvaziados)"],
 	"_(1 filtered)_::_(%n filtered)_" : ["(1 filtrada)","(%n filtradas)"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "A escrever definições",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Pode fechar isto — o resultado é guardado e mostrado em “Última transferência”.",
 	"You do not have the rights for this action." : "Não tem permissões para esta ação.",
-	"Your apps" : "As suas aplicações",
-	"1 setting" : "1 definição",
-	"%n settings" : "%n definições",
-	"1 row" : "1 linha",
-	"%n rows" : "%n linhas"
+	"Your apps" : "As suas aplicações"
 	}
 );

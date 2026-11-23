@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "%n rijen",
+	"%n settings" : "%n instellingen",
 	"(opens in a new tab)" : "(opent in een nieuw tabblad)",
 	"(opens in a new window)" : "(opent in een nieuw venster)",
 	"(unknown — skipped)" : "(onbekend — overgeslagen)",
+	"1 row" : "1 rij",
+	"1 setting" : "1 instelling",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s apps · %n map op je start","%1$s apps · %n mappen op je start"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 installatiegebonden waarde geleegd)","(%n installatiegebonden waarden geleegd)"],
 	"_(1 filtered)_::_(%n filtered)_" : ["(1 gefilterd)","(%n gefilterd)"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "Instellingen worden geschreven",
 	"You can close this — the result is saved and shown under “Last transfer”." : "U kunt dit sluiten — het resultaat wordt opgeslagen en getoond onder “Laatste overdracht”.",
 	"You do not have the rights for this action." : "U heeft geen rechten voor deze actie.",
-	"Your apps" : "Jouw apps",
-	"1 setting" : "1 instelling",
-	"%n settings" : "%n instellingen",
-	"1 row" : "1 rij",
-	"%n rows" : "%n rijen"
+	"Your apps" : "Jouw apps"
 	}
 );

@@ -1,9 +1,13 @@
 {
 	"name": "homecheck",
 	"translations": {
+		"%n rows": "%n wiersze",
+		"%n settings": "%n ustawienia",
 		"(opens in a new tab)": "(otwiera się w nowej karcie)",
 		"(opens in a new window)": "(otwiera się w nowym oknie)",
 		"(unknown — skipped)": "(nieznane — pominięto)",
+		"1 row": "1 wiersz",
+		"1 setting": "1 ustawienie",
 		"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_": [
 			"%1$s aplikacji · %n folder na stronie głównej",
 			"%1$s aplikacji · %n foldery na stronie głównej",
@@ -224,10 +228,6 @@
 		"Writing settings": "Zapisywanie ustawień",
 		"You can close this — the result is saved and shown under “Last transfer”.": "Możesz to zamknąć — wynik zostanie zapisany i pokazany w „Ostatni transfer”.",
 		"You do not have the rights for this action.": "Nie masz uprawnień do tej czynności.",
-		"Your apps": "Twoje aplikacje",
-		"1 setting": "1 ustawienie",
-		"%n settings": "%n ustawienia",
-		"1 row": "1 wiersz",
-		"%n rows": "%n wiersze"
+		"Your apps": "Twoje aplikacje"
 	}
 }

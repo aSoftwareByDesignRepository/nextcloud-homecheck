@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "%n satır",
+	"%n settings" : "%n ayar",
 	"(opens in a new tab)" : "(yeni sekmede açılır)",
 	"(opens in a new window)" : "(yeni pencerede açılır)",
 	"(unknown — skipped)" : "(bilinmiyor — atlandı)",
+	"1 row" : "1 satır",
+	"1 setting" : "1 ayar",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s uygulama · ana ekranında %n klasör"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(%n örneğe bağlı değer boşaltıldı)"],
 	"_(1 filtered)_::_(%n filtered)_" : ["(%n filtrelendi)"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "Ayarlar yazılıyor",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Bunu kapatabilirsiniz — sonuç kaydedilir ve “Son aktarım” altında gösterilir.",
 	"You do not have the rights for this action." : "Bu işlem için yetkiniz yok.",
-	"Your apps" : "Uygulamaların",
-	"1 setting" : "1 ayar",
-	"%n settings" : "%n ayar",
-	"1 row" : "1 satır",
-	"%n rows" : "%n satır"
+	"Your apps" : "Uygulamaların"
 	}
 );

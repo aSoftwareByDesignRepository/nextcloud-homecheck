@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "%n rader",
+	"%n settings" : "%n inställningar",
 	"(opens in a new tab)" : "(öppnas i en ny flik)",
 	"(opens in a new window)" : "(öppnas i ett nytt fönster)",
 	"(unknown — skipped)" : "(okänd — hoppades över)",
+	"1 row" : "1 rad",
+	"1 setting" : "1 inställning",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s appar · %n mapp på din startsida","%1$s appar · %n mappar på din startsida"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 instansbundet värde tömt)","(%n instansbundna värden tömda)"],
 	"_(1 filtered)_::_(%n filtered)_" : ["(1 filtrerad)","(%n filtrerade)"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "Skriver inställningar",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Du kan stänga det här — resultatet sparas och visas under “Senaste överföring”.",
 	"You do not have the rights for this action." : "Du har inte behörighet för den här åtgärden.",
-	"Your apps" : "Dina appar",
-	"1 setting" : "1 inställning",
-	"%n settings" : "%n inställningar",
-	"1 row" : "1 rad",
-	"%n rows" : "%n rader"
+	"Your apps" : "Dina appar"
 	}
 );

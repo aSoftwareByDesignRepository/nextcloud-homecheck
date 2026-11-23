@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "строк: %n",
+	"%n settings" : "настроек: %n",
 	"(opens in a new tab)" : "(открывается в новой вкладке)",
 	"(opens in a new window)" : "(открывается в новом окне)",
 	"(unknown — skipped)" : "(неизвестно — пропущено)",
+	"1 row" : "1 строка",
+	"1 setting" : "1 настройка",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["Приложений: %1$s · %n папка на домашнем экране","Приложений: %1$s · %n папки на домашнем экране","Приложений: %1$s · %n папок на домашнем экране"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 привязанное к инстансу значение очищено)","(%n привязанных к инстансу значения очищены)","(%n привязанных к инстансу значений очищено)"],
 	"_(1 filtered)_::_(%n filtered)_" : ["(отфильтрована 1 строка)","(отфильтрованы %n строки)","(отфильтровано %n строк)"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "Запись настроек",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Это окно можно закрыть — результат сохранён и показан в разделе «Последний перенос».",
 	"You do not have the rights for this action." : "У вас нет прав для этого действия.",
-	"Your apps" : "Ваши приложения",
-	"1 setting" : "1 настройка",
-	"%n settings" : "настроек: %n",
-	"1 row" : "1 строка",
-	"%n rows" : "строк: %n"
+	"Your apps" : "Ваши приложения"
 	}
 );

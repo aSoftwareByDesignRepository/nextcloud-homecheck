@@ -1,9 +1,13 @@
 OC.L10N.register(
 	"homecheck",
 	{
+	"%n rows" : "%n rader",
+	"%n settings" : "%n innstillinger",
 	"(opens in a new tab)" : "(åpnes i en ny fane)",
 	"(opens in a new window)" : "(åpnes i et nytt vindu)",
 	"(unknown — skipped)" : "(ukjent — hoppet over)",
+	"1 row" : "1 rad",
+	"1 setting" : "1 innstilling",
 	"_%1$s apps · %n folder on your home_::_%1$s apps · %n folders on your home_" : ["%1$s apper · %n mappe på startsiden din","%1$s apper · %n mapper på startsiden din"],
 	"_(1 env-bound value emptied)_::_(%n env-bound values emptied)_" : ["(1 instansbunden verdi tømt)","(%n instansbundne verdier tømt)"],
 	"_(1 filtered)_::_(%n filtered)_" : ["(1 filtrert)","(%n filtrert)"],
@@ -180,10 +184,6 @@ OC.L10N.register(
 	"Writing settings" : "Skriver innstillinger",
 	"You can close this — the result is saved and shown under “Last transfer”." : "Du kan lukke dette — resultatet lagres og vises under “Siste overføring”.",
 	"You do not have the rights for this action." : "Du har ikke rettigheter for denne handlingen.",
-	"Your apps" : "Dine apper",
-	"1 setting" : "1 innstilling",
-	"%n settings" : "%n innstillinger",
-	"1 row" : "1 rad",
-	"%n rows" : "%n rader"
+	"Your apps" : "Dine apper"
 	}
 );
