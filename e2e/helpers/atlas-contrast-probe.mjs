@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * ATLAS ds_chrome live contrast probe (homecheck) — ported from
- * einkaufcheck/projectcheck atlas-contrast-probe.mjs (3.5.15 lane duty).
+ * projectcheck atlas-contrast-probe.mjs (3.5.15 lane duty).
  *
  * Logs in as the dedicated fixture users (hmk_ds_probe / hmk_ds_admin),
  * walks representative surfaces — launcher index, admin settings section,

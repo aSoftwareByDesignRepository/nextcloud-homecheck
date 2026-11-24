@@ -246,7 +246,7 @@ test.describe('App Store screenshots', () => {
 			if (!list) {
 				return;
 			}
-			const keepNames = /^(DeskCheck|InvoiceCheck|Fotos|Photos|Activity|Aktivität|Forms|Notes|Notiz)/i;
+			const keepNames = /^(DeskCheck|the invoicing app|Fotos|Photos|Activity|Aktivität|Forms|Notes|Notiz)/i;
 			const rows = Array.from(list.querySelectorAll('.hmk-hidden-row'));
 			let kept = 0;
 			rows.forEach(function (row) {
