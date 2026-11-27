@@ -57,7 +57,7 @@ OC.L10N.register(
 	"Failed" : "Niepowodzenie",
 	"failed" : "niepowodzenie",
 	"File passphrase" : "Fraza pliku",
-	"Folder" : "Folder",
+	"Folder" : "Katalog",
 	"Folder hidden from HomeCheck" : "Folder ukryty w HomeCheck",
 	"Folder name" : "Nazwa folderu",
 	"Generate" : "Generuj",
